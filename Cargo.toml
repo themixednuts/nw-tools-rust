@@ -1,0 +1,14 @@
+[workspace]
+
+members = [
+  "nw-tools",
+  "object-stream",
+  "pak",
+  "file-system"
+]
+
+resolver = "2"
+
+[patch.crates-io]
+oodle-sys = { git = "https://github.com/sehnryr/oodle-sys.git"}
+

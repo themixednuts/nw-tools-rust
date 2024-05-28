@@ -1,0 +1,19 @@
+[package]
+name = "pak"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+links = "oo2core_win64"
+
+[dependencies]
+oodle-safe = "0.1.0"
+zip = "2.1.0"
+walkdir = "2.5.0"
+flate2 = "1.0.30"
+byteorder = "1.5.0"
+
+[build-dependencies.bindgen]
+optional = true
+version = "0.69.4"
+default-features = false
+features = ["runtime", "which-rustfmt"]
