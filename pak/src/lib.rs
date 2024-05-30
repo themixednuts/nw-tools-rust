@@ -1,159 +1,125 @@
-use byteorder::{self, BigEndian, ReadBytesExt};
-use flate2;
-use flate2::read::ZlibDecoder;
+pub mod azcs;
+pub mod reader;
+
+use async_trait::async_trait;
+use azcs::is_azcs;
+use futures::stream::{self, StreamExt};
 use oodle_safe;
-use std::error::Error;
+use std::fs::File;
 use std::io::{prelude::*, Cursor};
-use std::rc::Rc;
-use std::{fs::File, io};
+use std::sync::Arc;
+use tokio::{self, spawn};
+use tokio::io::{self, AsyncRead, AsyncReadExt};
+use tokio::sync::Mutex;
+use tokio::task::spawn_blocking;
+use zip::result::ZipResult;
 use zip::{read::ZipFile, CompressionMethod, ZipArchive};
 
-// var azcsSig = []byte{0x41, 0x5a, 0x43, 0x53}
-// var luacSig = []byte{0x04, 0x00, 0x1b, 0x4c, 0x75, 0x61}
+// var azcsSig = []byte{0x41, 0x5a, 0x43, 0x53};
+// var luacSig = []byte{0x04, 0x00, 0x1b, 0x4c, 0x75, 0x61};
 
-const SIGNATURE: &'static [u8] = b"AZCS";
-
-struct Header {
-    signature: String,
-    compressor_id: u32,
-    uncompressed_size: u64,
-}
-
-impl Default for Header {
-    fn default() -> Self {
-        Self {
-            signature: String::new(),
-            compressor_id: 0,
-            uncompressed_size: 0,
-        }
-    }
-}
-
-pub fn open(path: &str) -> Result<ZipArchive<File>, zip::result::ZipError> {
-    let file = File::open(path).expect("Open file");
+pub fn open(path: &str) -> ZipResult<ZipArchive<File>> {
+    let file = File::open(path)?;
     ZipArchive::new(file)
 }
 
-pub fn parse<'a>(
-    file: &'a mut zip::ZipArchive<File>,
-    path: &str,
-) -> Result<ZipFile<'a>, Box<dyn Error>> {
-    let idx = file.index_for_path(path).unwrap();
-    let entry = file.by_index_raw(idx)?;
-    if !entry.is_file() {
-        return Err("Not a file entry".into());
-    }
-    Ok(entry)
+#[derive(Debug)]
+pub struct Pak {
+    archive: ZipArchive<File>,
 }
 
-pub fn decompress(entry: Rc<ZipFile<'_>>) -> Result<Box<dyn Read>, io::Error> {
-    let mut entry = Rc::try_unwrap(entry)
-        .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to unwrap Rc"))?;
+impl Pak {
+    pub fn new(archive: ZipArchive<File>) -> Self {
+        Self { archive }
+    }
 
-    match entry.compression() {
-        CompressionMethod::Stored | CompressionMethod::Deflated => {
-            let mut buf = vec![0; 4]; // Read the first four bytes
-            entry.read_exact(&mut buf)?;
+    pub fn pick<'a>(&'a mut self, path: &str) -> Option<PakFile<'a>> {
+        let index = self.archive.index_for_path(path)?;
+        Some(PakFile {
+            archive: &mut self.archive,
+            index,
+        })
+    }
 
-            if buf == SIGNATURE {
-                // println!("this is azcs");
-                let mut header_data = Header::default();
-                header_data.signature = String::from_utf8_lossy(&buf).to_string();
-                header_data.compressor_id = read_uint32(&mut entry)?;
-                header_data.uncompressed_size = read_uint64(&mut entry)?;
+    pub async fn process_all<'a, F, Fut>(&mut self, mut processor: F) -> io::Result<()>
+    where
+        F: FnMut(PakFile) -> Fut + Send + 'static,
+        Fut: std::future::Future<Output = io::Result<()>> + Send,
+    {
+        let num_files = self.archive.len();
+        let mut handles = vec![];
 
-                match header_data.compressor_id {
-                    0x73887d3a => handle_zlib(&mut entry),
-                    0x72fd505e => Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        "zstd is not implemented",
-                    )),
-                    _ => Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        format!(
-                            "unsupported compressorId: 0x{:08x}",
-                            header_data.compressor_id
-                        ),
-                    )),
-                }?;
-            }
-
-            let mut buf = vec![];
-            entry.read_to_end(&mut buf)?;
-
-            Ok(Box::new(Cursor::new(buf)))
+        for i in 0..num_files {
+            let handle = spawn(move {
+                processor(PakFile {
+                    archive: &mut self.archive,
+                    index: i,
+                })
+            });
+            handles.push(handle);
         }
-        CompressionMethod::Unsupported(15) => {
-            let mut compressed = vec![];
-            entry.read_to_end(&mut compressed)?;
 
-            let decompressed_size = entry.size() as usize;
-            let mut decompressed = vec![0u8; decompressed_size];
-
-            let result = oodle_safe::decompress(
-                &compressed,
-                &mut decompressed,
-                None,
-                None,
-                None,
-                Some(oodle_safe::DecodeThreadPhase::All),
-            );
-
-            match result {
-                Ok(_) => Ok(Box::new(Cursor::new(decompressed))),
-                Err(_) => Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    format!("Error with oodle_safe::decompress. Size: {decompressed_size}"),
-                )),
-            }
+        for handle in handles {
+            handle.await?;
         }
-        _ => Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Unsupported compression method",
-        )),
+
+        Ok(())
     }
 }
 
-fn read_uint32(entry: &mut ZipFile<'_>) -> Result<u32, io::Error> {
-    let mut buf = [0u8; 4];
-    entry.read_exact(&mut buf)?;
-    Ok(u32::from_be_bytes(buf))
+pub struct PakFile<'a> {
+    archive: &'a mut ZipArchive<File>,
+    index: usize,
 }
 
-fn read_uint64(entry: &mut ZipFile<'_>) -> Result<u64, io::Error> {
-    let mut buf = [0u8; 8];
-    entry.read_exact(&mut buf)?;
-    Ok(u64::from_be_bytes(buf))
-}
+impl<'a> PakFile<'a> {
+    pub fn decompress(&mut self) -> io::Result<Box<dyn Read>> {
+        let mut entry = self.archive.by_index_raw(self.index)?;
+        match entry.compression() {
+            CompressionMethod::Stored | CompressionMethod::Deflated => {
+                let mut sig = [0; 4];
+                entry.read_exact(&mut sig)?;
 
-fn handle_zlib(entry: &mut ZipFile<'_>) -> Result<Box<dyn Read>, io::Error> {
-    let mut buf = [0u8; 4];
-    entry.read_exact(&mut buf)?;
+                match is_azcs(&mut entry, &mut sig) {
+                    Ok(header) => azcs::decompress(&mut entry, &header),
+                    Err(_) => {
+                        let mut buf = vec![];
+                        buf.extend_from_slice(&sig);
+                        entry.read_to_end(&mut buf)?;
+                        Ok(Box::new(Cursor::new(buf)))
+                    }
+                }
+            }
+            CompressionMethod::Unsupported(15) => {
+                let mut compressed = vec![];
+                entry.read_to_end(&mut compressed)?;
 
-    let num_seek_points = (&buf[..]).read_u32::<BigEndian>()?;
-    let num_seek_points_size = num_seek_points * 16;
+                let decompressed_size = entry.size() as usize;
+                let mut decompressed = vec![0u8; decompressed_size];
 
-    let mut compressed = vec![];
-    entry.read_to_end(&mut compressed)?;
-    println!("Compressed data (bytes): {:?}", compressed);
+                let result = oodle_safe::decompress(
+                    &compressed,
+                    &mut decompressed,
+                    None,
+                    None,
+                    None,
+                    Some(oodle_safe::DecodeThreadPhase::All),
+                );
 
-    // Calculate the number of bytes to read for seek points
-    let data_len = compressed.len();
-    if data_len < num_seek_points_size as usize {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Invalid compressed data size",
-        ));
+                match result {
+                    Ok(_) => Ok(Box::new(Cursor::new(decompressed))),
+                    Err(_) => Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        format!("Error with oodle_safe::decompress. Size: {decompressed_size}"),
+                    )),
+                }
+            }
+            _ => Err(io::Error::new(
+                io::ErrorKind::Other,
+                "Unsupported compression method",
+            )),
+        }
     }
-
-    let data_without_seek_points_len = data_len - num_seek_points_size as usize;
-
-    // Create a cursor over the relevant portion of the data
-    let data_cursor = Cursor::new(compressed);
-    let zr = ZlibDecoder::new(data_cursor.take(data_without_seek_points_len as u64));
-
-    // Return the zlib decoder wrapped in a Box<dyn Read>
-    Ok(Box::new(zr))
 }
 
 #[cfg(test)]
@@ -168,29 +134,39 @@ mod tests {
     }
 
     #[test]
-    fn test_parse() {
-        let mut file =
+    fn test_pick() {
+        let file =
             open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
-        let archive = parse(
-            &mut file,
-            "coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf",
-        );
 
-        assert!(archive.is_ok())
+        assert!(Pak::new(file)
+            .pick("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
+            .is_some())
     }
 
     #[test]
     fn test_decompress() {
-        let mut file =
+        let file =
             open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
-        let archive = parse(
-            &mut file,
-            "coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf",
-        )
-        .unwrap();
 
-        let reader = decompress(Rc::new(archive));
+        assert!(Pak::new(file)
+            .pick("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
+            .unwrap()
+            .decompress()
+            .is_ok())
+    }
 
-        assert!(reader.is_ok())
+    #[tokio::test]
+    async fn test_process_all() {
+        let file =
+            open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
+
+        Pak::new(file)
+            .process_all(|mut entry| async move {
+                let mut buf = vec![];
+                entry.decompress().unwrap().read_to_end(&mut buf);
+                Ok(())
+            })
+            .await
+            .unwrap();
     }
 }

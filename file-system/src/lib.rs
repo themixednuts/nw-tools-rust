@@ -20,6 +20,7 @@ impl FileSystem {
             index: Self::create_index(dir),
         }
     }
+
     fn create_index(dir: &str) -> HashMap<PathBuf, PathBuf> {
         let entries: Vec<_> = WalkDir::new(dir)
             .into_iter()
@@ -45,30 +46,31 @@ impl FileSystem {
             });
         map
     }
-    pub fn read(&self, entry: &str) -> Result<Box<dyn Read>, io::Error> {
-        let in_pak = self.index.get(&PathBuf::from(entry));
-        match in_pak {
-            Some(file) => {
-                let mut zip_file = pak::open(&file.display().to_string()).map_err(|e| {
-                    io::Error::new(
-                        io::ErrorKind::Other,
-                        format!("Failed to open pak file: {}", e),
-                    )
-                })?;
-                let archive = pak::parse(&mut zip_file, entry).map_err(|e| {
-                    io::Error::new(
-                        io::ErrorKind::Other,
-                        format!("Failed to parse archive: {}", e),
-                    )
-                })?;
-                pak::decompress(Rc::new(archive))
-            }
-            None => Err(io::Error::new(
-                io::ErrorKind::Other,
-                "Entry not found in the index",
-            )),
-        }
-    }
+
+    // pub fn read(&self, entry: &str) -> Result<Box<dyn Read>, io::Error> {
+    //     let in_pak = self.index.get(&PathBuf::from(entry));
+    //     match in_pak {
+    //         Some(file) => {
+    //             let mut zip_file = pak::open(&file.display().to_string()).map_err(|e| {
+    //                 io::Error::new(
+    //                     io::ErrorKind::Other,
+    //                     format!("Failed to open pak file: {}", e),
+    //                 )
+    //             })?;
+    //             let archive = pak::pick(&mut zip_file, entry).map_err(|e| {
+    //                 io::Error::new(
+    //                     io::ErrorKind::Other,
+    //                     format!("Failed to parse archive: {}", e),
+    //                 )
+    //             })?;
+    //             pak::decompress(Rc::new(archive))
+    //         }
+    //         None => Err(io::Error::new(
+    //             io::ErrorKind::Other,
+    //             "Entry not found in the index",
+    //         )),
+    //     }
+    // }
 }
 
 #[cfg(test)]
@@ -77,21 +79,21 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets");
-        let reader = fs.read("sharedassets/genericassets/playerbaseattributes.pbadb");
+        // let fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets");
+        // let reader = fs.read("sharedassets/genericassets/playerbaseattributes.pbadb");
 
-        match reader {
-            Ok(reader) => {
-                let mut bytes = reader.bytes();
-                while let Some(Ok(byte)) = bytes.next() {
-                    println!("Byte: {}", byte);
-                }
-                assert!(true)
-            }
-            Err(e) => {
-                dbg!(e);
-                assert!(false)
-            }
-        };
+        // match reader {
+        //     Ok(reader) => {
+        //         let mut bytes = reader.bytes();
+        //         while let Some(Ok(byte)) = bytes.next() {
+        //             println!("Byte: {}", byte);
+        //         }
+        //         assert!(true)
+        //     }
+        //     Err(e) => {
+        //         dbg!(e);
+        //         assert!(false)
+        //     }
+        // };
     }
 }
