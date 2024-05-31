@@ -1,83 +1,62 @@
 pub mod azcs;
+mod buffers;
 pub mod reader;
 
-use async_trait::async_trait;
 use azcs::is_azcs;
-use futures::stream::{self, StreamExt};
 use oodle_safe;
-use std::fs::File;
-use std::io::{prelude::*, Cursor};
-use std::sync::Arc;
-use tokio::{self, spawn};
-use tokio::io::{self, AsyncRead, AsyncReadExt};
-use tokio::sync::Mutex;
-use tokio::task::spawn_blocking;
-use zip::result::ZipResult;
-use zip::{read::ZipFile, CompressionMethod, ZipArchive};
+use std::{
+    fs::File,
+    io::{self, Cursor, Read},
+    path::PathBuf,
+    sync::{Arc, RwLock},
+};
+use zip::{CompressionMethod, ZipArchive};
 
 // var azcsSig = []byte{0x41, 0x5a, 0x43, 0x53};
 // var luacSig = []byte{0x04, 0x00, 0x1b, 0x4c, 0x75, 0x61};
 
-pub fn open(path: &str) -> ZipResult<ZipArchive<File>> {
-    let file = File::open(path)?;
-    ZipArchive::new(file)
-}
-
 #[derive(Debug)]
-pub struct Pak {
-    archive: ZipArchive<File>,
+pub struct PakFile {
+    archive: Arc<RwLock<ZipArchive<File>>>,
 }
 
-impl Pak {
-    pub fn new(archive: ZipArchive<File>) -> Self {
+impl PakFile {
+    pub fn new(archive: Arc<RwLock<ZipArchive<File>>>) -> Self {
         Self { archive }
     }
 
-    pub fn pick<'a>(&'a mut self, path: &str) -> Option<PakFile<'a>> {
-        let index = self.archive.index_for_path(path)?;
-        Some(PakFile {
-            archive: &mut self.archive,
+    pub fn entry<'a>(&'a mut self, path: &str) -> Option<PakFileEntry> {
+        let path = PathBuf::from(path);
+        let archive_clone = self.archive.clone();
+        let cloned = archive_clone.read().ok()?;
+        let index = cloned.index_for_path(path)?;
+        let pak = PakFileEntry {
+            archive: self.archive.clone(),
             index,
-        })
-    }
-
-    pub async fn process_all<'a, F, Fut>(&mut self, mut processor: F) -> io::Result<()>
-    where
-        F: FnMut(PakFile) -> Fut + Send + 'static,
-        Fut: std::future::Future<Output = io::Result<()>> + Send,
-    {
-        let num_files = self.archive.len();
-        let mut handles = vec![];
-
-        for i in 0..num_files {
-            let handle = spawn(move {
-                processor(PakFile {
-                    archive: &mut self.archive,
-                    index: i,
-                })
-            });
-            handles.push(handle);
-        }
-
-        for handle in handles {
-            handle.await?;
-        }
-
-        Ok(())
+        };
+        Some(pak)
     }
 }
 
-pub struct PakFile<'a> {
-    archive: &'a mut ZipArchive<File>,
+pub struct PakFileEntry {
+    archive: Arc<RwLock<ZipArchive<File>>>,
     index: usize,
 }
 
-impl<'a> PakFile<'a> {
-    pub fn decompress(&mut self) -> io::Result<Box<dyn Read>> {
-        let mut entry = self.archive.by_index_raw(self.index)?;
+impl PakFileEntry {
+    pub fn decompress(&mut self) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+        let archive = self.archive.clone();
+        let mut archive = archive.write().unwrap();
+        let mut entry = archive.by_index_raw(self.index)?;
+
         match entry.compression() {
-            CompressionMethod::Stored | CompressionMethod::Deflated => {
-                let mut sig = [0; 4];
+            CompressionMethod::Stored => {
+                let mut buf = vec![];
+                entry.read_to_end(&mut buf)?;
+                Ok(Box::new(Cursor::new(buf)))
+            }
+            CompressionMethod::Deflated | CompressionMethod::Deflate64 => {
+                let mut sig = [0; 5];
                 entry.read_exact(&mut sig)?;
 
                 match is_azcs(&mut entry, &mut sig) {
@@ -110,7 +89,10 @@ impl<'a> PakFile<'a> {
                     Ok(_) => Ok(Box::new(Cursor::new(decompressed))),
                     Err(_) => Err(io::Error::new(
                         io::ErrorKind::Other,
-                        format!("Error with oodle_safe::decompress. Size: {decompressed_size}"),
+                        format!(
+                            "Error with oodle_safe::decompress. Size: {}",
+                            decompressed_size
+                        ),
                     )),
                 }
             }
@@ -128,45 +110,44 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_open() {
-        let file = open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak");
-        assert!(file.is_ok());
-    }
-
-    #[test]
     fn test_pick() {
         let file =
-            open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
+            File::open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak")
+                .unwrap();
+        let archive = Arc::new(RwLock::new(ZipArchive::new(file).unwrap()));
 
-        assert!(Pak::new(file)
-            .pick("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
+        assert!(PakFile::new(archive)
+            .entry("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
             .is_some())
     }
 
     #[test]
     fn test_decompress() {
         let file =
-            open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
+            File::open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak")
+                .unwrap();
+        let archive = Arc::new(RwLock::new(ZipArchive::new(file).unwrap()));
 
-        assert!(Pak::new(file)
-            .pick("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
-            .unwrap()
+        assert!(PakFile::new(archive)
+            .entry("coatgen/65e9a962/08qp01_props_32x32_mesh_chunk_63_42_1__18623649790.cgf")
+            .expect("")
             .decompress()
             .is_ok())
     }
 
-    #[tokio::test]
-    async fn test_process_all() {
-        let file =
-            open("E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak").unwrap();
+    // #[tokio::test]
+    // async fn test_process_all() {
+    //     let file = "E:/Games/Steam/steamapps/common/New World/assets/DataStrm-part1.pak";
 
-        Pak::new(file)
-            .process_all(|mut entry| async move {
-                let mut buf = vec![];
-                entry.decompress().unwrap().read_to_end(&mut buf);
-                Ok(())
-            })
-            .await
-            .unwrap();
-    }
+    //     assert!(PakFile::new(file)
+    //         .await
+    //         .unwrap()
+    //         .process_all(|mut entry| async move {
+    //             // let mut buf =vec![];
+    //             assert!(entry.decompress().await.is_ok());
+    //             Ok(())
+    //         })
+    //         .await
+    //         .is_ok())
+    // }
 }

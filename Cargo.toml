@@ -4,7 +4,8 @@ members = [
   "nw-tools",
   "object-stream",
   "pak",
-  "file-system"
+  "file-system",
+  "datasheet"
 ]
 
 resolver = "2"
