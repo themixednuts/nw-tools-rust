@@ -4,3 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+pak = { path = "../pak" }
+tokio = { version = "^1.37.0", features = ["full"] }
+rayon = "1.10.0"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "bench"
+harness = false

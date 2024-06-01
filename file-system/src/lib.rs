@@ -1,6 +1,6 @@
 use pak::{self, PakFile};
 use std::{
-    io::{self, Read},
+    io::{self, Cursor},
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
 };
@@ -40,7 +40,7 @@ impl FileSystem {
         })
     }
 
-    pub async fn read(&mut self, entry: &str) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+    pub async fn read(&mut self, entry: &str) -> io::Result<Cursor<Vec<u8>>> {
         let entry_path = self.cache.inner.iter().find_map(|cache| {
             cache
                 .inner
@@ -133,7 +133,7 @@ impl FileSystem {
         }
     }
 
-    pub fn read_sync(&mut self, entry: &str) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+    pub fn read_sync(&mut self, entry: &str) -> io::Result<Cursor<Vec<u8>>> {
         let entry_path = self.cache.inner.iter().find_map(|cache| {
             cache
                 .inner
@@ -146,8 +146,8 @@ impl FileSystem {
             Some(path) => {
                 let file = std::fs::File::open(path)?;
                 let archive = Arc::new(RwLock::new(ZipArchive::new(file).unwrap()));
-                let pak = PakFile::new(archive).entry(entry).unwrap().decompress();
-                pak
+                let pak = PakFile::new(archive).entry(entry).unwrap().decompress()?;
+                Ok(pak)
             }
             None => {
                 let paks: Vec<_> = WalkDir::new(&mut self.assets)
@@ -212,9 +212,10 @@ impl FileSystem {
 
 #[cfg(test)]
 mod tests {
-    use pak::azcs;
+    use std::io::Seek;
 
     use super::*;
+    use pak::azcs;
 
     #[tokio::test]
     async fn it_works() -> io::Result<()> {
@@ -226,31 +227,30 @@ mod tests {
         assert!(azcs::parser(&mut reader).is_err());
 
         let mut reader = fs
+            .read("sharedassets/springboardentitites/datatables/javelindata_affixstats.datasheet")
+            .await?;
+
+        assert!(datasheet::parse_datasheet(&mut reader).is_ok());
+
+        let mut reader = fs
             .read("sharedassets/genericassets/playerbaseattributes.pbadb")
             .await?;
-        let mut buffer = [0; 5];
-        reader.read_exact(&mut buffer)?;
-        if let Ok(header) = azcs::is_azcs(&mut reader, &mut buffer) {
-            azcs::parser(&mut azcs::decompress(&mut reader, &header)?)?;
-        };
+
+        assert!(azcs::parser(&mut reader).is_ok());
 
         let mut reader = fs
             .read("sharedassets/genericassets/rangedattackdatabase.radb")
             .await?;
-        let mut buffer = [0; 5];
-        reader.read_exact(&mut buffer)?;
-        if let Ok(header) = azcs::is_azcs(&mut reader, &mut buffer) {
-            azcs::parser(&mut azcs::decompress(&mut reader, &header)?)?;
-        };
+        assert!(azcs::parser(&mut reader).is_ok());
 
-        // checks against none azcs files
         let mut reader = fs
             .read("sharedassets/springboardentitites/datatables/javelindata_achievements.datasheet")
             .await?;
+        datasheet::parse_datasheet(&mut reader)?;
+        reader.rewind()?;
+        datasheet::parse_datasheet_test(&mut reader)?;
 
-        let mut buffer = [0; 5];
-        reader.read_exact(&mut buffer)?;
-        assert!(azcs::is_azcs(&mut reader, &mut buffer).is_err());
+        assert!(azcs::parser(&mut reader).is_err());
 
         //checks to make sure none files returns errors
         let reader = fs

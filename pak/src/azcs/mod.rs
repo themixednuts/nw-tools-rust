@@ -1,6 +1,9 @@
 use crate::reader::ReadExt;
 use flate2::bufread::ZlibDecoder;
-use std::io::{self, Cursor, Error, Read};
+use std::{
+    io::{self, Cursor, Error, Read, Take},
+    sync::Arc,
+};
 use uuid::Uuid;
 
 #[cfg(bench)]
@@ -57,7 +60,7 @@ pub struct Header {
     uncompressed_size: u64,
 }
 
-pub fn parser<R: Read + Sync + Unpin>(reader: &mut R) -> io::Result<Stream> {
+pub fn parser(reader: &mut Cursor<Vec<u8>>) -> io::Result<Stream> {
     let stream_tag = reader.read_u8()?;
 
     if stream_tag != 0x00 {
@@ -112,7 +115,7 @@ pub fn parser_withpool<R: Read + Sync + Unpin>(reader: &mut R) -> io::Result<Str
 pub fn decompress<R: Read + Unpin>(
     reader: &mut R,
     header: &Header,
-) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+) -> io::Result<ZlibDecoder<Take<Cursor<Vec<u8>>>>> {
     match header.compressor_id {
         0x73887d3a => handle_zlib(reader),
         0x72fd505e => Err(io::Error::new(
@@ -147,8 +150,8 @@ pub fn is_azcs<R: Read>(reader: &mut R, buf: &mut [u8; 5]) -> io::Result<Header>
     }
 }
 
-fn read_element<R: Read>(
-    reader: &mut R,
+fn read_element(
+    reader: &mut Cursor<Vec<u8>>,
     stream: &Stream,
 ) -> Result<Element, Box<dyn std::error::Error>> {
     let mut element = Element::default();
@@ -272,7 +275,7 @@ fn read_element_pool<R: Read>(
 
 pub fn handle_zlib<R: Read + Unpin>(
     reader: &mut R,
-) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+) -> io::Result<ZlibDecoder<Take<Cursor<Vec<u8>>>>> {
     let num_seek_points = reader.read_u32()?;
     let num_seek_points_size = num_seek_points * 16;
 
@@ -291,11 +294,10 @@ pub fn handle_zlib<R: Read + Unpin>(
     let data_without_seek_points_len = data_len - num_seek_points_size as usize;
 
     // Create a cursor over the relevant portion of the data
-    let data_cursor = Cursor::new(compressed);
-    let zr = ZlibDecoder::new(data_cursor.take(data_without_seek_points_len as u64));
+    let data_cursor = Cursor::new(compressed).take(data_without_seek_points_len as u64);
+    let zr = ZlibDecoder::new(data_cursor);
 
-    let reader = Box::new(zr);
-    Ok(reader)
+    Ok(zr)
 }
 
 pub fn is_uncompressed(data: &[u8]) -> bool {

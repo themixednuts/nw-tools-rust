@@ -1,9 +1,9 @@
 pub mod azcs;
 mod buffers;
+pub mod decompressor;
 pub mod reader;
 
-use azcs::is_azcs;
-use oodle_safe;
+use decompressor::Decompressor;
 use std::{
     fs::File,
     io::{self, Cursor, Read},
@@ -44,58 +44,20 @@ pub struct PakFileEntry {
 }
 
 impl PakFileEntry {
-    pub fn decompress(&mut self) -> io::Result<Box<dyn Read + Sync + Unpin + Send>> {
+    pub fn decompress(&mut self) -> io::Result<Cursor<Vec<u8>>> {
         let archive = self.archive.clone();
-        let mut archive = archive.write().unwrap();
-        let mut entry = archive.by_index_raw(self.index)?;
+        let mut archive_lock = archive.write().unwrap();
+        let mut entry = archive_lock.by_index_raw(self.index)?;
 
-        match entry.compression() {
-            CompressionMethod::Stored => {
-                let mut buf = vec![];
-                entry.read_to_end(&mut buf)?;
-                Ok(Box::new(Cursor::new(buf)))
-            }
-            CompressionMethod::Deflated | CompressionMethod::Deflate64 => {
-                let mut sig = [0; 5];
-                entry.read_exact(&mut sig)?;
+        let mut decompressor = Self::get_decompressor(entry.compression())?;
+        Ok(Cursor::new(decompressor.decompress(&mut entry)?))
+    }
 
-                match is_azcs(&mut entry, &mut sig) {
-                    Ok(header) => azcs::decompress(&mut entry, &header),
-                    Err(_) => {
-                        let mut buf = vec![];
-                        buf.extend_from_slice(&sig);
-                        entry.read_to_end(&mut buf)?;
-                        Ok(Box::new(Cursor::new(buf)))
-                    }
-                }
-            }
-            CompressionMethod::Unsupported(15) => {
-                let mut compressed = vec![];
-                entry.read_to_end(&mut compressed)?;
-
-                let decompressed_size = entry.size() as usize;
-                let mut decompressed = vec![0u8; decompressed_size];
-
-                let result = oodle_safe::decompress(
-                    &compressed,
-                    &mut decompressed,
-                    None,
-                    None,
-                    None,
-                    Some(oodle_safe::DecodeThreadPhase::All),
-                );
-
-                match result {
-                    Ok(_) => Ok(Box::new(Cursor::new(decompressed))),
-                    Err(_) => Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        format!(
-                            "Error with oodle_safe::decompress. Size: {}",
-                            decompressed_size
-                        ),
-                    )),
-                }
-            }
+    fn get_decompressor(method: CompressionMethod) -> io::Result<Decompressor> {
+        match method {
+            CompressionMethod::Stored => Ok(Decompressor::Stored),
+            CompressionMethod::Deflated => Ok(Decompressor::Deflated),
+            CompressionMethod::Unsupported(15) => Ok(Decompressor::Unsupported),
             _ => Err(io::Error::new(
                 io::ErrorKind::Other,
                 "Unsupported compression method",
