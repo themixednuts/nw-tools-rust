@@ -1,0 +1,671 @@
+<ObjectStream version="3">
+	<Class name="PlayerBaseAttributes" type="{0F40ECC6-ACE9-476A-9A5C-B83BE6129A4B}">
+		<Class name="PlayerAttributeData" field="Player Attribute Data" version="2" type="{46113BED-540D-4584-92AA-B9223D83875A}">
+			<Class name="int" field="Base Amount To Apply" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Base Apply Rate" value="0.7500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Structure Rotation Amount ( Deg )" value="15.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Base Gather Durability Cost" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Repair Max Durability Cost" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="One Handed Gathering Distance" value="0.9500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Two Handed Gathering Distance" value="1.4500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="AZStd::string" field="Stamina Cost Entry" value="Gather_Default" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::vector" field="Post-FTUE Achievement ID Unlocks" type="{99DAD0BC-740E-5E82-826B-8FC7968CC02C}">
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_SealedCommission" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore1a" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore1b" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore1c" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore1d" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore2" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore4a" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore4b" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore4c" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore4d" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_SealedCommission" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_DeathandRebirthLore1a" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_GettingStarted_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_Mechanics_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_Crafting_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_TradingPost_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_Progression_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_Companies_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="AZStd::string" field="element" value="Lore_Unlock_Combat_All" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			</Class>
+			<Class name="AZStd::string" field="Camping Achievement ID" value="s_campingunlock" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="float" field="Salvage Min Percent" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Salvage Max Percent" value="0.4500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Chance of Salvage Success" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Minimum Salvage Quantity" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Salvage Dust Modifier" value="0.2500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Repair Resource Modifier" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="User Camera Min Sensitivity" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="User Camera Max Sensitivity" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Base Deployable Limit" value="10" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="AZStd::string" field="Player Age Display String" value="@ui_age_chat_display" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="float" field="Encumbrance Immobilization Modifier" value="1.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Encumbrance Max Limit Modifier" value="2.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Max Instanced Loot Chest Count" value="20" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="int" field="Instanced Loot Chest Reset Time Mins" value="60" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="int" field="Instanced AI Loot Clear Time Mins" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="int" field="Max AI Loot Receiver Count" value="10" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="int" field="Min Level Roll Perks" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="int" field="Min Level Roll Gem Slot" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Drop Probability Falloff" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Drop Probability Min" value="0.0200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="AZStd::string" field="Level Loot Tag" value="Level" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="Enemy Level Loot Tag" value="EnemyLevel" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="Global Mod Loot Tag" value="GlobalMod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="Crc32" field="Level Loot Tag Id" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="2599078931" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="Enemy Level Loot Tag Id" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="1114249609" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="Global Mod Tag Id" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="1553613686" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::string" field="Azoth Currency" value="Azoth_Currency" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="Crc32" field="Azoth Currency Id" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="928006727" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::vector" field="Durability Repair Cost Data" type="{14693584-F5F6-5B50-95EF-D89CDD13CA5D}">
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="4" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="4" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="10" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+			</Class>
+			<Class name="float" field="Durability To Coin Rate" value="0.0100000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Inventory Durability Loss Ratio" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="Chat Max Message Size" value="200" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="float" field="Min Armor Mitigation" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Max Armor Mitigation" value="2.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Physical Armor Scale Factor" value="1850.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Elemental Armor Scale Factor" value="1850.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Armor Set Rating Exponent" value="1.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Armor Mitigation Exponent" value="1.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Armor Rating Decimal Accuracy" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Base Damage Compound Increase" value="0.0112000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="Base Damage Gear Score Interval" value="5" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Min Possible Weapon Gear Score" value="100" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="bool" field="Round Gearscore Up?" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+			<Class name="int" field="Gear Score Rounding Interval" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="AZStd::vector" field="Item Rarity Data" type="{4A7F5EA4-A5C6-50D0-8431-01CBFE2BE1B2}">
+				<Class name="ItemRarityData" field="element" type="{70B5DE69-114F-41B5-993A-2249FDA496DE}">
+					<Class name="AZStd::string" field="Rarity Level Loc String" value="@RarityLevel0_DisplayName" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="int" field="Max Perk Count" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="bool" field="Is Legendary" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+				</Class>
+				<Class name="ItemRarityData" field="element" type="{70B5DE69-114F-41B5-993A-2249FDA496DE}">
+					<Class name="AZStd::string" field="Rarity Level Loc String" value="@RarityLevel1_DisplayName" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="int" field="Max Perk Count" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="bool" field="Is Legendary" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+				</Class>
+				<Class name="ItemRarityData" field="element" type="{70B5DE69-114F-41B5-993A-2249FDA496DE}">
+					<Class name="AZStd::string" field="Rarity Level Loc String" value="@RarityLevel2_DisplayName" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="int" field="Max Perk Count" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="bool" field="Is Legendary" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+				</Class>
+				<Class name="ItemRarityData" field="element" type="{70B5DE69-114F-41B5-993A-2249FDA496DE}">
+					<Class name="AZStd::string" field="Rarity Level Loc String" value="@RarityLevel3_DisplayName" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="int" field="Max Perk Count" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="bool" field="Is Legendary" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+				</Class>
+				<Class name="ItemRarityData" field="element" type="{70B5DE69-114F-41B5-993A-2249FDA496DE}">
+					<Class name="AZStd::string" field="Rarity Level Loc String" value="@RarityLevel4_DisplayName" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="int" field="Max Perk Count" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="bool" field="Is Legendary" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+				</Class>
+			</Class>
+			<Class name="PerkGenerationData" field="Perk Generation Data" type="{F9944C92-939C-4F11-B809-106EE60E48E9}">
+				<Class name="AZStd::vector" field="Perk Data Per Tier" type="{61D3F007-BD8B-5F15-8694-A337A222710E}">
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+					<Class name="PerkTierData" field="element" type="{1C7129EC-C7B6-471C-A6FF-278A2B3205A8}">
+						<Class name="int" field="Max Perks" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="int" field="Max Perk Channel" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+						<Class name="float" field="Gem Slot Probability" value="0.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+			</Class>
+			<Class name="float" field="Perk Chance Bonus Per Item" value="0.0050000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="Max Perk Ingredients" value="100" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="AZStd::vector" field="Primary Ingredient Modifiers" type="{D000C041-8C62-510B-B581-F7932CDE0297}">
+				<Class name="CraftingGemSlotModifier" field="element" type="{9F9254AB-946E-46F4-99E8-69749BF858C7}">
+					<Class name="float" field="Resource percentage ceiling" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="float" field="Gem Slot bonus percentage" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="AZStd::string" field="Display name" value="@crafting_nochancedesc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+				<Class name="CraftingGemSlotModifier" field="element" type="{9F9254AB-946E-46F4-99E8-69749BF858C7}">
+					<Class name="float" field="Resource percentage ceiling" value="0.2500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="float" field="Gem Slot bonus percentage" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="AZStd::string" field="Display name" value="@crafting_lowchancedesc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+				<Class name="CraftingGemSlotModifier" field="element" type="{9F9254AB-946E-46F4-99E8-69749BF858C7}">
+					<Class name="float" field="Resource percentage ceiling" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="float" field="Gem Slot bonus percentage" value="0.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="AZStd::string" field="Display name" value="@crafting_medchancedesc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+				<Class name="CraftingGemSlotModifier" field="element" type="{9F9254AB-946E-46F4-99E8-69749BF858C7}">
+					<Class name="float" field="Resource percentage ceiling" value="0.7500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="float" field="Gem Slot bonus percentage" value="0.3000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="AZStd::string" field="Display name" value="@crafting_highchancedesc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+				<Class name="CraftingGemSlotModifier" field="element" type="{9F9254AB-946E-46F4-99E8-69749BF858C7}">
+					<Class name="float" field="Resource percentage ceiling" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="float" field="Gem Slot bonus percentage" value="0.4000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					<Class name="AZStd::string" field="Display name" value="@crafting_veryhighchancedesc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::string" field="Perk Chance ItemId" value="AzureT1" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="float" field="Rested Exp Percentage Per Hour" value="0.0250000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Rested Exp Max Percentage" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Rested Exp Modifier" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="Rested Exp Threshold Hours" value="8" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Max Points Per Attribute" value="60" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="float" field="Level Damage Multiplier" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="AZStd::vector" field="Paperdoll Slot Unlocks By Level" type="{22506720-E7AF-56C3-AE08-471FCD604C81}">
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="10" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="6" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="20" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="25" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="26" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="30" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="15" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="16" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="15" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="17" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="45" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="20" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="31" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="30" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{25672DE4-785F-5842-92AA-8C6F67D1431F}">
+					<Class name="int" field="value1" value="32" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="45" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::vector" field="Ability Point Row Requirements" type="{14693584-F5F6-5B50-95EF-D89CDD13CA5D}">
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="4" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{64503325-ECF4-5F02-95F9-E37D00810E59}">
+					<Class name="int" field="value1" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="int" field="value2" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::unordered_flat_map" field="Status Effect Category Limits" type="{465475CB-D215-55C2-9E8F-A9BA6A8E76BF}"/>
+			<Class name="AZStd::unordered_flat_map" field="Status Effect Category Limit Crcs" type="{4CCF3754-33D3-5BB6-A770-BD37A66A5E35}"/>
+			<Class name="float" field="PropertyTaxRateMin" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="PropertyTaxRateMax" value="2.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="TradingTaxRateMin" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="TradingTaxRateMax" value="5.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="CraftingFeeRateMin" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="CraftingFeeRateMax" value="3.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="RefiningFeeRateMin" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="RefiningFeeRateMax" value="3.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="SetTaxOrFeeCoolDownInMin" value="1440" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="StructurePlacementData" field="Structure Placement Data" type="{0AAC0D48-9308-4ADB-B6CA-B1DCAAC61AA5}">
+			<Class name="float" field="Grid Box Size" value="4.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Grid Box Height" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Is Placing Sticky Factor" value="0.6500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Is Placed Sticky Factor" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Min Build Distance From Player" value="2.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Max Build Distance From Player" value="4.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Min Build Pitch Percent" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Max Build Pitch Percent" value="0.4500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Max Build Vertical Distance From Player" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Placement Obstruction Update Frequency Time In Secs" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="TerrainValidationData" field="Placing Settings" type="{28C197B6-642F-418E-B5BC-A7A363B13662}">
+				<Class name="float" field="m_aboveMinPointValidThreshold" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="m_belowMinPointValidThreshold" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerrainValidationData" field="Snapped To Settings" type="{28C197B6-642F-418E-B5BC-A7A363B13662}">
+				<Class name="float" field="m_aboveMinPointValidThreshold" value="0.3000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="m_belowMinPointValidThreshold" value="0.3500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="Asset" field="Snap Point Mesh File Name" value="id={D26B010D-53D9-5899-B74D-57447BD24DB2}:0,type={C2869E3B-DDA0-4E01-8FE3-6770D788866B},hint={objects/draftsman/buildables/snap/jav_snap_point_01.cgf}" version="1" type="{77A19D40-8731-4D3C-9041-1B43047366A4}"/>
+			<Class name="Asset" field="Grid Footprint Mesh File Name" value="id={868FEFE1-1125-5D45-BC68-4A24BE2EBFED}:0,type={C2869E3B-DDA0-4E01-8FE3-6770D788866B},hint={objects/draftsman/buildables/snap/jav_snap_box_1x1.cgf}" version="1" type="{77A19D40-8731-4D3C-9041-1B43047366A4}"/>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Valid Placement Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_01_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Invalid Placement Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_02_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Completion Blocked Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_03_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Snap Valid Placement Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_01_snap_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Snap Invalid Placement Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_02_snap_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AzFramework::SimpleAssetReference&lt;LmbrCentral::MaterialDataAsset&gt;" field="Snap Completion Blocked Material File Name" version="1" type="{B7B8ECC7-FF89-4A76-A50E-4C6CA2B6E6B4}">
+				<Class name="SimpleAssetReferenceBase" field="BaseClass1" version="1" type="{E16CA6C5-5C78-4AD9-8E9B-F8C1FB4D1DB8}">
+					<Class name="AZStd::string" field="AssetPath" value="objects/draftsman/shader/draftsman_hand_03_snap_mat.mtl" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::string" field="Placement Obstruction Filter" value="PlacementObstructionCast" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="Completion Obstruction Filter" value="CompletionObstructionCast" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="LOS Obstruction Filter" value="LOSPlacementCast" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="float" field="LOS Box Height" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="LOS Box Width" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		</Class>
+		<Class name="StructureAttributeData" field="Structure Attribute Data" type="{1E5E78CF-C590-412A-853E-1EFD1CD11694}">
+			<Class name="float" field="Demolish Min Percent" value="0.6000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Demolish Max Percent" value="0.7500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Demolish Min Quantity" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Foundation Damage Modifier" value="3000.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		</Class>
+		<Class name="GatherGameData" field="Gather Game Data" type="{BE1D2815-14DA-48ED-B11C-D40172FBBB34}">
+			<Class name="float" field="Perfect Hit Time Amount To Take" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Average Hit Time Amount To Take" value="0.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		</Class>
+		<Class name="DominionAttributeData" field="Dominion Data" type="{3CB6AFA5-A76F-44B2-A930-FF638DBAF396}">
+			<Class name="unsigned int" field="Protection time added when purchased (in minutes)" value="7200" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Amount of time remaining before a rebuy is available (in minutes)" value="720" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Protection time granted to a newly claimed territory (in minutes)" value="2880" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="FactionData" field="Faction Data" type="{5C98F982-85C3-423C-8CD8-65C55FAADE0C}">
+			<Class name="AZStd::string" field="Sanctuary Enter Notification Id" value="Enter_Sanctuary" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="Sanctuary Exit Notification Id" value="Exit_Sanctuary" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="Toggle PvP Notification Id" value="Toggle_PvP" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		</Class>
+		<Class name="EventCreditData" field="Event Credit Data" type="{AA0275B2-9B50-467E-B746-061C92ED1891}">
+			<Class name="int" field="Credit Time Limit Seconds" value="30" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="Credit Health Threshold Percentage" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="Credit Range Limit Meters" value="200" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="AZStd::unordered_map" field="Contribution Type Multipliers" type="{74CCF29C-5848-5404-80AD-EC6284EA6E12}"/>
+		</Class>
+		<Class name="WarData" field="War Data" version="2" type="{4FEBCF31-140C-4EF1-8C53-814DAA4426AC}">
+			<Class name="AZStd::array" field="War Cost" type="{382BB2D7-FF34-5AAA-B9F3-9848D197DAA3}">
+				<Class name="unsigned int" field="element" value="750000" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="element" value="1000000" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="element" value="1500000" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="float" field="War Extension Cost Modifier" value="1.2000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="War Extension Max Cost Percentage" value="20.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="unsigned int" field="Prewar Duration Minutes" value="1410" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Conquest Window Duration Minutes" value="480" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="War Duration Minutes" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Conquest Duration Minutes" value="30" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Resolution Duration Minutes" value="1" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Resolution Phase Buffer Minutes" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Claim Lock Duration Minutes" value="120" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Siege Window Cooldown Minutes" value="1440" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="float" field="Attacker War Count Modifier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Defender War Count Modifier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Counter Attack Discount" value="0.1000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Siege Window Rounding Hours" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="bool" field="Destroyed Claim Ends War" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+			<Class name="float" field="Larger Guild Multiplier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="AZStd::map" field="Member War Modifier Map" type="{735906FE-CB32-5B83-83D8-D367E2954EC5}"/>
+			<Class name="bool" field="Require Defender Territory" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+			<Class name="AZStd::array" field="Attacker Buildable Team Limits" type="{382BB2D7-FF34-5AAA-B9F3-9848D197DAA3}">
+				<Class name="unsigned int" field="element" value="6" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="element" value="8" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="element" value="10" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+		</Class>
+		<Class name="ClaimLeaderboardsData" field="Claim Leaderboards Data" type="{085C5F81-6C13-4B4F-9F0F-7F1794C25D8E}">
+			<Class name="unsigned int" field="Leaderboard Snapshot Period Length Minutes" value="1440" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Leaderboard Periods In a Season" value="30" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="AZStd::unordered_map" field="Leaderboard Snapshot Regions" type="{53109111-B216-5DE7-81EA-1807D7D3C779}">
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="fra-prod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="20" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="iad-prod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="2" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="gru-prod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="23" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="pdx-prod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="5" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="syd-prod" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="10" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{F3607B96-96DF-5E0E-80AD-08DC35FAAB81}">
+					<Class name="AZStd::string" field="value1" value="pdx-devo" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+					<Class name="ClaimLeaderboardsRegionOffsetData" field="value2" type="{858944E7-D91F-4625-B6C6-B120716070C3}">
+						<Class name="unsigned int" field="Snapshot Start Time Hour" value="5" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="unsigned int" field="Snapshot Start Time Minute" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					</Class>
+				</Class>
+			</Class>
+		</Class>
+		<Class name="ContractConfigData" field="Contract Data" type="{8FBA1347-A061-43C0-8950-2DD9A1E15B34}">
+			<Class name="unsigned int" field="Base Number of Buy/Sell Contracts" value="50" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="unsigned int" field="Base Number of Other Contracts" value="10" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			<Class name="AZStd::map" field="Buy Contract Duration Fee Map" type="{1F239D04-3E14-54CE-A252-2334710119DC}">
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="300" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="500" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0250000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="850" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0300000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="14" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="1500" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="28" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="2700" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0400000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+			</Class>
+			<Class name="AZStd::map" field="Sell Contract Duration Fee Map" type="{1F239D04-3E14-54CE-A252-2334710119DC}">
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="300" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="500" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0250000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="7" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="850" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0300000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="14" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="1500" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{70C6F9CD-959E-5DEF-B5CC-1F31D3759126}">
+					<Class name="int" field="value1" value="28" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="ContractBuySellFeeData" field="value2" type="{06F4F968-0A4A-4FAC-AF23-D6B5B018069D}">
+						<Class name="unsigned int" field="Flat Fee" value="2700" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+						<Class name="float" field="Percentage Fee" value="0.0400000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+					</Class>
+				</Class>
+			</Class>
+			<Class name="float" field="Buy Contract Transaction Tax" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="Sell Contract Transaction Tax" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		</Class>
+		<Class name="WarColorData" field="War Color Data" type="{15829599-0D65-4FB3-ABF7-10830776530D}">
+			<Class name="AZStd::map" field="War Colors Map" type="{A9C46D5C-8CB6-50F9-902D-47ABA1FEC96E}">
+				<Class name="AZStd::pair" field="element" type="{342E9680-7201-5301-94DA-6A46913F51B8}">
+					<Class name="int" field="value1" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="Color" field="value2" value="0.0784314 0.4862745 0.8000000 1.0000000" type="{7894072A-9050-4F0F-901B-34B1A0D29417}"/>
+				</Class>
+				<Class name="AZStd::pair" field="element" type="{342E9680-7201-5301-94DA-6A46913F51B8}">
+					<Class name="int" field="value1" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+					<Class name="Color" field="value2" value="0.8000000 0.2000000 0.0784314 1.0000000" type="{7894072A-9050-4F0F-901B-34B1A0D29417}"/>
+				</Class>
+			</Class>
+		</Class>
+		<Class name="AZStd::unordered_map" field="Guild Siege Window Region Data" type="{DA0AAB24-92A0-5EA4-9A1A-5CEF4E8C3BF9}">
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="iad" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="20" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="4" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="loc" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="23" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="7" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="syd" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="4" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="12" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="pdx" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="23" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="7" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="gru" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="18" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="2" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{4A87CD48-6A4F-5B1A-94F6-013B8B39CFD6}">
+				<Class name="AZStd::string" field="value1" value="fra" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="GuildSiegeWindowRegionData" field="value2" type="{1B34AF34-C6AC-4360-BA4A-60F06485710B}">
+					<Class name="unsigned int" field="Start Hour" value="14" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+					<Class name="unsigned int" field="End Hour" value="22" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				</Class>
+			</Class>
+		</Class>
+		<Class name="GuildTreasuryData" field="Guild Treasury Data" type="{500578D5-B32D-4773-9027-3CF3041C565D}">
+			<Class name="AZ::u64" field="Default Daily Withdrawal Limit" value="10000" type="{D6597933-47CD-4FC8-B911-63F3E2B0993A}"/>
+		</Class>
+		<Class name="AZStd::vector" field="Territory Bonus Data" type="{3A753E0F-942F-56E7-A029-58434364DBA1}">
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="1" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainStanding" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="2" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainXP" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="3" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainStorage" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="250.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="4" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainGatherRate" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="5" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainFactionRep" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="6" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_GainHousePoints" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="7" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_TaxTradingPost" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="8" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_TaxStations" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="9" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_TaxProperty" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="0.0500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.1350000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0025000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+			<Class name="TerritoryEntryData" field="element" type="{B565FDCA-4CF3-46DC-B2B8-506829883905}">
+				<Class name="unsigned char" field="Territory Bonus Id" value="10" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+				<Class name="AZStd::string" field="Progression Point Id" value="TB_PurchaseHouse" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+				<Class name="float" field="Initial Bonus" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Reduction Modifier" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+				<Class name="float" field="Min Value" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			</Class>
+		</Class>
+		<Class name="FactionInfluenceConfigData" field="Faction Influence Config Data" type="{8ED959C4-B0E3-4D45-84D1-FCAEC1C7D1A4}">
+			<Class name="float" field="MaxInfluence" value="64800.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="DecrementRate" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="IncrementRate" value="0.0166000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="MinimumTimeSinceLastWar" value="1440.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="int" field="MinTerritoryDiffToApplyUDMechanics" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			<Class name="float" field="UnderDogMissionInfluenceGain" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="UnderDogMissionInfluenceGainCap" value="0.7500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="UderDogFactionRepGain" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="UnderDogFactionRepGainCap" value="0.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="UnderDogPVPInfluenceGain" value="0.1500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+			<Class name="float" field="UnderDogPVPInfluenceGainCap" value="0.7500000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		</Class>
+	</Class>
+</ObjectStream>
+

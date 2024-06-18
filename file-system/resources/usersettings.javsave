@@ -1,0 +1,990 @@
+<ObjectStream version="3">
+	<Class name="SerializedOptionsData" version="26" type="{1F79DCED-0220-41F9-AF36-3E8D9843FD6C}">
+		<Class name="AZStd::string" field="m_preferredRegion" value="pdx-qa" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="int" field="m_masterVolume" value="40" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_cineVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_sfxVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_ambVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_vocalsVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_voVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_musicVolume" value="40" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_loudnessLevel" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_uiVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_audioQuality" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_outputConfiguration" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_ambientVolume" value="40" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_ignoreWindowFocus" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mutePerformanceMusic" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_muteCombatMusic" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_musicalInstrumentsVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="AZStd::string" field="m_speakerDeviceId" value="{0.0.0.00000000}.{963bfcc9-4b48-4e2a-ac29-ed98378bab1b}" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="AZStd::string" field="m_micDeviceId" value="{0.0.1.00000000}.{f014d8fb-82c4-4670-92dd-841387c45034}" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="int" field="m_voiceChatInputMode" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_receiveVolume" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_micVolume" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_micSensitivity" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_voiceChatMode" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_bandwidthMode" value="3" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="float" field="m_pitchInvertVal" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityMultiplier" value="0.0152163" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_cameraShake" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_strafeCameraKbam" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_strafeCameraGamepad" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_alwaysShowReticle" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_showPvpXp" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_showInspectHint" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_cameraZoom" value="4.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_autoZoomMap" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_modifiedCurveEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_verticalNoiseSuppressionEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_selfCorrectingFollowCamEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_attackFacingCameraGamepadEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_attackFacingCameraEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_smartcastEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_quickcastEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_deadzoneMultiplierLeft" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_deadzoneMultiplierRight" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerHorizontal" value="0.1200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerVertical" value="0.1010000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerADSHorizontal" value="0.1600000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerADSVertical" value="0.1010000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerTurretHorizontal" value="0.3000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_cameraSensitivityControllerTurretVertical" value="0.2200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_controllerInvertYAxis" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_edgeBoostMultiplierSetting" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_joystickCurve" value="0.1200000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_aimAssistEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_aimFrictionSensitivity" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_virtualCursorSensitivity" value="0.9000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_virtualCursorDeadzoneMultiplier" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_magnetismEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_frictionEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_frictionSpeedModifier" value="1.0555556" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_mapPanSpeed" value="90.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_mapZoomSpeed" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_targetedHealingEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockTargetFollow" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockRetarget" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockStickyLock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockSwapToggle" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockGroupMode" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_selectRaidMembersByGroupAndHotkey" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_showHealingHotkeysInRaidHud" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_cameraLockTargetSwitchInterpolationSpeed" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_targetOnlyMyGroupInRaid" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraTargetLock" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockTargetAutoSwitch" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_cameraLockBreakWithInputHold" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_cameraLockBreakWithInputHoldTenths" value="5" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_windowMode" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_windowWidth" value="1920" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_windowHeight" value="1080" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_fullscreenWidth" value="5120" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_fullscreenHeight" value="1440" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_monitorIndex" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_monitorLeft" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_monitorTop" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_showFrameCount" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_graphicsQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_maxFps" value="60" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_vsyncEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_motionBlur" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="float" field="m_gamma" value="1.0000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_brightness" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="float" field="m_contrast" value="0.5000000" type="{EA2C3E90-AFBE-44D4-A90D-FAAF79BAF93D}"/>
+		<Class name="bool" field="m_emoteFx" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_effectsQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_lightingQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_objectsQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_postProcessingQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_shadowsQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_terrainQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_texturesQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_waterQuality" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_fov" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_nameplateQuantity" value="15" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_capUnfocusedFPS" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_enableViewportScale" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hudShowVitalsValues" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hudAlwaysFade" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hudShowAllWeapons" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hudShowAbilityRadials" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_useNewDamageNumbers" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_autoTraverse" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mountAutoRoadFollow" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mountDashToggle" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mountSlowWalk" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_enableAllyTeamColorTinting" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_enableEnemyTeamColorTinting" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::string" field="m_language" value="en-US" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="AZStd::string" field="m_audioLanguage" value="en-US" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="bool" field="m_healingDropdown" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_videoQualityDropdown" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_volumeDropdown" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamermodeServerDropdown" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_ttsDropdown" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_colorBlindnessIndex" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_textSizeOption" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_chatProfanityFilterEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_subtitles" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_subtitlesTextSizeOption" value="1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_subtitlesTextColorOption" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_subtitlesTextBorderEffectOption" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_subtitlesSpeakerName" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_subtitlesSpeakerNameColorOption" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_subtitlesBackingOpacity" value="75" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_dialogueAutoProgressOption" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_achievementPopupsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_territoryNotificationsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_warNotificationsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_housingNotificationsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_perfectSalvageNotificationsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_spectatorPublic" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_genaEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_speechToTextEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_ttsEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_ttsRate" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_ttsVolume" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_diegeticPinSize" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="int" field="m_diegeticPinOpacity" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="bool" field="m_spellAlignmentVfxEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_shiftModifierToggleEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_rumbleEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="int" field="m_rumbleSensitivity" value="50" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+		<Class name="Crc32" field="m_controllerProfileId" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+			<Class name="unsigned int" field="Value" value="3814588639" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="AZStd::string" field="m_controllerProfilePath" value="libs/config/defaultprofile.xml" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		<Class name="bool" field="m_toggleBlockAimDownSights" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_twitchLoginEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_spotlightEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hideOtherStreamers" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_subArmyEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="unsigned char" field="m_chatFontSize" value="21" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+		<Class name="unsigned short" field="m_chatMessageFadeDelay" value="130" type="{ECA0B403-C4F8-4B86-95FC-81688D046E40}"/>
+		<Class name="unsigned char" field="m_chatMessageBackgroundOpacity" value="0" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+		<Class name="unsigned char" field="m_chatGameplayOpacity" value="100" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+		<Class name="unsigned char" field="m_chatDisplayState" value="0" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+		<Class name="bool" field="m_chatEnableAlerts" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_chatCloseAfterSending" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_chatAlwaysShowTimestamps" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_chatColorMessageToChannel" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::vector" field="m_chatTypeStates" type="{5AE1AB16-6D2D-50CF-9958-3F9B34137029}"/>
+		<Class name="bool" field="m_streamerModeUIEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerFriendBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerGroupBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerGuildBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerTradeBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerDuelBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerChatBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerCurrencyBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_streamerModeServerMusicInviteBlock" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::fixed_vector" field="m_enableAutoPinningObjectives" type="{B23460A4-7177-55DA-B71A-65ADD186E9CC}"/>
+		<Class name="bool" field="m_exitSurveyEnabled" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_analyticsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::unordered_set" field="m_inGameSurveyThresholdsSeen" type="{171CA2D3-AAA0-5BA6-B0CF-AEEA880394DC}"/>
+		<Class name="AZStd::unordered_set" field="m_calendarEventsSeen" type="{171CA2D3-AAA0-5BA6-B0CF-AEEA880394DC}"/>
+		<Class name="AZStd::unordered_map" field="m_calendarEventsToTimesSeen" type="{CD8FBD66-4C2D-591B-910E-E5E8E76231BB}">
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="233422280" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="4" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="411984321" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="4" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="907113570" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="1" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="1612075204" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="1" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="2120430119" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="1" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="2274579487" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="3" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{FEB4280B-EDAC-5CF3-B265-FE7ECFFE0A70}">
+				<Class name="unsigned int" field="value1" value="2299757637" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="unsigned int" field="value2" value="1" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+		</Class>
+		<Class name="bool" field="m_leaderboardEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="unsigned int" field="m_outpostRushTutorials" value="0" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		<Class name="unsigned char" field="m_acceptedCodeOfConductVersion" value="3" type="{72B9409A-7D1A-4831-9CFE-FCB3FADD3426}"/>
+		<Class name="bool" field="m_firstTimeSettingsComplete" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_viewedOpeningCutscene" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_isFirstLaunch" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasViewedNewMilestoneReward" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasDoneFirstTimeLandingScreen" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasSeenGearSetTutorial" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::unordered_map" field="m_gearSetExpandedStates" type="{AABF0144-53D1-5634-BC6D-18277A593C6A}"/>
+		<Class name="bool" field="m_hasSeenSalvageTutorial" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasSeenRepairAllTutorial" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasSeenSalvageUnusedGearTutorial" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasSeenViewsTutorial" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_crossplayCommunicationsEnabled" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_hasConvertedSeenEntitlements" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="SeenEntitlementsData" field="m_seenEntitlementsData" type="{A2B71967-E2E0-4B5D-9B06-F804531ECF2D}">
+			<Class name="ByteStream" field="m_bitmask" value="" type="{ADFD596B-7177-5519-9752-BC418FE42963}"/>
+		</Class>
+		<Class name="AZStd::unordered_map" field="m_tipsShown" type="{526307A2-FDF2-5612-AC46-A012E129B472}">
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="13691470" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="15786968" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="29802193" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="33692735" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="36872885" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="50524562" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="81751199" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="91205010" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="111356968" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="117788343" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="148131855" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="149783907" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="206889563" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="224949424" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="284349094" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="303936599" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="306119918" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="306562914" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="329844999" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="335239082" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="355763604" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="373755134" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="396302015" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="418640004" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="423927437" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="431799925" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="452024756" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="455041063" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="463269305" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="463685566" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="483980975" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="485566880" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="530461853" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="588463361" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="607698102" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="693520460" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="795118344" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="812845634" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="816010736" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="832701109" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="882419156" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="885036802" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="887477655" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="917618590" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="919586476" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1031199529" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1059252287" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1092655177" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1119039619" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1137158036" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1138943233" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1152017293" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1152453483" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1183183057" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1185231395" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1198799572" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1266463642" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1314428800" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1444592256" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1457313221" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1522360102" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1550851608" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1670762340" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1673788808" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1694263100" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1744167472" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1772430120" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1811290422" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1849929243" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1876136894" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1878310930" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1879211553" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1919458564" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1932903509" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="1948261017" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2012119668" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2044831433" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2069091021" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2144559257" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2160494109" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2180686142" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2182492573" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2192184836" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2258068775" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2309524258" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2314961692" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2315741376" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2325764285" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2334388264" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2335403535" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2335593812" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2392213253" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2404277572" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2434026763" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2447180213" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2452649976" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2505946081" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2546736767" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2573327124" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2601203761" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2604397327" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2630686397" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2643512559" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2648063269" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2655328275" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2661395426" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2676363039" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2735423059" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2775765686" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2845555800" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2846491722" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2862875297" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2864366096" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2915681976" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2917958701" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2948132388" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="2949027606" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3023601119" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3050010089" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3088374700" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3122293947" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3163871928" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3174165772" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3265826693" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3283357340" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3326743530" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3376404186" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3400743442" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3448774950" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3474189114" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3530940960" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3614406739" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3636569984" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3664092044" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3670996526" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3701709083" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3718459959" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3719846609" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3732761454" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3735893212" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3786929466" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3804972966" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3845605230" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3909824411" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3928137918" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3949055166" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3960241427" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3966969622" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3971928434" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="3978906403" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4035249068" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4038426466" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4072613782" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4076816524" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4120022165" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4155901515" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4156667531" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4187060115" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4217417303" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4231095746" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4240537974" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4255606827" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4260705926" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4272937080" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{599F65B7-4F7D-539B-8B8B-A180111CC912}">
+				<Class name="unsigned int" field="value1" value="4277973898" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+				<Class name="int" field="value2" value="-1" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+			</Class>
+		</Class>
+		<Class name="AZStd::unordered_map" field="m_lastWarScheduleAdjustmentsShown" type="{6B9C4C7B-385E-58F4-9751-B619137DBFFE}">
+			<Class name="AZStd::pair" field="element" type="{7601CCC0-1C85-57FC-A98A-A57A2DDE9455}">
+				<Class name="unsigned short" field="value1" value="2" type="{ECA0B403-C4F8-4B86-95FC-81688D046E40}"/>
+				<Class name="AZ::Uuid" field="value2" value="{8725CE17-25C1-4DC5-9BD5-DBAEB72BEA2D}" type="{E152C105-A133-4D03-BBF8-3D4B2FBA3E2A}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{7601CCC0-1C85-57FC-A98A-A57A2DDE9455}">
+				<Class name="unsigned short" field="value1" value="4" type="{ECA0B403-C4F8-4B86-95FC-81688D046E40}"/>
+				<Class name="AZ::Uuid" field="value2" value="{59581A78-38CB-417B-AABB-09AB913553AA}" type="{E152C105-A133-4D03-BBF8-3D4B2FBA3E2A}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{7601CCC0-1C85-57FC-A98A-A57A2DDE9455}">
+				<Class name="unsigned short" field="value1" value="15" type="{ECA0B403-C4F8-4B86-95FC-81688D046E40}"/>
+				<Class name="AZ::Uuid" field="value2" value="{C22B0997-29C7-495C-9078-54D1754E1183}" type="{E152C105-A133-4D03-BBF8-3D4B2FBA3E2A}"/>
+			</Class>
+			<Class name="AZStd::pair" field="element" type="{7601CCC0-1C85-57FC-A98A-A57A2DDE9455}">
+				<Class name="unsigned short" field="value1" value="16" type="{ECA0B403-C4F8-4B86-95FC-81688D046E40}"/>
+				<Class name="AZ::Uuid" field="value2" value="{7E404F06-B94F-40B8-8775-8599770EAFA1}" type="{E152C105-A133-4D03-BBF8-3D4B2FBA3E2A}"/>
+			</Class>
+		</Class>
+		<Class name="bool" field="m_mapOptionShowLocalPlayer" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowRespawn" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowTerritory" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowSettlements" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowStations" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowForts" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowFastTravel" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowPointOfInterest" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectives" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveMSQ" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveMSQAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveFactionStory" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveFactionStoryAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveSkillProgression" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveSkillProgressionAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveMountQuest" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveMountQuestAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveEpicEquipment" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveEpicEquipmentAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveJourney" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveJourneyAvailable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveMission" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveCommunityGoal" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveEvent" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveChallenge" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveSeasonQuest" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowObjectiveRepeatable" value="true" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowAvailableSoon" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_mapOptionShowFactionInfluence" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="AZStd::vector" field="m_inventorySectionsInventory" type="{11DC7A6B-FD20-56BD-B13E-D623F2C3A1F0}"/>
+		<Class name="AZStd::vector" field="m_inventorySectionsStorage" type="{11DC7A6B-FD20-56BD-B13E-D623F2C3A1F0}"/>
+		<Class name="bool" field="m_inventorySingleColumnInventory" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="bool" field="m_inventorySingleColumnStorage" value="false" type="{A0CA880C-AFE4-43CB-926C-59AC48496112}"/>
+		<Class name="Crc32" field="m_emoteSlot1" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+			<Class name="unsigned int" field="Value" value="829227414" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="Crc32" field="m_emoteSlot2" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+			<Class name="unsigned int" field="Value" value="553796351" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="Crc32" field="m_emoteSlot3" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+			<Class name="unsigned int" field="Value" value="1908290552" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="Crc32" field="m_emoteSlot4" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+			<Class name="unsigned int" field="Value" value="2499943070" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+		</Class>
+		<Class name="Color" field="m_reticleColor" value="1.0000000 1.0000000 1.0000000 1.0000000" type="{7894072A-9050-4F0F-901B-34B1A0D29417}"/>
+		<Class name="Color" field="m_reticleTargetColor" value="1.0000000 0.4431373 0.4431373 1.0000000" type="{7894072A-9050-4F0F-901B-34B1A0D29417}"/>
+		<Class name="AZStd::vector" field="m_seenTutorials" type="{287CEE87-6FF3-52FC-9D32-38255E2C7FE9}">
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="832910663" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="3791545651" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="53712597" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="1608276943" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="315899367" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="1501025756" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+			<Class name="Crc32" field="element" type="{9F4E062E-06A0-46D4-85DF-E0DA96467D3A}">
+				<Class name="unsigned int" field="Value" value="758557904" type="{43DA906B-7DEF-4CA8-9790-854106D3F983}"/>
+			</Class>
+		</Class>
+		<Class name="int" field="m_playerTutorialsClassificationThreshold" value="0" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/>
+	</Class>
+</ObjectStream>
+

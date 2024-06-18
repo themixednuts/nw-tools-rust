@@ -1,0 +1,15 @@
+[package]
+name = "assets"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uuid = "^1.8.0"
+tokio = { version = "1.38.0", features = ["full"] }
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["async_tokio"] }
+
+[[bench]]
+name = "bench"
+harness = false

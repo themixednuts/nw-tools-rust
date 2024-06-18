@@ -1,0 +1,9 @@
+<ObjectStream version="3">
+	<Class name="DebugRenderingSystemSaveData" type="{0AE02B58-AC53-49BE-A6FE-28E5E6F5026E}">
+		<Class name="AZStd::unordered_set" field="m_enabledChannels" type="{32EC831B-8AE7-5715-998B-C0C723CB61DA}">
+			<Class name="AZStd::string" field="element" value="NavMeshDebugComponent" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+			<Class name="AZStd::string" field="element" value="TraversalComponent" type="{03AAAB3F-5C47-5A66-9EBC-D5FA4DB353C9}"/>
+		</Class>
+	</Class>
+</ObjectStream>
+

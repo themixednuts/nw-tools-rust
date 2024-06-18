@@ -1,9 +1,6 @@
 use crate::reader::ReadExt;
 use flate2::bufread::ZlibDecoder;
-use std::{
-    io::{self, Cursor, Error, Read, Take},
-    sync::Arc,
-};
+use std::io::{self, Cursor, Read, Take};
 use uuid::Uuid;
 
 #[cfg(bench)]

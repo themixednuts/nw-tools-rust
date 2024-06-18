@@ -14,15 +14,11 @@ impl Decompressor {
     pub fn decompress(&mut self, entry: &mut ZipFile) -> io::Result<Vec<u8>> {
         let reader = match self {
             Self::Stored | Self::Deflated => {
-                // dbg!("Decompressing Stored");
-
                 let mut buf = vec![];
                 entry.read_to_end(&mut buf)?;
                 Ok(buf)
             }
             Self::Unsupported => {
-                // dbg!("Decompressing oodle");
-
                 let mut compressed = vec![];
                 entry.read_to_end(&mut compressed)?;
 
@@ -65,8 +61,6 @@ impl Decompressor {
                 Ok(buf)
             }
             Err(_) => {
-                // dbg!("Not AZCS");
-
                 let mut buf = vec![];
                 buf.extend_from_slice(&sig);
                 reader.read_to_end(&mut buf)?;

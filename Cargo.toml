@@ -5,8 +5,8 @@ members = [
   "object-stream",
   "pak",
   "file-system",
-  "datasheet"
+  "datasheet",
+  "assets",
 ]
 
 resolver = "2"
-
