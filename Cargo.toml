@@ -1,12 +1,12 @@
 [workspace]
 
 members = [
-  "nw-tools",
-  "object-stream",
-  "pak",
-  "file-system",
-  "datasheet",
-  "assets",
+    "nw-tools",
+    "object-stream",
+    "file-system",
+    "datasheet",
+    "assets",
+    "utils",
 ]
 
 resolver = "2"

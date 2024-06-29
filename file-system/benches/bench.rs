@@ -1,31 +1,63 @@
 extern crate criterion;
 use std::{
     collections::HashMap,
-    io::{Cursor, Read, Seek},
+    io::{Cursor, Read},
     path::PathBuf,
+    sync::Arc,
 };
 
 use criterion::{criterion_group, criterion_main, Criterion};
 use file_system::FileSystem;
 use futures::{self, future::join_all, FutureExt, StreamExt};
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use tokio::{self, fs::File};
+use tokio::{self, fs::File, io::AsyncSeekExt, sync::RwLock};
 use walkdir::WalkDir;
 use zip::ZipArchive;
 
-fn bench_sync(c: &mut Criterion) {
-    let mut group = c.benchmark_group("file_sytem");
-    let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets").unwrap();
+// fn bench_sync(c: &mut Criterion) {
+//     let mut group = c.benchmark_group("file_sytem");
+//     let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets").unwrap();
 
-    group.sample_size(10).bench_function("async", |b| {
-        b.to_async(tokio::runtime::Runtime::new().unwrap())
-            .iter(|| async {
-                let mut fs =
-                    FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets").unwrap();
-                fs.read("sharedassets/genericassets/playerbaseattributes.pbadb")
-                    .await
-                    .unwrap();
-            })
+//     group.sample_size(10).bench_function("async", |b| {
+//         b.to_async(tokio::runtime::Runtime::new().unwrap())
+//             .iter(|| async {
+//                 let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets")
+//                     .await
+//                     .unwrap();
+//                 fs.read("sharedassets/genericassets/playerbaseattributes.pbadb")
+//                     .await
+//                     .unwrap();
+//             })
+//     });
+// }
+
+fn get_all(c: &mut Criterion) {
+    let mut group = c.benchmark_group("get_all");
+    group.sample_size(10);
+    group.bench_function("get_all", |b| {
+        let runtime = tokio::runtime::Runtime::new().unwrap();
+
+        let _fs = runtime.block_on(async {
+            FileSystem::init("E:/Games/Steam/steamapps/common/New World")
+                .await
+                .unwrap()
+        });
+        let fs = Arc::new(RwLock::new(&_fs));
+        b.to_async(runtime).iter(|| async {
+            let mut stream = Arc::clone(&fs).read().await.get_all().await;
+            stream
+                .for_each_concurrent(0, |result| async {
+                    match result {
+                        Ok((path, mut pak)) => {
+                            // dbg!(&path, pak.seek(std::io::SeekFrom::End(0)).await.unwrap());
+                        }
+                        Err(err) => {
+                            // eprintln!("Error: {:?}", err);
+                        }
+                    }
+                })
+                .await;
+        });
     });
 }
 
@@ -122,7 +154,8 @@ fn index(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    index,
+    // index,
+    get_all,
     // parse,
     // to_json,
     // to_json_simd,

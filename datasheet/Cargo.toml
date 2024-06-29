@@ -4,14 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-pak = { path = "../pak" }
-tokio = { version = "^1.37.0", features = ["full"] }
+tokio = { version = "^1.38.0", features = ["full"] }
 rayon = "1.10.0"
 simd-json = "0.13.10"
 serde = "1.0.203"
-serde_json = { version = "1.0.117" , features = ["preserve_order"] }
+serde_json = { version = "1.0.117", features = ["preserve_order"] }
 serde_yml = "0.0.10"
-indexmap = { version ="2.2.6", features = ["serde"] }
+indexmap = { version = "2.2.6", features = ["serde"] }
 crc32fast = "1.4.2"
 
 [dev-dependencies]

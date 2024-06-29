@@ -1,3 +1,4 @@
+mod asset;
 pub mod assetcatalog;
 use assetcatalog::AssetCatalog;
 use tokio::io::{AsyncRead, AsyncSeek};

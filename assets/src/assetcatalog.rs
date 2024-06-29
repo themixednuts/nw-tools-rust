@@ -1,4 +1,7 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt};
 use uuid::{self, Uuid};
@@ -18,7 +21,9 @@ const ASSET_ID_TO_INFO_OFFSET: u8 = 0x000028;
 #[derive(Debug, Default)]
 pub struct AssetCatalog {
     version: u32,
-    asset_id_to_info: HashMap<AssetId, AssetInfo>,
+    asset_infos: Vec<AssetInfo>,
+    asset_id_index: HashMap<AssetId, usize>,
+    relative_path_index: HashMap<PathBuf, usize>,
     // asset_path_to_id: HashMap<Uuid, AssetId>,
     // asset_dependencies: HashMap<AssetId, Vec<ProductDependancy>>,
 }
@@ -81,7 +86,10 @@ impl AssetCatalog {
             u32::from_le_bytes(buf)
         };
 
-        let mut asset_id_to_info: HashMap<AssetId, AssetInfo> =
+        let mut asset_infos: Vec<AssetInfo> = Vec::with_capacity(asset_id_to_info_num as usize);
+        let mut relative_path_index: HashMap<PathBuf, usize> =
+            HashMap::with_capacity(asset_id_to_info_num as usize);
+        let mut asset_id_index: HashMap<AssetId, usize> =
             HashMap::with_capacity(asset_id_to_info_num as usize);
 
         let asset_id_to_info_ref_size = std::mem::size_of::<AssetIdToInfoRef>() as u64;
@@ -110,23 +118,6 @@ impl AssetCatalog {
             .await?;
         data.read_exact(&mut dir_data).await?;
 
-        // let mut offset = 0;
-        // let dir_data: HashMap<usize, PathBuf> = dir_data
-        //     .split(|&byte| byte == 0)
-        //     .filter_map(|slice| {
-        //         if slice.is_empty() {
-        //             None
-        //         } else {
-        //             let current = offset;
-        //             offset += slice.len() + 1;
-        //             Some((
-        //                 current,
-        //                 PathBuf::from(String::from_utf8_lossy(slice).into_owned()),
-        //             ))
-        //         }
-        //     })
-        //     .collect();
-
         let current = data
             .seek(tokio::io::SeekFrom::Start(file_name_data_offset as u64))
             .await?;
@@ -137,24 +128,9 @@ impl AssetCatalog {
             .await?;
         data.read_exact(&mut file_name_data).await?;
 
-        // let mut offset = 0;
-        // let file_name_data: HashMap<usize, PathBuf> = file_name_data
-        //     .split(|&byte| byte == 0)
-        //     .filter_map(|slice| {
-        //         if slice.is_empty() {
-        //             None
-        //         } else {
-        //             let current = offset;
-        //             offset += slice.len() + 1;
-        //             Some((
-        //                 current,
-        //                 PathBuf::from(String::from_utf8_lossy(slice).into_owned()),
-        //             ))
-        //         }
-        //     })
-        //     .collect();
-
-        for id_to_info_ref in asset_id_to_info_data.chunks_exact(asset_id_to_info_ref_size as usize)
+        for (idx, id_to_info_ref) in asset_id_to_info_data
+            .chunks_exact(asset_id_to_info_ref_size as usize)
+            .enumerate()
         {
             let mut chunks = id_to_info_ref.chunks_exact(4);
 
@@ -213,16 +189,34 @@ impl AssetCatalog {
                     asset_tye_data[asset_type_index].try_into().expect("msg"),
                 ),
                 size_bytes,
-                relative_path: path,
+                relative_path: path.to_owned(),
             };
 
-            asset_id_to_info.insert(asset_id, asset_info);
+            asset_infos.push(asset_info);
+            asset_id_index.insert(asset_id, idx);
+            relative_path_index.insert(path, idx);
         }
 
         Ok(Self {
             version,
-            asset_id_to_info,
+            asset_infos,
+            asset_id_index,
+            relative_path_index,
         })
+    }
+    fn get_asset(&self, path: &PathBuf) -> std::io::Result<()> {
+        let idx = self
+            .relative_path_index
+            .get(path)
+            .ok_or(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "Not found",
+            ))?;
+        match self.asset_infos.get(*idx) {
+            Some(_) => {}
+            _ => {}
+        };
+        Ok(())
     }
 }
 
@@ -300,6 +294,6 @@ mod test {
 
         let asset_catalog = AssetCatalog::new(&mut cursor).await;
         assert!(asset_catalog.is_ok());
-        dbg!(asset_catalog.unwrap());
+        // dbg!(asset_catalog.unwrap());
     }
 }
