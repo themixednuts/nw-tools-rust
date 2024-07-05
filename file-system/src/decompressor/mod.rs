@@ -44,6 +44,10 @@ fn handle_azcs(mut reader: &mut (impl Read + Unpin), buf: &mut impl Write) -> io
 }
 
 pub fn decompress_zip(zip: &mut ZipFile, buf: &mut impl Write) -> io::Result<u64> {
+    if zip.size() == 0 {
+        return Ok(0);
+    }
+
     match zip.compression() {
         CompressionMethod::Stored => {
             // eprintln!("STORED");

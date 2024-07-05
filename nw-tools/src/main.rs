@@ -89,7 +89,6 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
 
     let bytes = Arc::new(AtomicU64::new(0));
     let processed = Arc::new(AtomicU64::new(0));
-    let tasks_count = Arc::new(AtomicU64::new(0));
 
     let processed_clone = Arc::clone(&processed);
     let bytes_cloned = Arc::clone(&bytes);
@@ -102,7 +101,6 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
 
     let start = Instant::now();
     let all_pb = Arc::clone(&all);
-    let tasks_count_clone = tasks_count.clone();
     task::spawn(async move {
         let mut interval = time::interval(Duration::from_millis(1000 / 120)); // 60 FPS
 
@@ -120,10 +118,9 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
             };
 
             all_pb.set_message(format!(
-                "ETA: {} | Throughput: {}/s | #Writing Tasks {}",
+                "ETA: {} | Throughput: {}/s",
                 format_duration(eta),
                 format_bytes(bytes_per_sec),
-                tasks_count_clone.load(Ordering::Relaxed),
             ));
         }
     });
@@ -142,35 +139,34 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
     // let (term_tx, mut term_rx) = tokio::sync::mpsc::channel(1);
     // let term_tx = Arc::new(term_tx);
     let cancellation_token_handle = cancellation_token.clone();
-    let tasks_count = tasks_count.clone();
     let join = tokio::task::spawn(async move {
         let handle = Handle::current();
         fs.process_all(move |pak, entry, len, active, max, idx, size| {
             if cancellation_token_handle.is_cancelled() {
                 return Err(tokio::io::Error::other("task cancelled"));
             }
-            // pak_pb.set_message(format!("{} ({idx}/{len})", pak.file_name().unwrap().to_str());
+            pak_pb.set_message(format!(
+                "{} ({idx}/{len})",
+                pak.file_name().unwrap().to_str().unwrap()
+            ));
 
-            // file_pb.set_message(format!("{}", entry.display()));
-            // let all_pb = Arc::clone(&all_pb);
+            file_pb.set_message(format!("{}", entry.display()));
+            let all_pb = Arc::clone(&all_pb);
 
-            // let tasks_count = tasks_count.clone();
-            // let processed = Arc::clone(&cloned_processed);
-            // tasks_count.fetch_add(1, Ordering::Relaxed);
-            // all_pb.inc(1);
+            let processed = Arc::clone(&cloned_processed);
+            all_pb.inc(1);
 
-            // bytes_cloned.fetch_add(size, Ordering::Relaxed);
-            // if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
-            //     // done_tx.blocking_send(true).unwrap();
-            // };
+            bytes_cloned.fetch_add(size, Ordering::Relaxed);
+            if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
+                // done_tx.blocking_send(true).unwrap();
+            };
 
-            // stats_pb.set_message(format!(
-            //     "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
-            //     active,
-            //     max,
-            //     format_bytes(size as f64),
-            // ));
-            // tasks_count.fetch_sub(1, Ordering::Relaxed);
+            stats_pb.set_message(format!(
+                "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
+                active,
+                max,
+                format_bytes(size as f64),
+            ));
             Ok(())
         })
     })
