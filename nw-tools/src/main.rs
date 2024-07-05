@@ -44,14 +44,18 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
 
     let args = tokio::task::spawn_blocking(move || {
         if std::env::args().len() > 1 {
-            return cli::Args::parse();
+            return Ok(cli::Args::parse());
         } else {
-            cli::interactive().unwrap()
+            match cli::interactive() {
+                Ok(args) => Ok(args),
+                Err(e) => Err(e),
+            }
         }
     })
     .await;
 
-    let Ok(args) = args else { return Ok(()) };
+    let Ok(Ok(args)) = args else { return Ok(()) };
+
     let input_path = Arc::new(args.input.unwrap());
     assert!(input_path.join("assets").exists());
     let out_path = Arc::new(args.output.unwrap());
@@ -59,13 +63,7 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
     let fs = tokio::spawn(async move {
         let pb = cliclack::spinner();
         pb.start("Initializing File System");
-        let fs = race(
-            FileSystem::init(&input_path.as_ref(), &out_path.as_ref()),
-            &cancellation_token_handle,
-        )
-        .await
-        .unwrap()
-        .unwrap();
+        let fs = FileSystem::init(&input_path.as_ref(), &out_path.as_ref()).await;
         // pb.set_message("Initializing Asset Catalog");
         // let mut data = fs.get("assetcatalog.catalog").await.unwrap();
         // let _ = AssetCatalog::new(&mut data).await.unwrap();
@@ -151,28 +149,28 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
             if cancellation_token_handle.is_cancelled() {
                 return Err(tokio::io::Error::other("task cancelled"));
             }
-            pak_pb.set_message(format!("{} ({idx}/{len})", pak.display()));
+            // pak_pb.set_message(format!("{} ({idx}/{len})", pak.file_name().unwrap().to_str());
 
-            file_pb.set_message(format!("{}", entry.display()));
-            let all_pb = Arc::clone(&all_pb);
+            // file_pb.set_message(format!("{}", entry.display()));
+            // let all_pb = Arc::clone(&all_pb);
 
-            let tasks_count = tasks_count.clone();
-            let processed = Arc::clone(&cloned_processed);
-            tasks_count.fetch_add(1, Ordering::Relaxed);
-            all_pb.inc(1);
+            // let tasks_count = tasks_count.clone();
+            // let processed = Arc::clone(&cloned_processed);
+            // tasks_count.fetch_add(1, Ordering::Relaxed);
+            // all_pb.inc(1);
 
-            bytes_cloned.fetch_add(size, Ordering::Relaxed);
-            if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
-                // done_tx.blocking_send(true).unwrap();
-            };
+            // bytes_cloned.fetch_add(size, Ordering::Relaxed);
+            // if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
+            //     // done_tx.blocking_send(true).unwrap();
+            // };
 
-            stats_pb.set_message(format!(
-                "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
-                active,
-                max,
-                format_bytes(size as f64),
-            ));
-            tasks_count.fetch_sub(1, Ordering::Relaxed);
+            // stats_pb.set_message(format!(
+            //     "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
+            //     active,
+            //     max,
+            //     format_bytes(size as f64),
+            // ));
+            // tasks_count.fetch_sub(1, Ordering::Relaxed);
             Ok(())
         })
     })

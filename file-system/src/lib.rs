@@ -1,3 +1,4 @@
+use core::panic;
 use decompressor::{decompress_zip, ZipFileExt};
 use futures::{Future, StreamExt};
 use nucleo_matcher::{Config, Matcher, Utf32Str, Utf32String};
@@ -40,48 +41,36 @@ pub struct FileSystem {
 }
 
 impl FileSystem {
-    pub async fn init<P>(root: P, out_dir: P) -> tokio::io::Result<&'static FileSystem>
+    pub async fn init<P>(root: P, out_dir: P) -> &'static FileSystem
     where
         P: AsRef<Path>,
     {
-        let path = root.as_ref();
-        if !path.is_dir() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "Invalid directory",
-            ));
-        }
-        match INSTANCE.get() {
-            Some(fs) => Ok(fs),
-            None => {
-                let (crcs, uuids) = parse_strings(&path).await?;
+        let handle = Handle::current();
+        let path = root.as_ref().to_path_buf();
+        let out_dir = out_dir.as_ref().to_path_buf();
+
+        tokio::task::spawn_blocking(move || {
+            INSTANCE.get_or_init(|| {
+                if !path.is_dir() {
+                    panic!("Not a correct directory");
+                }
+                let _guard = handle.enter();
+                let handle2 = Handle::current();
+                let (crcs, uuids) = handle2.block_on(async { parse_strings(&path).await.unwrap() });
                 let (path_to_pak, len, size) = create_pak_map(&path);
-                let fs = FileSystem {
+                FileSystem {
                     root_dir: path.into(),
-                    out_dir: out_dir.as_ref().to_path_buf(),
+                    out_dir,
                     path_to_pak,
                     crcs,
                     uuids,
                     len,
                     size,
-                };
-                match INSTANCE.set(fs) {
-                    Ok(_) => {
-                        let Some(fs) = INSTANCE.get() else {
-                            return Err(io::Error::new(
-                                io::ErrorKind::InvalidInput,
-                                "Invalid directory",
-                            ));
-                        };
-                        Ok(fs)
-                    }
-                    Err(_) => Err(io::Error::new(
-                        io::ErrorKind::InvalidInput,
-                        "Invalid directory",
-                    )),
                 }
-            }
-        }
+            })
+        })
+        .await
+        .unwrap()
     }
 
     // pub async fn get(
@@ -191,16 +180,19 @@ impl FileSystem {
                 let join = handle.spawn_blocking(move || {
                     let active_threads = active_threads_clone.clone();
                     let max_threads = max_threads_clone.clone();
-                    cb(
-                        entry,
+                    if let Err(e) = cb(
                         pak_path,
+                        entry,
                         len,
                         active_threads.load(std::sync::atomic::Ordering::Relaxed),
                         max_threads.load(std::sync::atomic::Ordering::Relaxed),
                         index,
                         bytes,
-                    )
-                    .unwrap();
+                    ) {
+                        if e.to_string() != "task cancelled" {
+                            panic!("{}", e);
+                        }
+                    };
                 });
                 if let Ok(permit) = tx.try_reserve() {
                     permit.send(join);

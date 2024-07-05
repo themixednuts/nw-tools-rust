@@ -63,7 +63,7 @@ pub fn interactive() -> std::io::Result<Args> {
 
     let output_clone = output.clone();
     tokio::spawn(async move {
-        FileSystem::init(&input_clone, &output_clone).await.unwrap();
+        FileSystem::init(&input_clone, &output_clone).await;
     });
 
     cliclack::outro("Let's Begin!")?;
