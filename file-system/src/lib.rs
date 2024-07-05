@@ -1,4 +1,4 @@
-use decompressor::ZipFileExt;
+use decompressor::{decompress_zip, ZipFileExt};
 use futures::{Future, StreamExt};
 use nucleo_matcher::{Config, Matcher, Utf32Str, Utf32String};
 use pelite::{
@@ -23,15 +23,16 @@ use utils::crc32;
 use walkdir::WalkDir;
 use zip::read::ZipArchive;
 
-mod azcs;
-mod decompressor;
+pub mod azcs;
+pub mod decompressor;
 
 static INSTANCE: OnceLock<FileSystem> = OnceLock::new();
 
 #[derive(Debug, Default)]
 pub struct FileSystem {
-    dir: PathBuf,
-    path_to_pak: HashMap<String, PathBuf>,
+    root_dir: PathBuf,
+    out_dir: PathBuf,
+    path_to_pak: HashMap<PathBuf, (PathBuf, String)>,
     uuids: HashMap<String, String>,
     crcs: HashMap<String, String>,
     len: usize,
@@ -39,11 +40,11 @@ pub struct FileSystem {
 }
 
 impl FileSystem {
-    pub async fn init<P>(p: P) -> tokio::io::Result<&'static FileSystem>
+    pub async fn init<P>(root: P, out_dir: P) -> tokio::io::Result<&'static FileSystem>
     where
         P: AsRef<Path>,
     {
-        let path = p.as_ref();
+        let path = root.as_ref();
         if !path.is_dir() {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
@@ -56,7 +57,8 @@ impl FileSystem {
                 let (crcs, uuids) = parse_strings(&path).await?;
                 let (path_to_pak, len, size) = create_pak_map(&path);
                 let fs = FileSystem {
-                    dir: path.into(),
+                    root_dir: path.into(),
+                    out_dir: out_dir.as_ref().to_path_buf(),
                     path_to_pak,
                     crcs,
                     uuids,
@@ -82,66 +84,67 @@ impl FileSystem {
         }
     }
 
-    pub async fn get(
-        &self,
-        entry: &str,
-    ) -> tokio::io::Result<impl AsyncRead + AsyncSeek + Unpin + Sync + Send> {
-        match self.path_to_pak.get(entry) {
-            Some(path) => {
-                let file = File::open(path).await?.into_std().await;
-                let buf_read = BufReader::new(file);
-                let mut archive = ZipArchive::new(buf_read).unwrap();
-                let index = archive.index_for_path(entry).unwrap();
-                let entry = archive.by_index_raw(index).unwrap();
-                let mut buf = vec![];
-                entry.decompress(&mut buf).unwrap();
-                let reader = tokio::io::BufReader::new(Cursor::new(buf));
-                Ok(reader)
-            }
-            None => {
-                let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
-                let paths: Vec<Utf32String> = self
-                    .path_to_pak
-                    .keys()
-                    .into_iter()
-                    .filter_map(|path| Some(Utf32String::from(path.as_str())))
-                    .collect();
-                let mut scores = Vec::with_capacity(paths.len());
-                for haystack in &paths {
-                    scores.push(matcher.fuzzy_match(
-                        haystack.slice(..),
-                        Utf32Str::Ascii(entry.to_owned().as_bytes()),
-                    ));
-                }
-                scores.sort_unstable();
+    // pub async fn get(
+    //     &self,
+    //     entry: &str,
+    // ) -> tokio::io::Result<impl AsyncRead + AsyncSeek + Unpin + Sync + Send> {
+    //     match self.path_to_pak.get(entry) {
+    //         Some(path) => {
+    //             let file = File::open(path).await?.into_std().await;
+    //             let buf_read = BufReader::new(file);
+    //             let mut archive = ZipArchive::new(buf_read).unwrap();
+    //             let index = archive.index_for_path(entry).unwrap();
+    //             let entry = archive.by_index_raw(index).unwrap();
+    //             let mut buf = vec![];
+    //             entry.decompress(&mut buf).unwrap();
+    //             let reader = tokio::io::BufReader::new(Cursor::new(buf));
+    //             Ok(reader)
+    //         }
+    //         None => {
+    //             let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
+    //             let paths: Vec<Utf32String> = self
+    //                 .path_to_pak
+    //                 .keys()
+    //                 .into_iter()
+    //                 .filter_map(|path| Some(Utf32String::from(path.as_str())))
+    //                 .collect();
+    //             let mut scores = Vec::with_capacity(paths.len());
+    //             for haystack in &paths {
+    //                 scores.push(matcher.fuzzy_match(
+    //                     haystack.slice(..),
+    //                     Utf32Str::Ascii(entry.to_owned().as_bytes()),
+    //                 ));
+    //             }
+    //             scores.sort_unstable();
 
-                dbg!(&scores[0]);
+    //             dbg!(&scores[0]);
 
-                Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    "Entry not found in the paks",
-                ))
-            }
-        }
-    }
+    //             Err(io::Error::new(
+    //                 io::ErrorKind::Other,
+    //                 "Entry not found in the paks",
+    //             ))
+    //         }
+    //     }
+    // }
 
     pub async fn process_all<F>(&self, cb: F) -> tokio::io::Result<()>
     where
-        F: Fn(Vec<u8>, Arc<String>, Arc<PathBuf>, usize, usize, usize)
+        F: Fn(Arc<PathBuf>, Arc<PathBuf>, usize, usize, usize, usize, u64) -> io::Result<()>
             + Send
             + Sync
             + Clone
             + 'static,
-        // Fut: Future<Output = ()> + Send,
     {
         let (tx, rx) = tokio::sync::mpsc::channel(1000);
-        let mut paks: HashMap<PathBuf, Vec<String>> = HashMap::new();
+        let mut paks: HashMap<PathBuf, Vec<(PathBuf, String)>> = HashMap::new();
         self.path_to_pak.keys().for_each(|entry| {
             let path = self.path_to_pak.get(entry).unwrap();
-            paks.entry(path.clone()).or_default().push(entry.clone());
+            paks.entry(path.0.clone())
+                .or_default()
+                .push((entry.clone(), path.1.to_owned()));
         });
 
-        let mut paks: Vec<(PathBuf, Vec<String>)> = paks.into_iter().collect();
+        let mut paks: Vec<(PathBuf, Vec<(PathBuf, String)>)> = paks.into_iter().collect();
         paks.par_sort_unstable_by(|(s, _), (s2, _)| {
             natord::compare(
                 s.file_stem().expect("msg").to_str().expect("msg"),
@@ -153,49 +156,51 @@ impl FileSystem {
         let active_threads = Arc::new(AtomicUsize::new(0));
         let max_threads = Arc::new(AtomicUsize::new(0));
         let tx = Arc::new(tx);
+        let out_dir = Arc::new(self.out_dir.to_owned());
 
         let handle = Handle::current();
-        for (path, entries) in paks.into_iter() {
-            let file = tokio::fs::File::open(&path).await?;
+        for (pak_path, entries) in paks.into_iter() {
+            let file = tokio::fs::File::open(&pak_path).await?;
             let file = BufReader::new(file.into_std().await);
             let archive = Arc::new(RwLock::new(ZipArchive::new(file).unwrap()));
             let len = entries.len();
-            let path = Arc::new(path);
+            let pak_path = Arc::new(pak_path);
             let active_threads = active_threads.clone();
             let max_threads = max_threads.clone();
             let cb = cb.clone();
 
-            entries.into_par_iter().for_each(|entry| {
-                let cb = cb.clone();
+            entries.into_par_iter().for_each(|(entry, name)| {
                 active_threads.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 let entry = Arc::new(entry);
-                let path = Arc::clone(&path);
+                let pak_path = Arc::clone(&pak_path);
                 let archive = Arc::clone(&archive);
-                let mut buf = vec![];
-                {
-                    let mut write_archive = archive.write().unwrap();
-                    let index = write_archive.index_for_path(&*entry).unwrap();
-                    let zip = write_archive.by_index_raw(index).unwrap();
+                let mut write_archive = archive.write().unwrap();
 
-                    if zip.compressed_size() > 0 {
-                        zip.decompress(&mut buf)
-                            .expect(&format!("File: {}", &entry));
-                    };
-                }
+                let index = write_archive.index_for_path(&*entry).unwrap();
+                let mut zip = write_archive.by_index_raw(index).unwrap();
+
                 let active_threads_clone = active_threads.clone();
                 let max_threads_clone = max_threads.clone();
+                let cb = cb.clone();
+
+                let path = out_dir.join(entry.to_path_buf());
+                std::fs::create_dir_all(&path.parent().unwrap()).unwrap();
+                let mut file = std::fs::File::create(&path).unwrap();
+                let bytes = decompress_zip(&mut zip, &mut file).unwrap();
 
                 let join = handle.spawn_blocking(move || {
                     let active_threads = active_threads_clone.clone();
                     let max_threads = max_threads_clone.clone();
                     cb(
-                        buf,
                         entry,
-                        path,
+                        pak_path,
                         len,
                         active_threads.load(std::sync::atomic::Ordering::Relaxed),
                         max_threads.load(std::sync::atomic::Ordering::Relaxed),
-                    );
+                        index,
+                        bytes,
+                    )
+                    .unwrap();
                 });
                 if let Ok(permit) = tx.try_reserve() {
                     permit.send(join);
@@ -290,11 +295,13 @@ async fn parse_strings<P: AsRef<Path>>(
     ))
 }
 
-fn create_pak_map<P: AsRef<Path>>(dir: &P) -> (HashMap<String, PathBuf>, usize, u128) {
+fn create_pak_map<P: AsRef<Path>>(path: &P) -> (HashMap<PathBuf, (PathBuf, String)>, usize, u128) {
     let size = Arc::new(0);
     let len = Arc::new(AtomicUsize::new(0));
+
+    let assets_dir = Arc::new(path.as_ref().join("assets").to_path_buf());
     (
-        WalkDir::new(dir.as_ref().join("assets"))
+        WalkDir::new(assets_dir.to_path_buf())
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|path| {
@@ -311,10 +318,24 @@ fn create_pak_map<P: AsRef<Path>>(dir: &P) -> (HashMap<String, PathBuf>, usize, 
                     let size = Arc::make_mut(&mut size);
                     *size += s;
                 };
+
+                // dbg!(&dir);
                 let file_names = archive
                     .file_names()
-                    .map(|name| (name.to_owned(), dir.path().to_path_buf()))
-                    .collect::<Vec<(String, PathBuf)>>();
+                    .map(|name| {
+                        let full_name = dir
+                            .to_owned()
+                            .into_path()
+                            .strip_prefix(assets_dir.to_path_buf())
+                            .unwrap()
+                            .to_path_buf()
+                            .parent()
+                            .unwrap()
+                            .join(name);
+
+                        (full_name, (dir.path().to_path_buf(), name.to_owned()))
+                    })
+                    .collect::<Vec<(PathBuf, (PathBuf, String))>>();
                 len.fetch_add(file_names.len(), std::sync::atomic::Ordering::Relaxed);
                 file_names
             })
@@ -325,21 +346,26 @@ fn create_pak_map<P: AsRef<Path>>(dir: &P) -> (HashMap<String, PathBuf>, usize, 
     )
 }
 
-// #[cfg(test)]
-// mod tests {
+#[cfg(test)]
+mod tests {
 
-//     use super::*;
-//     use object_stream as objectstream;
+    use super::*;
 
-//     #[tokio::test(flavor = "multi_thread")]
-//     async fn async_read() -> tokio::io::Result<()> {
-//         let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World").await?;
+    // #[tokio::test(flavor = "multi_thread")]
+    // async fn async_read() -> tokio::io::Result<()> {
+    //     let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World").await?;
 
-//         let mut reader = fs
-//             .get("sharedassets/coatlicue/templateworld/regions/r_+00_+00/region.tractmap.tif")
-//             .await?;
-//         assert!(objectstream::parser(&mut reader).is_err());
+    //     let mut reader = fs
+    //         .get("sharedassets/coatlicue/templateworld/regions/r_+00_+00/region.tractmap.tif")
+    //         .await?;
+    //     assert!(objectstream::parser(&mut reader).is_err());
 
-//         Ok(())
-//     }
-// }
+    //     Ok(())
+    // }
+
+    #[test]
+    fn pak_map() {
+        let root = "C:/Program Files (x86)/Steam/steamapps/common/New World";
+        create_pak_map(&root);
+    }
+}

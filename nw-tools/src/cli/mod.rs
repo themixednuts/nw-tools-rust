@@ -1,6 +1,7 @@
 use clap::{self, Parser};
 use cliclack;
 use dirs::{self, home_dir};
+use file_system::FileSystem;
 use std::{path::PathBuf, str::FromStr};
 
 #[derive(Debug, Parser)]
@@ -22,7 +23,7 @@ pub fn interactive() -> std::io::Result<Args> {
         }))
         .validate_interactively(|path: &String| match PathBuf::from_str(path) {
             Ok(p) => {
-                if p.join(r"Bin64\NewWorld.exe").exists() {
+                if p.join(r"Bin64\NewWorld.exe").exists() && p.join(r"assets").exists() {
                     Ok(())
                 } else if p.exists() {
                     Err("New World does not exist in that path.")
@@ -33,6 +34,8 @@ pub fn interactive() -> std::io::Result<Args> {
             _ => Err("Not a valid path"),
         })
         .interact()?;
+
+    let input_clone = input.to_owned();
 
     let nw_type = if input
         .to_str()
@@ -47,8 +50,9 @@ pub fn interactive() -> std::io::Result<Args> {
     } else {
         "live"
     };
+
     let home_dir = home_dir().unwrap();
-    let output: PathBuf = cliclack::input("New World Directory")
+    let output: PathBuf = cliclack::input("Extract Directory")
         .default_input(
             home_dir
                 .join(r"Documents\nw\".to_owned() + nw_type)
@@ -56,6 +60,11 @@ pub fn interactive() -> std::io::Result<Args> {
                 .unwrap_or_default(),
         )
         .interact()?;
+
+    let output_clone = output.clone();
+    tokio::spawn(async move {
+        FileSystem::init(&input_clone, &output_clone).await.unwrap();
+    });
 
     cliclack::outro("Let's Begin!")?;
     Ok(Args {

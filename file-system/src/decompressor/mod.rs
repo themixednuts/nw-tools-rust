@@ -1,9 +1,11 @@
-use crate::azcs::{self, is_azcs};
-use std::io::{self, BufReader, Cursor, Read};
-use zip::{read::ZipFile, CompressionMethod};
+use crate::azcs::{self, is_azcs, Header};
+use flate2::Decompress;
+use regex::bytes;
+use std::io::{self, BufReader, Cursor, Read, Write};
+use zip::{read::ZipFile, unstable::stream::ZipStreamReader, CompressionMethod};
 
 enum Reader<'a> {
-    ZipFile(ZipFile<'a>),
+    ZipFile(&'a mut ZipFile<'a>),
     Cursor(Cursor<Vec<u8>>),
 }
 
@@ -16,65 +18,105 @@ impl<'a> Read for Reader<'a> {
     }
 }
 
-pub trait ZipFileExt {
-    fn decompress(self, buf: &mut Vec<u8>) -> std::io::Result<u64>;
+pub trait ZipFileExt<'a> {
+    fn decompress(&mut self, buf: &mut std::io::BufWriter<impl Write>) -> std::io::Result<u64>;
 }
 
-impl ZipFileExt for ZipFile<'_> {
-    fn decompress(mut self, buf: &mut Vec<u8>) -> std::io::Result<u64> {
-        let mut reader = match self.compression() {
-            CompressionMethod::Stored | CompressionMethod::Deflated => Reader::ZipFile(self),
-            #[allow(deprecated)]
-            CompressionMethod::Unsupported(15) => {
-                let mut compressed = vec![];
-                std::io::copy(&mut self, &mut compressed)?;
+impl<'a> ZipFileExt<'a> for ZipFile<'a> {
+    fn decompress(&mut self, buf: &mut std::io::BufWriter<impl Write>) -> std::io::Result<u64> {
+        decompress_zip(self, buf)
+    }
+}
 
-                let decompressed_size = self.size() as usize;
-                let mut decompressed = vec![0u8; decompressed_size];
+fn handle_azcs(mut reader: &mut (impl Read + Unpin), buf: &mut impl Write) -> io::Result<u64> {
+    let mut sig = [0; 5];
+    reader.read_exact(&mut sig)?;
+    // dbg!(&sig);
 
-                let result = oodle_safe::decompress(
-                    &compressed,
-                    &mut decompressed,
-                    None,
-                    None,
-                    None,
-                    Some(oodle_safe::DecodeThreadPhase::All),
+    if is_azcs(&mut sig) {
+        let mut reader = std::io::BufReader::new(azcs::decompress(&mut reader)?);
+        std::io::copy(&mut reader, buf)
+    } else {
+        let sig = Cursor::new(sig);
+        let mut chained = std::io::BufReader::new(sig.chain(reader));
+        std::io::copy(&mut chained, buf)
+    }
+}
+
+pub fn decompress_zip(zip: &mut ZipFile, buf: &mut impl Write) -> io::Result<u64> {
+    match zip.compression() {
+        CompressionMethod::Stored => {
+            // eprintln!("STORED");
+            handle_azcs(zip, buf)
+        }
+        CompressionMethod::Deflated => {
+            let mut bytes = [0; 2];
+            zip.read_exact(&mut bytes)?;
+            if &[0x78, 0xda] == &bytes {
+                let mut zip = flate2::read::ZlibDecoder::new_with_decompress(
+                    Cursor::new(bytes).chain(zip),
+                    Decompress::new(true),
                 );
-
-                match result {
-                    Ok(_) => Reader::Cursor(Cursor::new(decompressed)),
-                    Err(_) => {
-                        return Err(io::Error::new(
-                            io::ErrorKind::Other,
-                            format!(
-                                "Error with oodle_safe::decompress. Size: {}",
-                                decompressed_size
-                            ),
-                        ))
+                match handle_azcs(&mut zip, buf) {
+                    Ok(size) => Ok(size),
+                    Err(e) => {
+                        (0..20).for_each(|_| {
+                            dbg!(bytes);
+                            eprintln!("ZLIB DEFLATED")
+                        });
+                        // dbg!(&zip_decoder.total_in(), &zip_decoder.total_out());
+                        Err(e)
+                    }
+                }
+            } else {
+                let mut zip = flate2::read::DeflateDecoder::new(Cursor::new(bytes).chain(zip));
+                match handle_azcs(&mut zip, buf) {
+                    Ok(size) => Ok(size),
+                    Err(e) => {
+                        dbg!(bytes);
+                        // (0..20).for_each(|_| eprintln!("DEFLATED"));
+                        // dbg!(&zip_decoder.total_in(), &zip_decoder.total_out());
+                        Err(e)
                     }
                 }
             }
-            _ => {
-                return Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    "CompressionMethod not supported",
-                ))
-            }
-        };
+        }
+        #[allow(deprecated)]
+        CompressionMethod::Unsupported(15) => {
+            // eprintln!("OODLE");
+            let mut compressed = vec![];
+            std::io::copy(zip, &mut compressed)?;
 
-        let mut sig = [0; 5];
-        reader.read_exact(&mut sig)?;
+            let decompressed_size = zip.size() as usize;
+            let mut decompressed = vec![0u8; decompressed_size];
 
-        match is_azcs(&mut reader, &mut sig) {
-            Ok(header) => {
-                let mut reader = azcs::decompress(&mut reader, &header)?;
-                std::io::copy(&mut reader, buf)
+            let result = oodle_safe::decompress(
+                &compressed,
+                &mut decompressed,
+                None,
+                None,
+                None,
+                Some(oodle_safe::DecodeThreadPhase::All),
+            );
+
+            match result {
+                Ok(_) => handle_azcs(&mut Cursor::new(decompressed), buf),
+                Err(_) => {
+                    return Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        format!(
+                            "Error with oodle_safe::decompress. Size: {}",
+                            decompressed_size
+                        ),
+                    ))
+                }
             }
-            Err(_) => {
-                let sig = Cursor::new(sig);
-                let mut chained = sig.chain(reader);
-                std::io::copy(&mut chained, buf)
-            }
+        }
+        _ => {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "CompressionMethod not supported",
+            ))
         }
     }
 }

@@ -16,12 +16,35 @@ pub struct Header {
     uncompressed_size: u64,
 }
 
-pub fn decompress<R>(reader: &mut R, header: &Header) -> io::Result<impl Read + Unpin + Send>
+impl<R: Read> From<&mut R> for Header {
+    fn from(value: &mut R) -> Self {
+        Self {
+            signature: {
+                let mut buf = [0; 4];
+                value.read_exact(&mut buf).unwrap();
+                buf
+            },
+            compressor_id: {
+                let mut buf = [0; 4];
+                value.read_exact(&mut buf).unwrap();
+                u32::from_be_bytes(buf)
+            },
+            uncompressed_size: {
+                let mut buf = [0; 8];
+                value.read_exact(&mut buf).unwrap();
+                u64::from_be_bytes(buf)
+            },
+        }
+    }
+}
+
+pub fn decompress<R>(mut reader: R) -> io::Result<impl Read + Unpin + Send>
 where
     R: Read + Unpin,
 {
+    let header = { Header::from(&mut reader) };
     match header.compressor_id {
-        0x73887d3a => handle_zlib(reader),
+        0x73887d3a => handle_zlib(&mut reader),
         0x72fd505e => Err(io::Error::new(
             io::ErrorKind::Other,
             "zstd is not implemented",
@@ -33,31 +56,8 @@ where
     }
 }
 
-pub fn is_azcs<R>(reader: &mut R, buf: &mut [u8; 5]) -> io::Result<Header>
-where
-    R: Read + Unpin,
-{
-    match (is_compressed(buf) || is_uncompressed(buf)) && buf.starts_with(AZCS_SIGNATURE) {
-        true => {
-            let mut header_data = Header::default();
-            header_data.signature = *AZCS_SIGNATURE;
-
-            let mut buffer = [0; 4];
-            buffer[0] = buf[4];
-            reader.read_exact(&mut buffer[1..])?;
-
-            header_data.compressor_id = u32::from_be_bytes(buffer);
-
-            let mut buffer = [0; 8];
-            reader.read_exact(&mut buffer)?;
-            header_data.uncompressed_size = u64::from_be_bytes(buffer);
-            Ok(header_data)
-        }
-        false => Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Not an AZCS file stream",
-        )),
-    }
+pub fn is_azcs(sig: &mut [u8; 5]) -> bool {
+    (is_compressed(sig) || is_uncompressed(sig)) && sig.starts_with(AZCS_SIGNATURE)
 }
 
 pub fn handle_zlib<R>(reader: &mut R) -> io::Result<impl Read + Unpin + Send>
