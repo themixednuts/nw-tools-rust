@@ -1,5 +1,5 @@
-use flate2::bufread::ZlibDecoder;
-use std::io::{self, Cursor, Read};
+use flate2::{bufread::ZlibDecoder, Decompress};
+use std::io::{self, BufReader, Cursor, Read};
 
 const AZCS_SIGNATURE: &'static [u8; 4] = b"AZCS";
 
@@ -38,21 +38,24 @@ impl<R: Read> From<&mut R> for Header {
     }
 }
 
-pub fn decompress<R>(mut reader: R) -> io::Result<impl Read + Unpin + Send>
+pub fn decompress<R>(mut reader: R) -> io::Result<impl Read + Unpin>
 where
     R: Read + Unpin,
 {
     let header = { Header::from(&mut reader) };
     match header.compressor_id {
-        0x73887d3a => handle_zlib(&mut reader),
+        0x73887d3a => handle_zlib(reader),
         0x72fd505e => Err(io::Error::new(
             io::ErrorKind::Other,
             "zstd is not implemented",
         )),
-        _ => Err(io::Error::new(
-            io::ErrorKind::Other,
-            format!("unsupported compressorId: 0x{:08x}", header.compressor_id),
-        )),
+        _ => {
+            dbg!(&header);
+            Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Unsupported compressor_id: 0x{:08x}", header.compressor_id),
+            ))
+        }
     }
 }
 
@@ -60,7 +63,7 @@ pub fn is_azcs(sig: &mut [u8; 5]) -> bool {
     (is_compressed(sig) || is_uncompressed(sig)) && sig.starts_with(AZCS_SIGNATURE)
 }
 
-pub fn handle_zlib<R>(reader: &mut R) -> io::Result<impl Read + Unpin + Send>
+pub fn handle_zlib<R>(mut reader: R) -> io::Result<impl Read + Unpin>
 where
     R: Read + Unpin,
 {
@@ -69,21 +72,23 @@ where
     let num_seek_points = u32::from_be_bytes(buf);
     let num_seek_points_size = num_seek_points * 16;
 
-    let mut compressed = vec![];
-    reader.read_to_end(&mut compressed)?;
+    // let mut compressed = vec![];
+    // reader.read_to_end(&mut compressed)?;
 
-    // Calculate the number of bytes to read for seek points
-    let data_len = compressed.len();
-    if data_len < num_seek_points_size as usize {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Invalid compressed data size",
-        ));
-    }
-    let data_without_seek_points_len = data_len - num_seek_points_size as usize;
+    // // Calculate the number of bytes to read for seek points
+    // let data_len = compressed.len();
+    // if data_len < num_seek_points_size as usize {
+    //     return Err(io::Error::new(
+    //         io::ErrorKind::Other,
+    //         "Invalid compressed data size",
+    //     ));
+    // }
+    // let data_without_seek_points_len = data_len - num_seek_points_size as usize;
 
-    let data_cursor = Cursor::new(compressed).take(data_without_seek_points_len as u64);
-    let zr = ZlibDecoder::new(data_cursor);
+    // let data_cursor = Cursor::new(compressed).take(data_without_seek_points_len as u64);
+    // ZlibDecoder::new_with_decompress(reader, Decompress::new(true));
+    let reader = BufReader::new(reader);
+    let zr = ZlibDecoder::new(reader);
 
     Ok(zr)
 }

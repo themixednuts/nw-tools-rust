@@ -18,23 +18,23 @@ impl<'a> Read for Reader<'a> {
     }
 }
 
-pub trait ZipFileExt<'a> {
-    fn decompress(&mut self, buf: &mut std::io::BufWriter<impl Write>) -> std::io::Result<u64>;
+pub trait ZipFileExt {
+    fn decompress(&mut self, buf: &mut impl Write) -> std::io::Result<u64>;
 }
 
-impl<'a> ZipFileExt<'a> for ZipFile<'a> {
-    fn decompress(&mut self, buf: &mut std::io::BufWriter<impl Write>) -> std::io::Result<u64> {
+impl ZipFileExt for ZipFile<'_> {
+    fn decompress(&mut self, buf: &mut impl Write) -> std::io::Result<u64> {
         decompress_zip(self, buf)
     }
 }
 
-fn handle_azcs(mut reader: &mut (impl Read + Unpin), buf: &mut impl Write) -> io::Result<u64> {
+fn handle_azcs(reader: &mut (impl Read + Unpin), buf: &mut impl Write) -> io::Result<u64> {
     let mut sig = [0; 5];
     reader.read_exact(&mut sig)?;
     // dbg!(&sig);
 
     if is_azcs(&mut sig) {
-        let mut reader = std::io::BufReader::new(azcs::decompress(&mut reader)?);
+        let mut reader = std::io::BufReader::new(azcs::decompress(sig.chain(reader))?);
         std::io::copy(&mut reader, buf)
     } else {
         let sig = Cursor::new(sig);
@@ -51,7 +51,14 @@ pub fn decompress_zip(zip: &mut ZipFile, buf: &mut impl Write) -> io::Result<u64
     match zip.compression() {
         CompressionMethod::Stored => {
             // eprintln!("STORED");
-            handle_azcs(zip, buf)
+            match handle_azcs(zip, buf) {
+                Ok(size) => Ok(size),
+                Err(e) => {
+                    // (0..20).for_each(|_| eprintln!("Stored"));
+                    // dbg!(&zip_decoder.total_in(), &zip_decoder.total_out());
+                    Err(e)
+                }
+            }
         }
         CompressionMethod::Deflated => {
             let mut bytes = [0; 2];
@@ -78,7 +85,7 @@ pub fn decompress_zip(zip: &mut ZipFile, buf: &mut impl Write) -> io::Result<u64
                     Ok(size) => Ok(size),
                     Err(e) => {
                         dbg!(bytes);
-                        // (0..20).for_each(|_| eprintln!("DEFLATED"));
+                        (0..20).for_each(|_| eprintln!("DEFLATED"));
                         // dbg!(&zip_decoder.total_in(), &zip_decoder.total_out());
                         Err(e)
                     }

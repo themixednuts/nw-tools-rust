@@ -1,13 +1,17 @@
 use core::panic;
 use decompressor::{decompress_zip, ZipFileExt};
-use futures::{Future, StreamExt};
+use futures::{
+    future::{self, join_all},
+    Future, StreamExt,
+};
 use nucleo_matcher::{Config, Matcher, Utf32Str, Utf32String};
 use pelite::{
     pe::{Pe, PeFile},
     FileMap,
 };
-use rayon::prelude::*;
-use std::sync::OnceLock;
+use rayon::{prelude::*, ThreadPool, ThreadPoolBuilder};
+use scopeguard::defer;
+use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
     collections::HashMap,
     io::{self, BufReader, Cursor},
@@ -18,8 +22,10 @@ use tokio::{
     fs::File,
     io::{AsyncRead, AsyncSeek},
     runtime::Handle,
+    sync::Semaphore,
 };
 use tokio_stream::wrappers::ReceiverStream;
+use tokio_util::compat::FuturesAsyncReadCompatExt;
 use utils::crc32;
 use walkdir::WalkDir;
 use zip::read::ZipArchive;
@@ -124,7 +130,7 @@ impl FileSystem {
             + Clone
             + 'static,
     {
-        let (tx, rx) = tokio::sync::mpsc::channel(1000);
+        // let (tx, rx) = tokio::sync::mpsc::channel(1_000);
         let mut paks: HashMap<PathBuf, Vec<(PathBuf, String)>> = HashMap::new();
         self.path_to_pak.keys().for_each(|entry| {
             let path = self.path_to_pak.get(entry).unwrap();
@@ -144,73 +150,94 @@ impl FileSystem {
         let cb = Arc::new(cb);
         let active_threads = Arc::new(AtomicUsize::new(0));
         let max_threads = Arc::new(AtomicUsize::new(0));
-        let tx = Arc::new(tx);
         let out_dir = Arc::new(self.out_dir.to_owned());
+        // let tx = Arc::new(tx);
 
-        let handle = Handle::current();
-        for (pak_path, entries) in paks.into_iter() {
-            let file = tokio::fs::File::open(&pak_path).await?;
-            let file = BufReader::new(file.into_std().await);
-            let archive = Arc::new(RwLock::new(ZipArchive::new(file).unwrap()));
-            let len = entries.len();
-            let pak_path = Arc::new(pak_path);
-            let active_threads = active_threads.clone();
-            let max_threads = max_threads.clone();
-            let cb = cb.clone();
+        // let mut tasks = Vec::new();
+        // let handle = Handle::current();
 
-            entries.into_par_iter().for_each(|(entry, name)| {
-                active_threads.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                let entry = Arc::new(entry);
-                let pak_path = Arc::clone(&pak_path);
-                let archive = Arc::clone(&archive);
-                let mut write_archive = archive.write().unwrap();
+        let pool = ThreadPoolBuilder::new().build().unwrap();
+        // tokio::task::spawn_blocking(move || {
+        pool.scope(|s| {
+            paks.into_par_iter().for_each(|(pak_path, entries)| {
+                let pak_path = Arc::new(pak_path);
+                let out_dir = out_dir.clone();
+                let len = entries.len();
+                let idx = Arc::new(AtomicUsize::new(0));
 
-                let index = write_archive.index_for_path(&*entry).unwrap();
-                let mut zip = write_archive.by_index_raw(index).unwrap();
+                // let tx = tx.clone();
 
-                let active_threads_clone = active_threads.clone();
-                let max_threads_clone = max_threads.clone();
-                let cb = cb.clone();
+                let file = std::fs::File::open(&pak_path.as_ref().to_path_buf()).unwrap();
+                let file = BufReader::new(file);
+                let archive = Arc::new(Mutex::new(ZipArchive::new(file).unwrap()));
 
-                let path = out_dir.join(entry.to_path_buf());
-                std::fs::create_dir_all(&path.parent().unwrap()).unwrap();
-                let mut file = std::fs::File::create(&path).unwrap();
-                let bytes = decompress_zip(&mut zip, &mut file).unwrap();
+                entries.into_par_iter().for_each(|(entry, name)| {
+                    let entry = Arc::new(entry);
 
-                let join = handle.spawn_blocking(move || {
-                    let active_threads = active_threads_clone.clone();
-                    let max_threads = max_threads_clone.clone();
-                    if let Err(e) = cb(
-                        pak_path,
-                        entry,
-                        len,
-                        active_threads.load(std::sync::atomic::Ordering::Relaxed),
-                        max_threads.load(std::sync::atomic::Ordering::Relaxed),
-                        index,
-                        bytes,
-                    ) {
-                        if e.to_string() != "task cancelled" {
-                            panic!("{}", e);
+                    let active_threads = active_threads.clone();
+                    let max_threads = max_threads.clone();
+                    let cb = cb.clone();
+                    let pak_path = pak_path.clone();
+                    let archive = archive.clone();
+                    let idx = idx.clone();
+                    // let len = len.clone();
+                    let out_dir = out_dir.clone();
+                    // s.spawn(move |s| {
+
+                    s.spawn(move |_| {
+                        let c = active_threads.fetch_add(1, Ordering::Relaxed) + 1;
+                        if c > max_threads.load(Ordering::Relaxed) {
+                            max_threads.store(c, Ordering::Relaxed);
                         }
-                    };
+                        let mut archive = archive.lock().unwrap();
+                        let index = archive.index_for_path(name).unwrap();
+                        let mut zip = archive.by_index_raw(index).unwrap();
+
+                        let path = out_dir.join(entry.to_path_buf());
+                        let Some(parent) = path.parent() else {
+                            return;
+                        };
+
+                        std::fs::create_dir_all(parent.to_path_buf()).unwrap();
+                        let mut file = std::fs::File::create(&path).unwrap();
+                        let bytes = decompress_zip(&mut zip, &mut file)
+                            .expect(&format!("file: {}", entry.display()));
+                        drop(zip);
+                        if let Err(e) = cb(
+                            pak_path,
+                            entry,
+                            len,
+                            active_threads.load(Ordering::Relaxed),
+                            max_threads.load(Ordering::Relaxed),
+                            idx.fetch_add(1, Ordering::Relaxed) + 1,
+                            bytes,
+                        ) {
+                            if e.to_string() != "task cancelled" {
+                                panic!("{}", e);
+                            }
+                        };
+                        active_threads.fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
+                    });
                 });
-                if let Ok(permit) = tx.try_reserve() {
-                    permit.send(join);
-                }
-
-                let active_threads = active_threads.clone();
-                let max_threads = max_threads.clone();
-                let c = active_threads.fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
-                if c > max_threads.load(std::sync::atomic::Ordering::Relaxed) {
-                    max_threads.store(c, std::sync::atomic::Ordering::Relaxed);
-                }
+                // });
             });
-        }
+        });
+        // tokio::task::spawn_blocking(move || {
+        // });
+        // if let Ok(permit) = tx.try_reserve() {
+        //     permit.send(task);
+        // }
+        // });
+        // })
+        // .await
+        // .unwrap();
+        // .await?;
 
-        let mut stream = ReceiverStream::new(rx);
-        while let Some(s) = stream.next().await {
-            s.await.unwrap();
-        }
+        // let mut stream = ReceiverStream::new(rx);
+        // while let Some(task) = stream.next().await {
+        //     tasks.push(task);
+        // }
+        // join_all(tasks).await;
         Ok(())
     }
 

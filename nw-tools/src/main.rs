@@ -1,4 +1,7 @@
+mod app;
 mod cli;
+mod events;
+
 use clap::Parser;
 use cliclack::{spinner, ProgressBar};
 use file_system::{decompressor::decompress_zip, FileSystem};
@@ -139,51 +142,48 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
     // let (term_tx, mut term_rx) = tokio::sync::mpsc::channel(1);
     // let term_tx = Arc::new(term_tx);
     let cancellation_token_handle = cancellation_token.clone();
-    let join = tokio::task::spawn(async move {
-        let handle = Handle::current();
-        fs.process_all(move |pak, entry, len, active, max, idx, size| {
-            if cancellation_token_handle.is_cancelled() {
-                return Err(tokio::io::Error::other("task cancelled"));
-            }
-            pak_pb.set_message(format!(
-                "{} ({idx}/{len})",
-                pak.file_name().unwrap().to_str().unwrap()
-            ));
+    fs.process_all(move |pak, entry, len, active, max, idx, size| {
+        if cancellation_token_handle.is_cancelled() {
+            return Err(tokio::io::Error::other("task cancelled"));
+        }
+        pak_pb.set_message(format!(
+            "{} ({idx}/{len})",
+            pak.file_name().unwrap().to_str().unwrap()
+        ));
 
-            file_pb.set_message(format!("{}", entry.display()));
-            let all_pb = Arc::clone(&all_pb);
+        file_pb.set_message(format!("{}", entry.display()));
+        let all_pb = Arc::clone(&all_pb);
 
-            let processed = Arc::clone(&cloned_processed);
-            all_pb.inc(1);
+        let processed = Arc::clone(&cloned_processed);
+        all_pb.inc(1);
 
-            bytes_cloned.fetch_add(size, Ordering::Relaxed);
-            if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
-                // done_tx.blocking_send(true).unwrap();
-            };
+        bytes_cloned.fetch_add(size, Ordering::Relaxed);
+        if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
+            // done_tx.blocking_send(true).unwrap();
+        };
 
-            stats_pb.set_message(format!(
-                "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
-                active,
-                max,
-                format_bytes(size as f64),
-            ));
-            Ok(())
-        })
+        stats_pb.set_message(format!(
+            "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
+            active,
+            max,
+            format_bytes(size as f64),
+        ));
+        Ok(())
     })
-    .await;
+    .await?;
 
-    match join {
-        Ok(res) => {
-            if let Err(e) = res.await {
-                dbg!(e);
-            }
-        }
-        Err(e) => {
-            dbg!(e);
-        }
-    }
+    // match join {
+    //     Ok(res) => {
+    //         if let Err(e) = res.await {
+    //             dbg!(e);
+    //         }
+    //     }
+    //     Err(e) => {
+    //         dbg!(e);
+    //     }
+    // }
     let cancellation_token_handle = cancellation_token.clone();
-    let multi_pb_clone = Arc::clone(&multi_pb);
+    // let multi_pb_clone = Arc::clone(&multi_pb);
     // tokio::spawn(async move {
     //     let Some(err) = term_rx.recv().await else {
     //         return;
