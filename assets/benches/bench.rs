@@ -9,7 +9,7 @@ fn bench(c: &mut Criterion) {
         b.to_async(tokio::runtime::Runtime::new().unwrap())
             .iter(|| async move {
                 let mut cursor = Cursor::new(catalog);
-                AssetCatalog::new(&mut cursor).await.unwrap();
+                // AssetCatalog::init(&mut cursor).await.unwrap();
             })
     });
 }

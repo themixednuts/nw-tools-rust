@@ -1,81 +1,84 @@
 mod app;
-mod cli;
 mod events;
+mod resources;
 
-use clap::Parser;
+use app::App;
+use assets::assetcatalog::AssetCatalog;
 use cliclack::{spinner, ProgressBar};
-use file_system::{decompressor::decompress_zip, FileSystem};
+use file_system::FileSystem;
 use scopeguard::defer_on_unwind;
-use std::{
-    borrow::Borrow,
-    io::{self, Cursor, Read, Seek, Write},
-    path::{Path, PathBuf},
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc,
-    },
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
 };
 use tokio::{
     self,
-    runtime::Handle,
     signal::ctrl_c,
-    task::{self, JoinHandle},
+    task::{self},
     time::{self, Duration, Instant},
 };
-use tokio_util::sync::CancellationToken;
-use utils::{format_bytes, format_duration, race};
-use zip::read::ZipFile;
+use utils::{format_bytes, format_duration};
 
 #[tokio::main]
 async fn main() -> tokio::io::Result<()> {
-    let cancellation_token = CancellationToken::new();
+    let app = App::init();
+    // parse_lumberyard_source().await.unwrap();
+    // map_resources().await;
+    // return Ok(());
 
-    let cancellation_token_handle = cancellation_token.clone();
+    let token = app.notify.clone();
     tokio::spawn(async move {
         ctrl_c().await.unwrap();
-        cancellation_token_handle.cancel();
+        token.cancel();
     });
 
-    let cancellation_token_handle = cancellation_token.clone();
-    start(cancellation_token_handle).await?;
+    start().await?;
 
     Ok(())
 }
 
-async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
-    let cancellation_token_handle = cancellation_token.clone();
-
-    let args = tokio::task::spawn_blocking(move || {
-        if std::env::args().len() > 1 {
-            return Ok(cli::Args::parse());
-        } else {
-            match cli::interactive() {
-                Ok(args) => Ok(args),
-                Err(e) => Err(e),
-            }
-        }
-    })
-    .await;
-
+async fn start() -> tokio::io::Result<()> {
+    // TODO: handle this differently
+    let args = tokio::task::spawn_blocking(cli::interactive).await;
     let Ok(Ok(args)) = args else { return Ok(()) };
 
-    let input_path = Arc::new(args.input.unwrap());
+    let input_path = Arc::new(args.input.as_ref().unwrap());
     assert!(input_path.join("assets").exists());
-    let out_path = Arc::new(args.output.unwrap());
+    let out_path = Arc::new(args.output.as_ref().unwrap());
 
     let fs = tokio::spawn(async move {
         let pb = cliclack::spinner();
         pb.start("Initializing File System");
-        let fs = FileSystem::init(&input_path.as_ref(), &out_path.as_ref()).await;
-        // pb.set_message("Initializing Asset Catalog");
-        // let mut data = fs.get("assetcatalog.catalog").await.unwrap();
-        // let _ = AssetCatalog::new(&mut data).await.unwrap();
-        pb.stop("File System Initialized");
+        let fs = FileSystem::init().await;
+        pb.set_message("File System Initialized");
+        pb.set_message("Initializing Asset Catalog");
+        let _ = AssetCatalog::init().await.unwrap();
+        pb.stop("Asset Catalog Initialized");
         fs
     })
     .await?;
 
+    // tokio::spawn(async move {
+    //     let mut file = tokio::fs::File::open("E:/Extract/NW/assets/assetcatalog.xml")
+    //         .await
+    //         .unwrap()
+    //         .into_std()
+    //         .await;
+
+    //     let mut out = tokio::fs::File::create("e:\\extract\\assetcatalog.xml")
+    //         .await
+    //         .unwrap()
+    //         .into_std()
+    //         .await;
+
+    //     object_stream::parser(&mut file)
+    //         .unwrap()
+    //         .to_xml(&mut out, &fs.uuids, &fs.crcs);
+    // })
+    // .await?;
+
     let len = fs.len() as u64;
+    let size = fs.size();
 
     let multi_pb = Arc::new(cliclack::MultiProgress::new("Decompressing paks"));
     let status_pb = Arc::new(multi_pb.add(spinner()));
@@ -105,35 +108,44 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
     let start = Instant::now();
     let all_pb = Arc::clone(&all);
     task::spawn(async move {
-        let mut interval = time::interval(Duration::from_millis(1000 / 120)); // 60 FPS
+        let mut interval = time::interval(Duration::from_millis(1000 / 120));
 
         loop {
             interval.tick().await;
             let elapsed = start.elapsed();
-            let bytes_per_sec = bytes_cloned.load(Ordering::Relaxed) as f64 / elapsed.as_secs_f64();
+            let bytes_prcocessed = bytes_cloned.load(Ordering::Relaxed);
+            let bytes_per_sec = bytes_prcocessed as f64 / elapsed.as_secs_f64();
             let processed_count = processed_clone.load(Ordering::Relaxed);
             let eta = if processed_count < len {
-                let remaining = len - processed_count;
-                let time_per_file = elapsed.as_secs_f64() / (processed_count + 1) as f64;
-                Duration::from_secs_f64(time_per_file * remaining as f64)
+                // let remaining = len - processed_count;
+                // let time_per_file = elapsed.as_secs_f64() / (processed_count + 1) as f64;
+                // Duration::from_secs_f64(time_per_file * remaining as f64)
+                let remaining = size - bytes_prcocessed as u128;
+                if bytes_per_sec > 0.0 {
+                    Duration::from_secs_f64(remaining as f64 / bytes_per_sec)
+                } else {
+                    Duration::ZERO
+                }
             } else {
                 Duration::ZERO
             };
 
             all_pb.set_message(format!(
-                "ETA: {} | Throughput: {}/s",
+                "ETA: {} | Throughput: {}/s | Approx. Size: {}/{}",
                 format_duration(eta),
                 format_bytes(bytes_per_sec),
+                format_bytes(bytes_prcocessed as f64),
+                format_bytes(size as f64)
             ));
         }
     });
 
-    let cancellation_token_handle = cancellation_token.clone();
-    let status_pb_clone = status_pb.clone();
-    tokio::spawn(async move {
-        cancellation_token_handle.cancelled().await;
-        status_pb_clone.set_message("Aborting...");
-    });
+    // let cancellation_token_handle = cancellation_token.clone();
+    // let status_pb_clone = status_pb.clone();
+    // tokio::spawn(async move {
+    //     cancellation_token_handle.cancelled().await;
+    //     status_pb_clone.set_message("Aborting...");
+    // });
 
     let all_pb = Arc::clone(&all);
     let cloned_processed = processed.clone();
@@ -141,11 +153,11 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
 
     // let (term_tx, mut term_rx) = tokio::sync::mpsc::channel(1);
     // let term_tx = Arc::new(term_tx);
-    let cancellation_token_handle = cancellation_token.clone();
+    // let cancellation_token_handle = cancellation_token.clone();
     fs.process_all(move |pak, entry, len, active, max, idx, size| {
-        if cancellation_token_handle.is_cancelled() {
-            return Err(tokio::io::Error::other("task cancelled"));
-        }
+        // if cancellation_token_handle.is_cancelled() {
+        //     return Err(tokio::io::Error::other("task cancelled"));
+        // }
         pak_pb.set_message(format!(
             "{} ({idx}/{len})",
             pak.file_name().unwrap().to_str().unwrap()
@@ -153,17 +165,16 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
 
         file_pb.set_message(format!("{}", entry.display()));
         let all_pb = Arc::clone(&all_pb);
-
-        let processed = Arc::clone(&cloned_processed);
         all_pb.inc(1);
 
         bytes_cloned.fetch_add(size, Ordering::Relaxed);
+        let processed = Arc::clone(&cloned_processed);
         if (processed.fetch_add(1, Ordering::Relaxed) + 1) == len as u64 {
             // done_tx.blocking_send(true).unwrap();
         };
 
         stats_pb.set_message(format!(
-            "#Processing Threads: {} | Max Threads: {} | #Last Bytes Written: {} ",
+            "#Tasks: {} | Max Tasks: {} | #Last Bytes Written: {} ",
             active,
             max,
             format_bytes(size as f64),
@@ -172,17 +183,6 @@ async fn start(cancellation_token: CancellationToken) -> tokio::io::Result<()> {
     })
     .await?;
 
-    // match join {
-    //     Ok(res) => {
-    //         if let Err(e) = res.await {
-    //             dbg!(e);
-    //         }
-    //     }
-    //     Err(e) => {
-    //         dbg!(e);
-    //     }
-    // }
-    let cancellation_token_handle = cancellation_token.clone();
     // let multi_pb_clone = Arc::clone(&multi_pb);
     // tokio::spawn(async move {
     //     let Some(err) = term_rx.recv().await else {

@@ -1,4 +1,4 @@
-use flate2::{bufread::ZlibDecoder, Decompress};
+use flate2::{read::ZlibDecoder, Decompress};
 use std::io::{self, BufReader, Cursor, Read};
 
 const AZCS_SIGNATURE: &'static [u8; 4] = b"AZCS";
@@ -87,7 +87,7 @@ where
 
     // let data_cursor = Cursor::new(compressed).take(data_without_seek_points_len as u64);
     // ZlibDecoder::new_with_decompress(reader, Decompress::new(true));
-    let reader = BufReader::new(reader);
+    // let reader = BufReader::new(reader);
     let zr = ZlibDecoder::new(reader);
 
     Ok(zr)

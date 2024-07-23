@@ -4,10 +4,11 @@ use crc32fast::Hasher;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Number, Value};
-mod serializer;
 
 const VERSION: usize = 0x00;
+const NAME_CRC: usize = 0x04;
 const NAME_OFFSET_FROM_STRING: usize = 0x08;
+const TYPE_CRC: usize = 0x12;
 const TYPE_OFFSET_FROM_STRING: usize = 0x16;
 const NUM_COLUMNS: usize = 0x44;
 const NUM_ROWS: usize = 0x48;
@@ -15,6 +16,17 @@ const HEADER: usize = 0x5c;
 const HEADER_BYTE_SIZE: usize = 12;
 const CELL_BYTE_SIZE: usize = 8;
 const DATA_END: usize = 0x38;
+
+#[derive(Debug, Clone, Default)]
+pub struct Datasheet {
+    pub version: u32,
+    pub name: String,
+    pub _type: String,
+    pub column_count: usize,
+    pub row_count: usize,
+    header: Vec<HeaderCell>,
+    rows: Vec<DatasheetRow>,
+}
 
 #[derive(Debug, Clone)]
 pub struct HeaderCell {
@@ -32,20 +44,9 @@ pub enum DatasheetCell {
 }
 
 #[derive(Default, Debug, Clone)]
-pub struct CellMeta {
+pub struct Metadata {
     crc32: u32,
     data: [u8; 4],
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct Datasheet {
-    pub version: u32,
-    pub name: String,
-    pub _type: String,
-    pub column_count: usize,
-    pub row_count: usize,
-    header: Vec<HeaderCell>,
-    rows: Vec<DatasheetRow>,
 }
 
 impl Datasheet {
@@ -61,7 +62,7 @@ impl Datasheet {
                             DatasheetCell::String(value) => Value::String(value.into()),
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
-                                    Value::Number((*value as i64).into()).into()
+                                    Value::Number((*value as i64).into())
                                 } else {
                                     Number::from_f64(*value).into()
                                 }
@@ -88,7 +89,7 @@ impl Datasheet {
                             DatasheetCell::String(value) => Value::String(value.into()),
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
-                                    Value::Number((*value as i64).into()).into()
+                                    Value::Number((*value as i64).into())
                                 } else {
                                     Number::from_f64(*value).into()
                                 }
@@ -108,17 +109,17 @@ impl Datasheet {
         // Write the header row
         for (i, header) in self.header.iter().enumerate() {
             if i > 0 {
-                csv.push_str(",");
+                csv.push(',');
             }
             csv.push_str(&(header.text.clone()));
         }
-        csv.push_str("\n");
+        csv.push('\n');
 
         // Write the data rows
         for row in &self.rows {
             for (i, cell) in row.iter().enumerate() {
                 if i > 0 {
-                    csv.push_str(",");
+                    csv.push(',');
                 }
                 match cell {
                     DatasheetCell::String(value) => {
@@ -134,7 +135,7 @@ impl Datasheet {
                     DatasheetCell::Boolean(value) => csv.push_str(&value.to_string()),
                 }
             }
-            csv.push_str("\n");
+            csv.push('\n');
         }
         csv
     }
@@ -152,7 +153,7 @@ impl Datasheet {
                         if value.fract() == 0.0 {
                             json_row.insert(
                                 &self.header[i].text,
-                                Value::Number((*value as i64).into()).into(),
+                                Value::Number((*value as i64).into()),
                             );
                         } else {
                             json_row.insert(&self.header[i].text, Number::from_f64(*value).into());
@@ -182,6 +183,7 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
     data.read_exact(&mut buffer)?;
     let version = u32::from_le_bytes(buffer);
 
+    // datatable crc  -- i32
     data.seek(SeekFrom::Current(4))?;
     data.read_exact(&mut buffer)?;
     let name_offset = u32::from_le_bytes(buffer);
@@ -211,7 +213,7 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
 
     let mut header = Vec::with_capacity(column_count);
     for _ in 0..column_count {
-        let meta = CellMeta {
+        let meta = Metadata {
             crc32: {
                 data.read_exact(&mut buffer)?;
                 u32::from_le_bytes(buffer)
@@ -243,7 +245,7 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
         let mut cells = Vec::with_capacity(column_count);
         for j in 0..column_count {
             let _type = header[j]._type;
-            let meta = CellMeta {
+            let meta = Metadata {
                 crc32: {
                     data.read_exact(&mut buffer)?;
                     u32::from_le_bytes(buffer)
@@ -300,5 +302,5 @@ fn read_string<R: Read + Seek>(data: &mut R) -> io::Result<String> {
         }
         string.push(buf[0]);
     }
-    Ok(String::from_utf8(string).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?)
+    String::from_utf8(string).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
 }

@@ -1,23 +1,8 @@
 mod asset;
-pub mod assetcatalog;
-use assetcatalog::AssetCatalog;
-use tokio::io::{AsyncRead, AsyncSeek};
-
-#[derive(Debug, Default)]
-pub struct AssetManager {
-    asset_catalog: AssetCatalog,
-}
-
-impl AssetManager {
-    async fn new<R>(mut data: R) -> Self
-    where
-        R: AsyncRead + AsyncSeek + Unpin + Sync,
-    {
-        Self {
-            asset_catalog: AssetCatalog::new(&mut data).await.unwrap(),
-        }
-    }
-}
+mod assetcatalog;
+mod assetmanager;
+mod assetregistry;
+mod common;
 
 #[cfg(test)]
 mod test {

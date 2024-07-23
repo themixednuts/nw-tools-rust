@@ -37,27 +37,27 @@ fn get_all(c: &mut Criterion) {
     group.bench_function("get_all", |b| {
         let runtime = tokio::runtime::Runtime::new().unwrap();
 
-        let _fs = runtime.block_on(async {
-            FileSystem::init("E:/Games/Steam/steamapps/common/New World")
-                .await
-                .unwrap()
-        });
-        let fs = Arc::new(RwLock::new(&_fs));
-        b.to_async(runtime).iter(|| async {
-            let mut stream = Arc::clone(&fs).read().await.get_all().await;
-            stream
-                .for_each_concurrent(0, |result| async {
-                    match result {
-                        Ok((path, mut pak)) => {
-                            // dbg!(&path, pak.seek(std::io::SeekFrom::End(0)).await.unwrap());
-                        }
-                        Err(err) => {
-                            // eprintln!("Error: {:?}", err);
-                        }
-                    }
-                })
-                .await;
-        });
+        // let _fs = runtime.block_on(async {
+        //     FileSystem::init("E:/Games/Steam/steamapps/common/New World")
+        //         .await
+        //         .unwrap()
+        // });
+        // let fs = Arc::new(RwLock::new(&_fs));
+        // b.to_async(runtime).iter(|| async {
+        //     let mut stream = Arc::clone(&fs).read().await.get_all().await;
+        //     stream
+        //         .for_each_concurrent(0, |result| async {
+        //             match result {
+        //                 Ok((path, mut pak)) => {
+        //                     // dbg!(&path, pak.seek(std::io::SeekFrom::End(0)).await.unwrap());
+        //                 }
+        //                 Err(err) => {
+        //                     // eprintln!("Error: {:?}", err);
+        //                 }
+        //             }
+        //         })
+        //         .await;
+        // });
     });
 }
 

@@ -12,3 +12,13 @@ impl<T: Clone + Send> EventBus<T> {
 
     pub fn broadcast(&self, event: T) {}
 }
+
+enum Event {
+    Error(ErrorType),
+    Task(TaskType),
+    State(StateType),
+}
+
+enum ErrorType {}
+enum TaskType {}
+enum StateType {}

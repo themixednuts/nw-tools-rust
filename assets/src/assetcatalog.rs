@@ -1,10 +1,16 @@
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
+    sync::OnceLock,
 };
 
+use file_system::{FileSystem, FILESYSTEM};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt};
 use uuid::{self, Uuid};
+
+use crate::asset::{AssetId, AssetInfo};
+
+static CATALOG: OnceLock<AssetCatalog> = OnceLock::new();
 
 const SIGNATURE: &[u8; 4] = b"RASC";
 const VERSION_OFFSET: u8 = 0x000004;
@@ -29,10 +35,10 @@ pub struct AssetCatalog {
 }
 
 impl AssetCatalog {
-    pub async fn new<R>(data: &mut R) -> tokio::io::Result<Self>
-    where
-        R: AsyncRead + AsyncSeek + Unpin + Sync,
-    {
+    pub async fn init() -> tokio::io::Result<&'static Self> {
+        let fs = FILESYSTEM.get().unwrap();
+        let mut data = fs.open("assetcatalog.catalog").await?;
+
         let mut buf = [0u8; 4];
         data.read_exact(&mut buf)
             .await
@@ -41,10 +47,11 @@ impl AssetCatalog {
         assert_eq!(
             &buf,
             SIGNATURE,
-            "Incorrect signature bytes. {:?} doesn't match {:?}.",
+            "Incorrect signature bytes. {:?} does not match {:?}.",
             std::str::from_utf8(&buf),
             std::str::from_utf8(SIGNATURE)
         );
+
         let version = {
             data.read_exact(&mut buf).await?;
             u32::from_le_bytes(buf)
@@ -197,14 +204,15 @@ impl AssetCatalog {
             relative_path_index.insert(path, idx);
         }
 
-        Ok(Self {
+        Ok(CATALOG.get_or_init(move || Self {
             version,
             asset_infos,
             asset_id_index,
             relative_path_index,
-        })
+        }))
     }
-    fn get_asset(&self, path: &PathBuf) -> std::io::Result<()> {
+
+    pub fn get_asset_info_by_path(&'static self, path: &PathBuf) -> std::io::Result<&AssetInfo> {
         let idx = self
             .relative_path_index
             .get(path)
@@ -212,11 +220,13 @@ impl AssetCatalog {
                 std::io::ErrorKind::NotFound,
                 "Not found",
             ))?;
-        match self.asset_infos.get(*idx) {
-            Some(_) => {}
-            _ => {}
-        };
-        Ok(())
+
+        let asset_info = self.asset_infos.get(*idx).ok_or(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "No AssetInfo found for path",
+        ))?;
+
+        Ok(asset_info)
     }
 }
 
@@ -233,52 +243,17 @@ struct AssetIdToInfoRef {
     file_name_offset: u32,
 }
 
-#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
-struct AssetId {
-    guid: Uuid,
-    sub_id: u32,
-}
-
-#[derive(Debug)]
-struct AssetInfo {
-    asset_id: AssetId,
-    asset_type: Uuid,
-    relative_path: PathBuf,
-    size_bytes: u32,
-}
-
-struct AssetPathToId {
-    asset_type: Uuid,
-    asset_id: AssetId,
-}
-
 struct AssetPathToIdRef {
     asset_type_index: u32,
     guid_index: u32,
     sub_id: u32,
 }
 
-// struct AssetRegistry {
-//     asset_id_to_info: AssetIdToInfo,
-//     asset_path_to_id: AssetPathToId,
-//     legacy_asset_id_to_real_asset_id: LegacyAssetIdToRealAssetId,
-// }
-
 struct LegacyAssetIdToRealAssetIdRef {
     legacy_guid_index: u32,
     legacy_sub_id: u32,
     real_guid_index: u32,
     real_sub_id: u32,
-}
-
-struct LegacyAssetIdToRealAssetId {
-    legacy_asset_id: AssetId,
-    real_asset_id: AssetId,
-}
-
-struct ProductDependancy {
-    asset_id: AssetId,
-    flags: u8,
 }
 
 #[cfg(test)]
@@ -292,7 +267,7 @@ mod test {
         let catalog = include_bytes!("E:/Extract/NW Live/assetcatalog.catalog");
         let mut cursor = Cursor::new(catalog);
 
-        let asset_catalog = AssetCatalog::new(&mut cursor).await;
+        let asset_catalog = AssetCatalog::init().await;
         assert!(asset_catalog.is_ok());
         // dbg!(asset_catalog.unwrap());
     }
