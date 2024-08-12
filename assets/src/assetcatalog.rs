@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    io,
     path::{Path, PathBuf},
     sync::OnceLock,
 };
@@ -7,8 +8,9 @@ use std::{
 use file_system::{FileSystem, FILESYSTEM};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt};
 use uuid::{self, Uuid};
+use uuid_simd::UuidExt;
 
-use crate::asset::{AssetId, AssetInfo};
+use crate::common::{AssetId, AssetInfo};
 
 static CATALOG: OnceLock<AssetCatalog> = OnceLock::new();
 
@@ -212,10 +214,33 @@ impl AssetCatalog {
         }))
     }
 
-    pub fn get_asset_info_by_path(&'static self, path: &PathBuf) -> std::io::Result<&AssetInfo> {
+    pub fn get_asset_info_by_id<T>(&'static self, id: T) -> io::Result<&AssetInfo>
+    where
+        T: AsRef<AssetId>,
+    {
+        let idx = self
+            .asset_id_index
+            .get(id.as_ref())
+            .ok_or(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "Not found",
+            ))?;
+
+        let asset_info = self.asset_infos.get(*idx).ok_or(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "No AssetInfo found for path",
+        ))?;
+
+        Ok(asset_info)
+    }
+
+    pub fn get_asset_info_by_path<P>(&'static self, path: P) -> io::Result<&AssetInfo>
+    where
+        P: AsRef<Path>,
+    {
         let idx = self
             .relative_path_index
-            .get(path)
+            .get(path.as_ref())
             .ok_or(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 "Not found",

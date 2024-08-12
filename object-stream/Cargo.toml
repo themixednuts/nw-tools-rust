@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+utils = { path = "../utils" }
 flate2 = "1.0.30"
 crc32fast = "1.4.2"
 pelite = "0.10.0"
@@ -11,8 +12,15 @@ regex = "1.10.5"
 serde = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order"] }
 serde_bytes = { workspace = true }
-walkdir = { workspace = true}
+walkdir = { workspace = true }
 rayon = { workspace = true }
 quick-xml = { workspace = true }
 uuid = { workspace = true }
 uuid-simd = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "bench"
+harness = false

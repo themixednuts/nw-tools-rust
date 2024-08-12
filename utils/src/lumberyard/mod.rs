@@ -18,7 +18,7 @@ use tokio::{
 };
 use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
 static AZ_CRC: OnceLock<Regex> = OnceLock::new();
 static AZ_TYPE_INFO: OnceLock<Regex> = OnceLock::new();
@@ -152,7 +152,7 @@ async fn parse(buf: &mut Vec<u8>) -> (HashMap<u32, String>, HashMap<Uuid, String
     (crcs, uuids)
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct LumberyardSource {
     pub uuids: HashMap<Uuid, String>,
     pub crcs: HashMap<u32, String>,

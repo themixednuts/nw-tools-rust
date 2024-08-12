@@ -1,18 +1,14 @@
-// mod de;
-// mod error;
-// mod ser;
+mod de;
+mod error;
+pub mod ser;
 mod types;
 
 use crc32fast::hash;
-use quick_xml::de::XmlRead;
 use serde::{self, Deserialize, Serialize};
 use serde_json::Value;
-use std::{
-    borrow::Cow,
-    io::{self, Read},
-};
-use uuid::{self, serde::braced, Uuid};
-use uuid_simd::UuidExt;
+use std::io::{self, Cursor, Read, Write};
+use utils::{lumberyard::LumberyardSource, types::uuid_data_to_serialize};
+use uuid::{self, serde::compact, Uuid};
 
 const ST_BINARYFLAG_MASK: u8 = 0xF8;
 const ST_BINARY_VALUE_SIZE_MASK: u8 = 0x07;
@@ -27,65 +23,41 @@ const BINARY_STREAM_TAG: u8 = 0;
 const XML_STREAM_TAG: u8 = b'<';
 const JSON_STREAM_TAG: u8 = b'{';
 
-#[repr(u8)]
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-enum StreamTag {
-    #[default]
-    Binary = BINARY_STREAM_TAG,
-    Xml = XML_STREAM_TAG,
-    Json = JSON_STREAM_TAG,
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct StreamTag(pub u8);
+
+impl StreamTag {
+    pub const BINARY: Self = StreamTag(BINARY_STREAM_TAG);
+    pub const XML: Self = StreamTag(XML_STREAM_TAG);
+    pub const JSON: Self = StreamTag(JSON_STREAM_TAG);
 }
 
-impl TryFrom<u8> for StreamTag {
-    fn try_from(value: u8) -> io::Result<Self> {
-        match value {
-            0 => Ok(Self::Binary),
-            b'<' => Ok(Self::Xml),
-            b'{' => Ok(Self::Json),
-            _ => Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Invalid stream tag value",
-            )),
-        }
-    }
-
-    type Error = io::Error;
-}
-
-impl From<StreamTag> for u8 {
-    fn from(val: StreamTag) -> Self {
-        match val {
-            StreamTag::Binary => BINARY_STREAM_TAG,
-            StreamTag::Json => JSON_STREAM_TAG,
-            StreamTag::Xml => XML_STREAM_TAG,
-        }
+impl Default for StreamTag {
+    fn default() -> Self {
+        Self::BINARY
     }
 }
 
-pub enum ObjectStream {
-    Binary(BinaryObjectStream),
-    Xml(XMLObjectStream),
-    Json(JSONObjectStream),
+impl PartialEq<u8> for StreamTag {
+    fn eq(&self, other: &u8) -> bool {
+        self.0 == *other
+    }
 }
 
 #[derive(Default, Debug, Serialize, Deserialize)]
-pub struct BinaryObjectStream {
-    #[serde(skip)]
-    tag: StreamTag,
+pub struct ObjectStream {
+    _tag: StreamTag,
     version: u32,
     elements: Vec<Element>,
 }
 
-impl From<XMLObjectStream> for BinaryObjectStream {
+impl From<XMLObjectStream> for ObjectStream {
     fn from(value: XMLObjectStream) -> Self {
         Self {
-            tag: StreamTag::Xml,
+            _tag: StreamTag::BINARY,
             version: value.version,
-            elements: value
-                .elements
-                .into_iter()
-                .map(|ele| Element::from(ele))
-                .collect(),
+            elements: value.elements.into_iter().map(Element::from).collect(),
+            ..Default::default()
         }
     }
 }
@@ -99,8 +71,15 @@ pub struct XMLObjectStream {
     elements: Vec<XMLElement>,
 }
 
-impl From<BinaryObjectStream> for XMLObjectStream {
-    fn from(value: BinaryObjectStream) -> Self {
+impl XMLObjectStream {
+    pub fn to_writer(&mut self, buf: &mut impl Write) -> io::Result<u64> {
+        let string = quick_xml::se::to_string(self).map_err(|e| std::io::Error::other(e))?;
+        std::io::copy(&mut Cursor::new(string), buf)
+    }
+}
+
+impl From<ObjectStream> for XMLObjectStream {
+    fn from(value: ObjectStream) -> Self {
         Self {
             version: value.version,
             elements: value.elements.into_iter().map(XMLElement::from).collect(),
@@ -116,7 +95,22 @@ pub struct JSONObjectStream {
     elements: Vec<JSONElement>,
 }
 
-impl BinaryObjectStream {
+impl JSONObjectStream {
+    pub fn to_writer(&self, buf: &mut impl Write) {
+        serde_json::to_writer_pretty(buf, self).unwrap()
+    }
+}
+impl From<ObjectStream> for JSONObjectStream {
+    fn from(value: ObjectStream) -> Self {
+        Self {
+            name: "ObjectStream".into(),
+            version: value.version,
+            elements: value.elements.into_iter().map(JSONElement::from).collect(),
+        }
+    }
+}
+
+impl ObjectStream {
     pub fn query_elements<F>(&self, query: F) -> Option<&Element>
     where
         F: Fn(&Element) -> bool,
@@ -130,19 +124,20 @@ impl BinaryObjectStream {
     }
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Default, Debug, Serialize, Deserialize)]
 pub struct Element {
-    #[serde(with = "braced")]
-    id: Uuid,
-    name: String,
     flags: u8,
     name_crc: Option<u32>,
     version: Option<u8>,
-    #[serde(with = "option_braced_uppercase")]
+    #[serde(with = "compact")]
+    id: Uuid,
     specialization: Option<Uuid>,
+    #[serde(skip)]
+    name: String,
     data_size: Option<usize>,
     data: Option<Vec<u8>>,
     elements: Vec<Element>,
+    field: Option<String>,
 }
 
 impl From<XMLElement> for Element {
@@ -158,11 +153,7 @@ impl From<XMLElement> for Element {
                 }
             },
             version: value.version,
-            elements: value
-                .elements
-                .into_iter()
-                .map(|ele| Element::from(ele))
-                .collect(),
+            elements: value.elements.into_iter().map(Element::from).collect(),
             ..Default::default()
         }
     }
@@ -171,7 +162,7 @@ impl From<XMLElement> for Element {
 impl From<JSONElement> for Element {
     fn from(value: JSONElement) -> Self {
         Self {
-            id: Uuid::parse(&value.id.as_bytes()).unwrap(),
+            id: value.id,
             name: value.name.to_owned(),
             // flags: todo!(),
             name_crc: {
@@ -181,14 +172,15 @@ impl From<JSONElement> for Element {
                     None
                 }
             },
+            field: value.field,
             version: value.version,
             // data_size: todo!(),
             // data: todo!(),
+            specialization: value.specialization,
             elements: value
                 .elements
-                .into_iter()
-                .map(|ele| Element::from(ele))
-                .collect(),
+                .map(|ele| ele.into_iter().map(Element::from).collect())
+                .unwrap_or_default(),
             ..Default::default()
         }
     }
@@ -201,7 +193,7 @@ pub struct XMLElement {
     #[serde(rename = "@field", skip_serializing_if = "Option::is_none")]
     field: Option<String>,
     #[serde(rename = "@value", skip_serializing_if = "Option::is_none")]
-    value: Option<String>,
+    value: Option<Value>,
     #[serde(rename = "@version", skip_serializing_if = "Option::is_none")]
     version: Option<u8>,
     #[serde(rename = "@type", with = "uuid_braced_uppercase")]
@@ -210,12 +202,23 @@ pub struct XMLElement {
     elements: Vec<XMLElement>,
 }
 
+impl XMLElement {
+    pub fn to_writer(&mut self, buf: &mut (impl Write + std::fmt::Write)) {
+        quick_xml::se::to_writer(buf, self).unwrap();
+    }
+}
+
 impl From<Element> for XMLElement {
     fn from(value: Element) -> Self {
         Self {
             name: value.name,
-            field: value.name_crc.map(|crc| crc.to_string()),
-            value: None,
+            field: value.field,
+            value: match value.data {
+                Some(data) if !data.is_empty() => {
+                    uuid_data_to_serialize(&value.id, &data, false).ok()
+                }
+                _ => None,
+            },
             version: value.version,
             id: value.id,
             elements: value.elements.into_iter().map(XMLElement::from).collect(),
@@ -225,20 +228,58 @@ impl From<Element> for XMLElement {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct JSONElement {
+    #[serde(skip_serializing_if = "Option::is_none")]
     field: Option<String>,
-    #[serde(rename = "typeId")]
-    id: String,
+    #[serde(rename = "typeId", with = "uuid_braced_uppercase")]
+    id: Uuid,
     #[serde(rename = "typeName")]
     name: String,
-    // #[serde(
-    //     rename = "specializationTypeId",
-    //     with = "uuid::serde::braced",
-    // )]
-    specialization: Option<String>,
+    #[serde(
+        rename = "specializationTypeId",
+        with = "option_braced_uppercase",
+        skip_serializing_if = "Option::is_none"
+    )]
+    specialization: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     value: Option<Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     version: Option<u8>,
-    #[serde(rename = "Objects")]
-    elements: Vec<JSONElement>,
+    #[serde(rename = "Objects", skip_serializing_if = "Option::is_none")]
+    elements: Option<Vec<JSONElement>>,
+}
+
+impl From<Element> for JSONElement {
+    fn from(value: Element) -> Self {
+        Self {
+            field: value.field,
+            id: value.id,
+            name: value.name,
+            specialization: value.specialization,
+            value: match &value.data {
+                Some(data) if !data.is_empty() => {
+                    uuid_data_to_serialize(&value.id, data, true).ok().map(|v| {
+                        if !v.is_string() {
+                            Value::String(v.to_string())
+                        } else {
+                            v
+                        }
+                    })
+                }
+                Some(data) if data.is_empty() && value.elements.is_empty() => Some("".into()),
+                _ => None,
+            },
+            version: value.version,
+            elements: {
+                let ele: Vec<JSONElement> =
+                    value.elements.into_iter().map(JSONElement::from).collect();
+                if ele.is_empty() && value.data.is_some() {
+                    None
+                } else {
+                    Some(ele)
+                }
+            },
+        }
+    }
 }
 
 impl Element {
@@ -257,10 +298,52 @@ impl Element {
         }
         None
     }
+
+    fn to_writer<W>(&self, writer: &mut W) -> io::Result<()>
+    where
+        W: Write,
+    {
+        writer.write_all(&self.flags.to_be_bytes())?;
+        if let Some(crc) = self.name_crc {
+            writer.write_all(&crc.to_be_bytes())?;
+        }
+        if let Some(version) = self.version {
+            writer.write_all(&version.to_be_bytes())?;
+        }
+        writer.write_all(&self.id.as_u128().to_be_bytes())?;
+
+        if let Some(specialized) = self.specialization {
+            writer.write_all(&specialized.as_u128().to_be_bytes())?;
+        }
+        if self.flags & ST_BINARYFLAG_HAS_VALUE > 0 {
+            let value_bytes = self.flags & ST_BINARY_VALUE_SIZE_MASK;
+            if self.flags & ST_BINARYFLAG_EXTRA_SIZE_FIELD > 0 {
+                if let Some(size) = self.data_size {
+                    match value_bytes {
+                        1 => writer.write_all(&(size as u8).to_be_bytes())?,
+                        2 => writer.write_all(&(size as u16).to_be_bytes())?,
+                        4 => writer.write_all(&(size as u32).to_be_bytes())?,
+                        _ => {}
+                    };
+                }
+            };
+        };
+
+        if let Some(data) = &self.data {
+            writer.write_all(data)?;
+        }
+
+        self.elements
+            .iter()
+            .for_each(|ele| ele.to_writer(writer).unwrap());
+        writer.write_all(&[0])?;
+
+        Ok(())
+    }
 }
 
 pub mod uuid_braced_uppercase {
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use serde::{Deserialize, Deserializer, Serializer};
     use uuid::Uuid;
     use uuid_simd::UuidExt;
 
@@ -282,7 +365,7 @@ pub mod uuid_braced_uppercase {
 }
 
 pub mod option_braced_uppercase {
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use serde::{Deserialize, Deserializer, Serializer};
     use uuid::Uuid;
     use uuid_simd::UuidExt;
 
@@ -312,7 +395,7 @@ pub mod option_braced_uppercase {
 }
 
 pub mod option_borrow_braced {
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use serde::{Deserialize, Deserializer, Serializer};
     use std::borrow::Cow;
     use uuid::Uuid;
     use uuid_simd::UuidExt;
@@ -353,15 +436,18 @@ impl std::fmt::Display for EOE {
 
 impl std::error::Error for EOE {}
 
-pub fn parser<R>(reader: &mut R) -> io::Result<BinaryObjectStream>
+pub fn from_reader<R>(
+    reader: &mut R,
+    hashes: Option<&'static LumberyardSource>,
+) -> io::Result<ObjectStream>
 where
-    R: Read + Unpin,
+    R: Read,
 {
     let mut buf = [0; 1];
     reader.read_exact(&mut buf)?;
-    let tag = u8::from_be_bytes(buf).try_into()?;
+    let tag = u8::from_be_bytes(buf);
 
-    if tag != StreamTag::Binary {
+    if tag != StreamTag::BINARY.0 {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Not valid ObjectStream",
@@ -371,14 +457,16 @@ where
     let mut buf = [0; 4];
     reader.read_exact(&mut buf)?;
     let version = u32::from_be_bytes(buf);
-    let mut stream = BinaryObjectStream {
-        tag,
+
+    let mut stream = ObjectStream {
+        _tag: StreamTag::BINARY,
         version,
         elements: vec![],
+        ..Default::default()
     };
 
     loop {
-        match read_element(reader, &stream) {
+        match read_element(reader, &stream, hashes) {
             Ok(element) => stream.elements.push(element),
             Err(e) if e.is::<EOE>() => return Ok(stream),
             Err(e) => return Err(io::Error::new(io::ErrorKind::Other, format!("{e}"))),
@@ -388,10 +476,11 @@ where
 
 fn read_element<R>(
     reader: &mut R,
-    stream: &BinaryObjectStream,
+    stream: &ObjectStream,
+    hashes: Option<&'static LumberyardSource>,
 ) -> Result<Element, Box<dyn std::error::Error>>
 where
-    R: Read + Unpin,
+    R: Read,
 {
     let mut element = Element::default();
     let mut buf = [0; 16];
@@ -405,6 +494,7 @@ where
     if flags & ST_BINARYFLAG_HAS_NAME > 0 {
         reader.read_exact(&mut buf[..4])?;
         let name_crc = u32::from_be_bytes(buf[..4].try_into()?);
+        element.field = hashes.and_then(|v| v.crcs.get(&name_crc).cloned());
         element.name_crc = Some(name_crc);
     }
 
@@ -416,6 +506,9 @@ where
 
     reader.read_exact(&mut buf)?;
     element.id = Uuid::from_slice(&buf)?;
+    element.name = hashes
+        .and_then(|v| v.uuids.get(&element.id).cloned())
+        .unwrap_or_default();
 
     if stream.version == 2 {
         reader.read_exact(&mut buf)?;
@@ -458,7 +551,7 @@ where
     element.flags = flags;
 
     loop {
-        match read_element(reader, stream) {
+        match read_element(reader, stream, hashes) {
             Ok(child_element) => element.elements.push(child_element),
             Err(e) if e.is::<EOE>() => return Ok(element),
             Err(e) => return Err(e),
@@ -466,37 +559,62 @@ where
     }
 }
 
+impl ObjectStream {
+    pub fn to_writer<W>(&self, writer: &mut W) -> io::Result<()>
+    where
+        W: Write,
+    {
+        writer.write_all(&0u8.to_be_bytes())?;
+        writer.write_all(&self.version.to_be_bytes())?;
+        self.elements
+            .iter()
+            .for_each(|ele| ele.to_writer(writer).unwrap());
+        writer.write_all(&[0])?;
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use io::Cursor;
+    use quick_xml::DeError;
 
     use super::*;
 
     #[test]
-    fn test() {
-        let byt =
-            include_bytes!("E:/Extract/nw live/sharedassets/genericassets/fuelcategory.fueldb");
-        let xml = r#"<ObjectStream version="3"><Class name="int" field="test" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/><Class name="Asset" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"><Class name="int" field="element" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/></Class></ObjectStream>"#;
-        let json = r#"{"name":"ObjectStream","version":3,"Objects":[]}"#;
-        let object_stream = parser(&mut Cursor::new(byt)).unwrap();
-        // dbg!(&object_stream);
-        let t: XMLObjectStream = XMLObjectStream::from(object_stream);
+    fn binary() -> io::Result<()> {
+        // let byt =
+        //     include_bytes!("E:/Extract/nw live/sharedassets/genericassets/fuelcategory.fueldb");
+        // let object_stream = from_reader(&mut Cursor::new(byt))?;
+        // let t: XMLObjectStream = XMLObjectStream::from(object_stream);
         // dbg!(quick_xml::se::to_string(&t).unwrap());
 
-        let xml_object_stream: XMLObjectStream = quick_xml::de::from_str(&xml).unwrap();
-        // dbg!(&xml_object_stream);
-        assert_eq!(
-            quick_xml::se::to_string(&xml_object_stream)
-                .unwrap()
-                .as_str(),
-            xml
-        );
-        let object_stream: BinaryObjectStream = BinaryObjectStream::from(xml_object_stream);
         // dbg!(&object_stream);
 
-        let json_object_stream: JSONObjectStream = serde_json::from_str(&json).unwrap();
+        Ok(())
+    }
+
+    #[test]
+    fn xml() -> Result<(), DeError> {
+        let xml = r#"<ObjectStream version="3"><Class name="int" field="test" value="2" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/><Class name="Asset" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"><Class name="int" field="element" value="100" type="{72039442-EB38-4D42-A1AD-CB68F7E0EEF6}"/></Class></ObjectStream>"#;
+
+        let xml_object_stream: XMLObjectStream = quick_xml::de::from_str(&xml)?;
+        // dbg!(&xml_object_stream);
+        assert_eq!(quick_xml::se::to_string(&xml_object_stream)?.as_str(), xml);
+        // let object_stream: BinaryObjectStream = BinaryObjectStream::from(xml_object_stream);
+        // dbg!(&object_stream);
+
+        Ok(())
+    }
+
+    #[test]
+    fn json() -> io::Result<()> {
+        let json = r#"{"name":"ObjectStream","version":3,"Objects":[]}"#;
+        let json_object_stream: JSONObjectStream = serde_json::from_str(&json)?;
         // dbg!(&json_object_stream);
-        assert_eq!(&serde_json::to_string(&json_object_stream).unwrap(), &json);
+        assert_eq!(&serde_json::to_string(&json_object_stream)?, &json);
+        Ok(())
     }
 }
 

@@ -22,20 +22,11 @@ pub enum Error {
     // Deserializer without going through `ser::Error` and `de::Error`. These
     // are specific to the format, in this case JSON.
     Eof,
-    Syntax,
-    ExpectedBoolean,
-    ExpectedInteger,
-    ExpectedString,
-    ExpectedNull,
-    ExpectedArray,
-    ExpectedArrayComma,
-    ExpectedArrayEnd,
-    ExpectedMap,
-    ExpectedMapColon,
-    ExpectedMapComma,
-    ExpectedMapEnd,
-    ExpectedEnum,
-    TrailingCharacters,
+    ExpectedElement,
+    ExpectedValue,
+    ExpectedType,
+    ExpectedVersion,
+    Io(std::io::Error),
 }
 
 impl ser::Error for Error {
@@ -55,20 +46,11 @@ impl Display for Error {
         match self {
             Error::Message(msg) => formatter.write_str(msg),
             Error::Eof => formatter.write_str("unexpected end of input"),
-            Error::Syntax => todo!(),
-            Error::ExpectedBoolean => todo!(),
-            Error::ExpectedInteger => todo!(),
-            Error::ExpectedString => todo!(),
-            Error::ExpectedNull => todo!(),
-            Error::ExpectedArray => todo!(),
-            Error::ExpectedArrayComma => todo!(),
-            Error::ExpectedArrayEnd => todo!(),
-            Error::ExpectedMap => todo!(),
-            Error::ExpectedMapColon => todo!(),
-            Error::ExpectedMapComma => todo!(),
-            Error::ExpectedMapEnd => todo!(),
-            Error::ExpectedEnum => todo!(),
-            Error::TrailingCharacters => todo!(),
+            Error::ExpectedElement => todo!(),
+            Error::ExpectedValue => todo!(),
+            Error::ExpectedType => todo!(),
+            Error::ExpectedVersion => todo!(),
+            Error::Io(err) => formatter.write_str(&err.to_string()),
             /* and so forth */
         }
     }

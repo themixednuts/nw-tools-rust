@@ -8,3 +8,5 @@ clap = { workspace = true }
 cliclack = { workspace = true }
 dirs = { workspace = true }
 regex = { workspace = true }
+rusqlite = { workspace = true }
+ctrlc = { workspace = true }

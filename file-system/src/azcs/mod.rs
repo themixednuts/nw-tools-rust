@@ -59,8 +59,8 @@ where
     }
 }
 
-pub fn is_azcs(sig: &mut [u8; 5]) -> bool {
-    (is_compressed(sig) || is_uncompressed(sig)) && sig.starts_with(AZCS_SIGNATURE)
+pub fn is_azcs(sig: &mut [u8; 4]) -> bool {
+    sig.eq(&AZCS_SIGNATURE)
 }
 
 pub fn handle_zlib<R>(mut reader: R) -> io::Result<impl Read + Unpin>
@@ -68,7 +68,7 @@ where
     R: Read + Unpin,
 {
     let mut buf = [0; 4];
-    reader.read_exact(&mut buf)?;
+    reader.read_exact(&mut buf).unwrap();
     let num_seek_points = u32::from_be_bytes(buf);
     let num_seek_points_size = num_seek_points * 16;
 

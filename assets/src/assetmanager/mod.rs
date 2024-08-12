@@ -15,6 +15,9 @@ impl AssetManager {
     async fn init() -> &'static Self {
         let manager = Self {
             m_catalog: AssetCatalog::init().await.unwrap(),
+            m_handlers: todo!(),
+            m_assets: todo!(),
+            m_assets_containers: todo!(),
         };
 
         MANAGER.get_or_init(move || manager)

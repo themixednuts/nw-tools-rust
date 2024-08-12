@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{array::TryFromSliceError, collections::HashMap, io::Read, path::PathBuf};
 use uuid::Uuid;
 
 pub struct ProductDependancy {
@@ -10,6 +10,19 @@ pub struct ProductDependancy {
 pub struct AssetId {
     pub guid: Uuid,
     pub sub_id: u32,
+}
+
+impl AssetId {}
+
+impl TryFrom<&[u8]> for AssetId {
+    type Error = TryFromSliceError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self {
+            guid: Uuid::from_bytes(value[0..16].try_into()?),
+            sub_id: u32::from_be_bytes(value[16..].try_into()?),
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

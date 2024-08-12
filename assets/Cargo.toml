@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-uuid = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
 file-system = { path = "../file-system" }
+uuid = { workspace = true }
+uuid-simd = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["async_tokio"] }

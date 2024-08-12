@@ -1,5 +1,5 @@
 mod asset;
-mod assetcatalog;
+pub mod assetcatalog;
 mod assetmanager;
 mod assetregistry;
 mod common;

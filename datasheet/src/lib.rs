@@ -1,10 +1,14 @@
-use std::io::{self, Read, Seek, SeekFrom};
+use std::{
+    ffi::CString,
+    io::{self, Cursor, Read, Seek, SeekFrom},
+};
 
 use crc32fast::Hasher;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Number, Value};
 
+const MAGIC: [u8; 4] = [0x11, 0x00, 0x00, 0x00];
 const VERSION: usize = 0x00;
 const NAME_CRC: usize = 0x04;
 const NAME_OFFSET_FROM_STRING: usize = 0x08;
@@ -17,6 +21,36 @@ const HEADER_BYTE_SIZE: usize = 12;
 const CELL_BYTE_SIZE: usize = 8;
 const DATA_END: usize = 0x38;
 
+struct Meta<'a> {
+    crc: &'a [u8; 4],
+    pointer: &'a [u8; 4],
+}
+
+struct Header<'a> {
+    magic: &'a [u8; 4],
+    name: Meta<'a>,
+    _type: Meta<'a>,
+    field4: &'a [u8; 4],
+    strings_size: u64,
+    padding: [u8; 24],
+    data_size: u32,
+}
+
+#[repr(u32)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+enum ColumnType {
+    String = 0x01,
+    Number = 0x02,
+    Boolean = 0x03,
+}
+
+#[repr(C, packed)]
+struct DataMetadata<'a> {
+    output: Meta<'a>,
+    num_cols: u32,
+    num_rows: u32,
+    reserved: u128,
+}
 #[derive(Debug, Clone, Default)]
 pub struct Datasheet {
     pub version: u32,
@@ -77,8 +111,8 @@ impl Datasheet {
         .to_string()
     }
 
-    pub fn to_json_simd(&self) -> Result<String, simd_json::Error> {
-        simd_json::to_string(&simd_json::json!(self
+    pub fn to_json_simd(&self, pretty: bool) -> Result<String, simd_json::Error> {
+        let value = &simd_json::json!(self
             .rows
             .iter()
             .map(|row| {
@@ -100,7 +134,12 @@ impl Datasheet {
                     })
                     .collect::<IndexMap<_, _>>()
             })
-            .collect::<Vec<_>>()))
+            .collect::<Vec<_>>());
+        if pretty {
+            simd_json::to_string_pretty(value)
+        } else {
+            simd_json::to_string(value)
+        }
     }
 
     pub fn to_csv(&self) -> String {
@@ -170,13 +209,16 @@ impl Datasheet {
     }
 }
 
-impl<T: Read + Seek + Sync + Unpin + Send> From<&mut T> for Datasheet {
-    fn from(value: &mut T) -> Self {
-        parse_datasheet(value).unwrap()
+impl<R: Read> From<&mut R> for Datasheet {
+    fn from(value: &mut R) -> Self {
+        from_reader(value).unwrap()
     }
 }
 
-fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Result<Datasheet> {
+fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
+    let mut buf = vec![];
+    data.read_to_end(&mut buf)?;
+    let mut data = Cursor::new(buf);
     data.rewind()?;
     let mut buffer = [0; 4];
 
@@ -227,7 +269,7 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
         let position = data.stream_position()?;
         let offset = strings_offset + i32::from_le_bytes(meta.data) as usize;
         data.seek(SeekFrom::Start(offset as u64))?;
-        let text = read_string(data)?;
+        let text = read_string(&mut data)?;
         data.seek(SeekFrom::Start(position))?;
         data.read_exact(&mut buffer)?;
 
@@ -260,7 +302,7 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
                     let position = data.stream_position()?;
                     let offset = strings_offset + u32::from_le_bytes(meta.data) as usize;
                     data.seek(SeekFrom::Start(offset as u64))?;
-                    let string = read_string(data)?;
+                    let string = read_string(&mut data)?;
                     data.seek(SeekFrom::Start(position))?;
                     Ok(DatasheetCell::String(string))
                 }
@@ -277,8 +319,8 @@ fn parse_datasheet<R: Read + Sync + Send + Unpin + Seek>(data: &mut R) -> io::Re
     }
 
     data.seek(SeekFrom::Current(name_offset.into()))?;
-    let name = read_string(data)?;
-    let _type = read_string(data)?;
+    let name = read_string(&mut data)?;
+    let _type = read_string(&mut data)?;
 
     Ok(Datasheet {
         header,

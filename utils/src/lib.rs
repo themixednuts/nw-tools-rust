@@ -1,4 +1,5 @@
 pub mod lumberyard;
+pub mod types;
 
 use crc32fast::Hasher;
 use std::{borrow::Borrow, future::Future, time::Duration};

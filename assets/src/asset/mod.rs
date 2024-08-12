@@ -1,11 +1,14 @@
-use crate::common;
+use uuid::Uuid;
+
+use crate::common::{self, AssetId};
 
 pub struct Asset {
-    data: common::AssetInfo,
+    id: AssetId,
+    name: String,
 }
 
-// impl Asset {
-//     pub fn deserializer(&self) {
-
-//     }
-// }
+pub trait SerializeContext: Sized {
+    type Value;
+    fn serialize(&self) -> std::io::Result<Self::Value>;
+    fn deserialize(value: &Self::Value) -> std::io::Result<Self>;
+}
