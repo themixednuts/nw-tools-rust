@@ -3,7 +3,7 @@ use std::{
     io::{BufReader, Read},
 };
 
-use quick_xml::DeError;
+// use quick_xml::DeError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
