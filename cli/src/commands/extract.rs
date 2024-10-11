@@ -10,7 +10,7 @@ use crate::{
         CommonConfig,
     },
     traits::IArgs,
-    BYTES, CSV, JSON_MINI, JSON_PRETTY, SQL, XML, YAML,
+    BYTES, CSV, MINI, PRETTY, SQL, XML, YAML,
 };
 
 #[derive(Debug, Parser)]
@@ -63,7 +63,7 @@ impl<'a> IArgs<'a> for Extract {
                         "Datasheet Format",
                         &format!(
                             "{} = default | {} | {} | {} | {}",
-                            BYTES, JSON_MINI, JSON_PRETTY, YAML, CSV
+                            BYTES, MINI, PRETTY, YAML, CSV
                         ),
                     ),
                     (
@@ -75,10 +75,7 @@ impl<'a> IArgs<'a> for Extract {
                     (
                         "objectstream",
                         "ObjectStream",
-                        &format!(
-                            "{} = default | {} | {} | {}",
-                            BYTES, XML, JSON_MINI, JSON_PRETTY
-                        ),
+                        &format!("{} = default | {} | {} | {}", BYTES, XML, MINI, PRETTY),
                     ),
                 ])
                 .interact()?;
@@ -103,16 +100,16 @@ impl<'a> IArgs<'a> for Extract {
                         .items(&[
                             (BYTES, "Binary", "default"),
                             (XML, "XML", ""),
-                            (JSON_PRETTY, "JSON Pretty", ""),
-                            (JSON_MINI, "JSON Minified", ""),
+                            (PRETTY, "JSON Pretty", ""),
+                            (MINI, "JSON Minified", ""),
                         ])
                         .initial_value("bytes")
                         .interact()?;
 
                     self.objectstream.objectstream = match obj_stream {
                         XML => ObjectStreamFormat::XML,
-                        JSON_MINI => ObjectStreamFormat::JSON,
-                        JSON_PRETTY => ObjectStreamFormat::PRETTY,
+                        MINI => ObjectStreamFormat::MINI,
+                        PRETTY => ObjectStreamFormat::PRETTY,
                         _ => ObjectStreamFormat::BYTES,
                     };
                 }
@@ -121,8 +118,8 @@ impl<'a> IArgs<'a> for Extract {
                     let datasheet = cliclack::Select::new("Datasheet Format")
                         .items(&[
                             (BYTES, "Binary", "default"),
-                            (JSON_MINI, "JSON Minified", ""),
-                            (JSON_PRETTY, "JSON Pretty", ""),
+                            (MINI, "JSON Minified", ""),
+                            (PRETTY, "JSON Pretty", ""),
                             (CSV, "CSV", ""),
                             (YAML, "YAML", "vomit"),
                         ])
@@ -130,8 +127,8 @@ impl<'a> IArgs<'a> for Extract {
                         .interact()?;
 
                     self.datasheet.datasheet = match datasheet {
-                        JSON_MINI => DatasheetFormat::MINI,
-                        JSON_PRETTY => DatasheetFormat::PRETTY,
+                        MINI => DatasheetFormat::MINI,
+                        PRETTY => DatasheetFormat::PRETTY,
                         CSV => DatasheetFormat::CSV,
                         YAML => DatasheetFormat::YAML,
                         SQL => DatasheetFormat::SQL,

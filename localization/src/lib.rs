@@ -3,10 +3,11 @@ use std::{
     io::{BufReader, Read},
 };
 
+use dashmap::DashMap;
 // use quick_xml::DeError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Default)]
 #[serde(rename = "resources")]
 pub struct Localization {
     #[serde(rename = "@xmlns:xsi")]
@@ -15,7 +16,7 @@ pub struct Localization {
     string: Vec<KeyValue>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Default)]
 #[serde(rename = "string")]
 pub struct KeyValue {
     #[serde(rename = "@key")]
@@ -36,6 +37,20 @@ pub struct KeyValue {
     xsi_nil: Option<bool>,
     #[serde(rename = "$value", default)]
     value: Option<String>,
+}
+
+impl From<Localization> for DashMap<String, Option<String>> {
+    fn from(value: Localization) -> Self {
+        value
+            .string
+            .iter()
+            .map(|s| (s.key.to_owned(), s.value.to_owned()))
+            .filter_map(|(k, v)| match k {
+                Some(k) => Some((k, v)),
+                None => None,
+            })
+            .collect::<DashMap<_, _>>()
+    }
 }
 
 impl From<Localization> for HashMap<String, Option<String>> {

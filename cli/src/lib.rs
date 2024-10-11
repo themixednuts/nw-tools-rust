@@ -13,8 +13,8 @@ pub static ARGS: LazyLock<Args> = LazyLock::new(|| match cli() {
 });
 
 const STEAM_DIR: &'static str = r#"C:\Program Files (x86)\Steam\steamapps\common\New World"#;
-const JSON_PRETTY: &'static str = "json";
-const JSON_MINI: &'static str = "mini";
+const PRETTY: &'static str = "json";
+const MINI: &'static str = "mini";
 const XML: &'static str = "xml";
 const CSV: &'static str = "csv";
 const SQL: &'static str = "sql";

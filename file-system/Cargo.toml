@@ -37,6 +37,7 @@ quick-xml = { workspace = true }
 schemars = { workspace = true }
 simd-json = { workspace = true }
 ignore = { workspace = true }
+dashmap = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }

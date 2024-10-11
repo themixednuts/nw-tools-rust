@@ -38,12 +38,12 @@ impl<R: Read> From<&mut R> for Header {
     }
 }
 
-pub fn decompress<R>(mut reader: R) -> io::Result<impl Read + Unpin>
+pub fn decompress<R>(reader: &mut R) -> io::Result<impl Read + Unpin + '_>
 where
     R: Read + Unpin,
 {
-    let header = { Header::from(&mut reader) };
-    match header.compressor_id {
+    let header = { Header::from(&mut *reader) };
+    match &header.compressor_id {
         0x73887d3a => handle_zlib(reader),
         0x72fd505e => Err(io::Error::new(
             io::ErrorKind::Other,
@@ -53,7 +53,7 @@ where
             dbg!(&header);
             Err(io::Error::new(
                 io::ErrorKind::Other,
-                format!("Unsupported compressor_id: 0x{:08x}", header.compressor_id),
+                format!("Unsupported compressor_id: 0x{:08x}", &header.compressor_id),
             ))
         }
     }

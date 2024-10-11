@@ -1,7 +1,9 @@
+use std::fmt::Display;
+
 use clap::{Parser, ValueEnum};
 use rusqlite::Connection;
 
-use crate::{traits::IArgs, BYTES, CSV, JSON_MINI, JSON_PRETTY, SQL, XML, YAML};
+use crate::{traits::IArgs, BYTES, CSV, MINI, PRETTY, SQL, XML, YAML};
 
 #[derive(Debug, Parser)]
 pub struct DatasheetConfig {
@@ -12,8 +14,8 @@ pub struct DatasheetConfig {
     pub datasheet_filenames: DatasheetOutputMode,
     #[arg(long)]
     pub with_meta: bool,
-    #[arg(long, value_enum, default_value_t)]
-    pub inline_locale: Localization,
+    #[arg(long, value_enum)]
+    pub inline_locale: Option<Localization>,
 }
 
 #[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
@@ -22,6 +24,27 @@ pub enum Localization {
     EN,
     ES,
     IT,
+    DE,
+    MX,
+    FR,
+    PL,
+    BR,
+}
+
+impl Display for Localization {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = match self {
+            Localization::EN => "en-us",
+            Localization::ES => "en-es",
+            Localization::IT => "it-it",
+            Localization::DE => "de-de",
+            Localization::MX => "es-mx",
+            Localization::FR => "fr-fr",
+            Localization::PL => "pl-pl",
+            Localization::BR => "pt-br",
+        };
+        write!(f, "{}", value)
+    }
 }
 
 impl<'a> IArgs<'a> for DatasheetConfig {
@@ -46,18 +69,18 @@ pub enum DatasheetFormat {
     SQL,
 }
 
-impl ToString for DatasheetFormat {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for DatasheetFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = match self {
             DatasheetFormat::BYTES => BYTES,
             DatasheetFormat::XML => XML,
-            DatasheetFormat::MINI => JSON_MINI,
-            DatasheetFormat::PRETTY => JSON_PRETTY,
+            DatasheetFormat::MINI => MINI,
+            DatasheetFormat::PRETTY => PRETTY,
             DatasheetFormat::CSV => CSV,
             DatasheetFormat::YAML => YAML,
             DatasheetFormat::SQL => SQL,
-        }
-        .into()
+        };
+        write!(f, "{}", value)
     }
 }
 

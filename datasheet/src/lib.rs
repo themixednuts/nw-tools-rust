@@ -1,5 +1,6 @@
 use std::io::{self, Cursor, Read, Seek, SeekFrom};
 
+use dashmap::DashMap;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Number, Value};
@@ -48,8 +49,8 @@ struct DataMetadata<'a> {
     num_rows: u32,
     reserved: u128,
 }
-#[derive(Debug, Clone, Default)]
-pub struct Datasheet {
+#[derive(Debug, Clone)]
+pub struct Datasheet<'a> {
     pub version: u32,
     pub name: String,
     pub _type: String,
@@ -57,6 +58,7 @@ pub struct Datasheet {
     pub row_count: usize,
     header: Vec<HeaderCell>,
     rows: Vec<DatasheetRow>,
+    localization: Option<&'a DashMap<String, Option<String>>>,
 }
 
 #[derive(Debug, Clone)]
@@ -80,7 +82,11 @@ pub struct Metadata {
     data: [u8; 4],
 }
 
-impl Datasheet {
+impl<'a> Datasheet<'a> {
+    pub fn with_localization(&mut self, localization: Option<&'a DashMap<String, Option<String>>>) {
+        self.localization = localization;
+    }
+
     pub fn meta(&self) -> Value {
         serde_json::json!({
             "type": self._type,
@@ -97,6 +103,16 @@ impl Datasheet {
             }).collect::<IndexMap<_, _>>(),
             "rows": self.row_count,
         })
+    }
+
+    fn parse_localization(&self, key: String) -> String {
+        let Some(map) = self.localization else {
+            return key;
+        };
+        match map.get(&key) {
+            Some(v) => v.clone().unwrap_or_else(|| key),
+            None => key,
+        }
     }
 
     pub fn to_sql(&self) -> String {
@@ -137,7 +153,7 @@ impl Datasheet {
                 .map(|row| row
                     .iter()
                     .map(|cell| match cell {
-                        DatasheetCell::String(v) => v.to_owned(),
+                        DatasheetCell::String(v) => self.parse_localization(v.to_owned()),
                         DatasheetCell::Number(v) => v.to_owned().to_string(),
                         DatasheetCell::Boolean(v) => (*v as u32).to_owned().to_string(),
                     })
@@ -159,7 +175,9 @@ impl Datasheet {
                     .enumerate()
                     .map(|(i, cell)| {
                         let value = match cell {
-                            DatasheetCell::String(value) => Value::String(value.into()),
+                            DatasheetCell::String(value) => {
+                                Value::String(self.parse_localization(value.into()))
+                            }
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
                                     Value::Number((*value as i64).into())
@@ -185,7 +203,9 @@ impl Datasheet {
                     .enumerate()
                     .map(|(i, cell)| {
                         let value = match cell {
-                            DatasheetCell::String(value) => Value::String(value.into()),
+                            DatasheetCell::String(value) => {
+                                Value::String(self.parse_localization(value.into()))
+                            }
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
                                     Value::Number((*value as i64).into())
@@ -212,9 +232,9 @@ impl Datasheet {
                     .enumerate()
                     .map(|(i, cell)| {
                         let value = match cell {
-                            DatasheetCell::String(value) => {
-                                simd_json::value::owned::Value::String(value.into())
-                            }
+                            DatasheetCell::String(value) => simd_json::value::owned::Value::String(
+                                self.parse_localization(value.into()),
+                            ),
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
                                     simd_json::value::owned::Value::Static((*value as i64).into())
@@ -258,7 +278,7 @@ impl Datasheet {
                 }
                 match cell {
                     DatasheetCell::String(value) => {
-                        csv.push_str(value);
+                        csv.push_str(&self.parse_localization(value.into()));
                     }
                     DatasheetCell::Number(value) => {
                         if value.fract() == 0.0 {
@@ -282,7 +302,10 @@ impl Datasheet {
             for (i, cell) in row.iter().enumerate() {
                 match cell {
                     DatasheetCell::String(value) => {
-                        json_row.insert(&self.header[i].text, Value::String(value.into()));
+                        json_row.insert(
+                            &self.header[i].text,
+                            Value::String(self.parse_localization(value.into())),
+                        );
                     }
                     DatasheetCell::Number(value) => {
                         if value.fract() == 0.0 {
@@ -305,11 +328,130 @@ impl Datasheet {
     }
 }
 
-impl<R: Read> From<&mut R> for Datasheet {
-    fn from(value: &mut R) -> Self {
-        // value.rewind().unwrap();
-        from_reader(value).unwrap()
+impl<'a> TryFrom<Vec<u8>> for Datasheet<'a> {
+    fn try_from(value: Vec<u8>) -> io::Result<Self> {
+        let mut data = Cursor::new(value);
+        data.rewind()?;
+        let mut buffer = [0; 4];
+
+        data.read_exact(&mut buffer)?;
+        let version = u32::from_le_bytes(buffer);
+
+        // datatable crc  -- i32
+        data.seek(SeekFrom::Current(4))?;
+        data.read_exact(&mut buffer)?;
+        let name_offset = u32::from_le_bytes(buffer);
+
+        data.seek(SeekFrom::Current(4))?;
+        data.read_exact(&mut buffer)?;
+        let _type_offset = u32::from_le_bytes(buffer);
+
+        data.seek(SeekFrom::Current(36))?;
+        data.read_exact(&mut buffer)?;
+        let data_end_offset = u32::from_le_bytes(buffer);
+
+        data.read_exact(&mut buffer)?;
+        let _ = u32::from_le_bytes(buffer);
+
+        data.seek(SeekFrom::Current(4))?;
+        data.read_exact(&mut buffer)?;
+        let column_count = u32::from_le_bytes(buffer) as usize;
+
+        data.read_exact(&mut buffer)?;
+        let row_count = u32::from_le_bytes(buffer) as usize;
+
+        // SKIP TO HEADER OFFSET
+        data.seek(SeekFrom::Current(16))?;
+
+        let strings_offset = data_end_offset as usize + DATA_END + 4;
+
+        let mut header = Vec::with_capacity(column_count);
+        for _ in 0..column_count {
+            let meta = Metadata {
+                crc32: {
+                    data.read_exact(&mut buffer)?;
+                    u32::from_le_bytes(buffer)
+                },
+                data: {
+                    data.read_exact(&mut buffer)?;
+                    buffer
+                },
+            };
+
+            let position = data.stream_position()?;
+            let offset = strings_offset + i32::from_le_bytes(meta.data) as usize;
+            data.seek(SeekFrom::Start(offset as u64))?;
+            let text = read_string(&mut data)?;
+            data.seek(SeekFrom::Start(position))?;
+            data.read_exact(&mut buffer)?;
+
+            // let mut hasher = Hasher::new();
+            // hasher.update(text.as_bytes());
+            // let crc = hasher.finalize();
+            // dbg!(&text, &meta.crc32, crc);
+
+            let _type = u32::from_le_bytes(buffer);
+            header.push(HeaderCell { text, _type });
+        }
+
+        let mut rows = Vec::with_capacity(row_count);
+        for _ in 0..row_count {
+            let mut cells = Vec::with_capacity(column_count);
+            for j in 0..column_count {
+                let _type = header[j]._type;
+                let meta = Metadata {
+                    crc32: {
+                        data.read_exact(&mut buffer)?;
+                        u32::from_le_bytes(buffer)
+                    },
+                    data: {
+                        data.read_exact(&mut buffer)?;
+                        buffer
+                    },
+                };
+                let value = match _type {
+                    1 => {
+                        let position = data.stream_position()?;
+                        let offset = strings_offset + u32::from_le_bytes(meta.data) as usize;
+                        data.seek(SeekFrom::Start(offset as u64))?;
+                        let string = read_string(&mut data)?;
+                        data.seek(SeekFrom::Start(position))?;
+                        Ok(DatasheetCell::String(string))
+                    }
+                    2 => Ok(DatasheetCell::Number(f32::from_le_bytes(meta.data) as f64)),
+                    3 => Ok(DatasheetCell::Boolean(i32::from_le_bytes(meta.data) != 0)),
+                    _ => Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "Unknown cell type",
+                    )),
+                }?;
+                cells.push(value);
+            }
+            rows.push(cells);
+        }
+
+        data.seek(SeekFrom::Start(
+            (strings_offset as u32 + name_offset).into(),
+        ))?;
+        let name = read_string(&mut data)?;
+        data.seek(SeekFrom::Start(
+            (strings_offset as u32 + _type_offset).into(),
+        ))?;
+        let _type = read_string(&mut data)?;
+
+        Ok(Datasheet {
+            header,
+            rows,
+            version,
+            row_count,
+            column_count,
+            name,
+            _type,
+            localization: None,
+        })
     }
+
+    type Error = io::Error;
 }
 
 fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
@@ -432,6 +574,7 @@ fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
         column_count,
         name,
         _type,
+        localization: None,
     })
 }
 

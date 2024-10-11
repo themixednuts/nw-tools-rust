@@ -20,7 +20,7 @@ pub enum ObjectStreamFormat {
     #[default]
     BYTES,
     XML,
-    JSON,
+    MINI,
     PRETTY,
     // CSV,
     // YAML,

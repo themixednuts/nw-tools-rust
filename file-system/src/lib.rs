@@ -5,7 +5,8 @@ use cli::common::{
 };
 use cli::ARGS;
 use core::panic;
-use decompressor::{Metadata, ZipFileExt};
+use dashmap::DashMap;
+use decompressor::{Decompressor, Metadata};
 use localization::Localization;
 use memmap2::Mmap;
 use regex::Regex;
@@ -17,7 +18,7 @@ use std::sync::RwLock;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
 use rayon::{prelude::*, ThreadPoolBuilder};
-use std::io::{self, BufReader, Cursor, Write};
+use std::io::{self, Cursor, Write};
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
     collections::HashMap,
@@ -77,51 +78,6 @@ impl FileSystem {
         .await
         .unwrap()
     }
-    pub async fn load_localization(&'static self, locale: &str) -> HashMap<String, Option<String>> {
-        let locale_path = PathBuf::from(format!("localization/{}", locale));
-        let files = self
-            .path_to_pak
-            .iter()
-            .filter(|(_, (_, name))| name.starts_with(locale_path.to_str().unwrap()))
-            .map(|(_, v)| v)
-            .collect::<Vec<_>>();
-
-        files
-            .iter()
-            .map(|(path, _)| path)
-            .collect::<HashSet<_>>()
-            .par_iter()
-            .map(|path| {
-                let file = std::fs::File::open(path).unwrap();
-                let mut archive = ZipArchive::new(file).unwrap();
-
-                files
-                    .iter()
-                    .map(|(_path, name)| {
-                        let Some(idx) = archive.index_for_name(name) else {
-                            return None;
-                        };
-
-                        let mut entry = archive.by_index_raw(idx).unwrap();
-                        let mut buf = Vec::with_capacity(entry.size() as usize);
-                        entry.decompress(&mut buf).unwrap();
-
-                        let locale =
-                            match std::panic::catch_unwind(|| Localization::from(Cursor::new(buf)))
-                            {
-                                Ok(v) => v,
-                                Err(_) => panic!("File Name: {}\n", name),
-                            };
-
-                        Some(HashMap::from(locale))
-                    })
-                    .filter_map(|v| v)
-                    .flatten()
-                    .collect::<HashMap<_, _>>()
-            })
-            .flatten()
-            .collect::<HashMap<_, _>>()
-    }
 
     pub fn files(
         &'static self,
@@ -154,7 +110,9 @@ impl FileSystem {
                 let mut entry = archive.by_index_raw(index).unwrap();
 
                 let mut buf = vec![];
-                entry.decompress(&mut buf).unwrap();
+                let decompressor = Decompressor::try_new(&mut entry, None).unwrap();
+                decompressor.to_writer(&mut buf).unwrap();
+
                 let reader = Cursor::new(buf);
                 Ok(reader)
             }
@@ -211,6 +169,19 @@ impl FileSystem {
             )
         });
 
+        let locale = match &ARGS.command {
+            Commands::Extract(cmd) => match cmd.datasheet.inline_locale {
+                Some(ref v) => {
+                    let v = v.to_string();
+                    Some(load_localization(&self.path_to_pak, v).await)
+                }
+                None => None,
+            },
+        };
+
+        let locale = Arc::new(locale);
+        dbg!(&locale);
+
         let cb = Arc::new(cb);
         let out_dir = Arc::new(self.out_dir.to_owned());
 
@@ -245,6 +216,7 @@ impl FileSystem {
                         let pak_path = pak_path.clone();
                         let state = state.clone();
                         // let mmap = mmap.clone();
+                        let locale = locale.clone();
 
                         p.spawn(move |_| {
                             if self.cancel.is_cancelled() {
@@ -266,19 +238,24 @@ impl FileSystem {
                             let path = out_dir.join(entry.to_path_buf());
 
                             let mut buf = Vec::with_capacity(zip.size() as usize);
-                            let (bytes, file_type, metadata) = match zip.decompress(&mut buf) {
+                            let de =
+                                Decompressor::try_new(&mut zip, locale.as_ref().into()).unwrap();
+
+                            let metadata = match de.to_writer(&mut buf) {
                                 Ok(res) => res,
                                 Err(_) => {
                                     self.cancel.cancel();
                                     return;
                                 }
                             };
-                            let path = handle_extension(file_type, path, metadata);
+
+                            let file_type = de.file_type().unwrap();
+                            let path = handle_extension(&file_type, path, metadata.as_ref());
                             let Some(parent) = path.parent() else { return };
                             std::fs::create_dir_all(parent).expect("failed to create directory");
                             let mut file = std::fs::File::create(&path).unwrap();
 
-                            std::io::copy(&mut Cursor::new(buf), &mut file).unwrap();
+                            let bytes = std::io::copy(&mut Cursor::new(buf), &mut file).unwrap();
 
                             state.active.fetch_sub(1, Ordering::Relaxed);
                             state.max.load(Ordering::Relaxed);
@@ -315,7 +292,7 @@ pub struct State {
     pub size: Arc<AtomicUsize>,
 }
 
-fn handle_extension(file_type: FileType, mut path: PathBuf, meta: Option<Metadata>) -> PathBuf {
+fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metadata>) -> PathBuf {
     let ext = path.extension().unwrap().to_os_string();
     match file_type {
         FileType::ObjectStream(fmt) => match fmt {
@@ -325,7 +302,7 @@ fn handle_extension(file_type: FileType, mut path: PathBuf, meta: Option<Metadat
                     path.set_extension("xml");
                 }
             }
-            ObjectStreamFormat::JSON | ObjectStreamFormat::PRETTY => {
+            ObjectStreamFormat::MINI | ObjectStreamFormat::PRETTY => {
                 if ext != "json" {
                     // std::fs::rename(&path, path.with_extension("json")).unwrap();
                     path.set_extension("json");
@@ -549,22 +526,52 @@ pub enum FileType {
     #[default]
     Other,
 }
+pub async fn load_localization(
+    paths: &HashMap<PathBuf, (PathBuf, String)>,
+    locale: String,
+) -> DashMap<String, Option<String>> {
+    let locale_path = PathBuf::from(format!("localization/{}", locale));
+    let files = paths
+        .iter()
+        .filter(|(_, (_, name))| name.starts_with(locale_path.to_str().unwrap()))
+        .map(|(_, v)| v)
+        .collect::<Vec<_>>();
 
-pub fn file_type(sig: &[u8; 5]) -> io::Result<FileType> {
-    let _type = match sig {
-        [0x04, 0x00, 0x1B, 0x4C, 0x75] => FileType::Luac,
-        [0x00, 0x00, 0x00, 0x00, 0x03] => match &ARGS.command {
-            Commands::Extract(extract) => {
-                FileType::ObjectStream(&extract.objectstream.objectstream)
-            }
-        },
-        [0x11, 0x00, 0x00, 0x00, _] => match &ARGS.command {
-            Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
-        },
-        _ => FileType::default(),
-    };
+    files
+        .iter()
+        .map(|(path, _)| path)
+        .collect::<HashSet<_>>()
+        .par_iter()
+        .map(|path| {
+            let file = std::fs::File::open(path).unwrap();
+            let mut archive = ZipArchive::new(file).unwrap();
 
-    Ok(_type)
+            files
+                .iter()
+                .map(|(_path, name)| {
+                    let Some(idx) = archive.index_for_name(name) else {
+                        return None;
+                    };
+
+                    let mut entry = archive.by_index_raw(idx).unwrap();
+                    let mut buf = Vec::with_capacity(entry.size() as usize);
+                    let mut decompressor = Decompressor::try_new(&mut entry, None).unwrap();
+                    decompressor.to_writer(&mut buf).unwrap();
+
+                    let locale =
+                        match std::panic::catch_unwind(|| Localization::from(Cursor::new(buf))) {
+                            Ok(v) => v,
+                            Err(_) => panic!("File Name: {}\n", name),
+                        };
+
+                    Some(DashMap::from(locale))
+                })
+                .filter_map(|v| v)
+                .flatten()
+                .collect::<DashMap<_, _>>()
+        })
+        .flatten()
+        .collect::<DashMap<_, _>>()
 }
 
 #[cfg(test)]
