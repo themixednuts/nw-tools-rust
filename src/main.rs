@@ -67,11 +67,6 @@ async fn run() -> tokio::io::Result<()> {
     })
     .await?;
 
-    let locale = fs.load_localization("en-us").await;
-    dbg!(locale);
-
-    todo!();
-
     let files = fs.files(filter);
     let len = files.len() as u64;
     // let size: usize = files.iter().map(|(_, (_, _, size))| size).sum();

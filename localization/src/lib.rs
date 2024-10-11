@@ -10,16 +10,16 @@ use serde::{Deserialize, Serialize};
 #[serde(rename = "resources")]
 pub struct Localization {
     #[serde(rename = "@xmlns:xsi")]
-    xmlns: u32,
+    xmlns: Option<String>,
     #[serde(default)]
-    strings: Vec<KeyValue>,
+    string: Vec<KeyValue>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
 #[serde(rename = "string")]
 pub struct KeyValue {
     #[serde(rename = "@key")]
-    key: String,
+    key: Option<String>,
     #[serde(rename = "@comment")]
     comment: Option<String>,
     #[serde(rename = "@rel_version")]
@@ -33,17 +33,21 @@ pub struct KeyValue {
     #[serde(rename = "@dialogue-next")]
     dialogue_next: Option<String>,
     #[serde(rename = "@xsi:nil")]
-    xsi_nil: Option<String>,
-    #[serde(rename = "$text")]
-    value: String,
+    xsi_nil: Option<bool>,
+    #[serde(rename = "$value", default)]
+    value: Option<String>,
 }
 
-impl From<Localization> for HashMap<String, String> {
+impl From<Localization> for HashMap<String, Option<String>> {
     fn from(value: Localization) -> Self {
         value
-            .strings
+            .string
             .iter()
             .map(|s| (s.key.to_owned(), s.value.to_owned()))
+            .filter_map(|(k, v)| match k {
+                Some(k) => Some((k, v)),
+                None => None,
+            })
             .collect::<HashMap<_, _>>()
     }
 }

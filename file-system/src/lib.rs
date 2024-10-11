@@ -77,7 +77,7 @@ impl FileSystem {
         .await
         .unwrap()
     }
-    pub async fn load_localization(&'static self, locale: &str) -> HashMap<String, String> {
+    pub async fn load_localization(&'static self, locale: &str) -> HashMap<String, Option<String>> {
         let locale_path = PathBuf::from(format!("localization/{}", locale));
         let files = self
             .path_to_pak
