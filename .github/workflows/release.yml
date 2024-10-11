@@ -1,8 +1,7 @@
-name: Rust
+name: Release
 
 on:
   push:
-    branches: [ "master" ]
     tags:
       - 'v*'
   pull_request:
