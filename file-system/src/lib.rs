@@ -1,19 +1,24 @@
 use cli::commands::Commands;
+use cli::common::{
+    datasheet::{DatasheetFormat, DatasheetOutputMode},
+    objectstream::ObjectStreamFormat,
+};
 use cli::ARGS;
 use core::panic;
-use decompressor::ZipFileExt;
+use decompressor::{Metadata, ZipFileExt};
 use memmap2::Mmap;
+use regex::Regex;
 use std::fmt::Debug;
+use std::sync::RwLock;
 // use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
 use rayon::{prelude::*, ThreadPoolBuilder};
-use std::io::{self, Cursor};
+use std::io::{self, Cursor, Write};
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
-    str::FromStr,
     sync::{atomic::AtomicUsize, Arc},
 };
 use tokio::{
@@ -35,39 +40,32 @@ pub static FILESYSTEM: OnceLock<FileSystem> = OnceLock::new();
 
 #[derive(Debug)]
 pub struct FileSystem {
-    root_dir: &'static PathBuf,
+    cwd: &'static PathBuf,
     out_dir: &'static PathBuf,
     path_to_pak: HashMap<PathBuf, (PathBuf, String)>,
     pub hashes: LumberyardSource,
-    len: usize,
-    size: u128,
     cancel: CancellationToken,
 }
 
 impl FileSystem {
-    pub async fn init(token: CancellationToken) -> &'static FileSystem {
-        let args = &ARGS;
+    pub async fn init(
+        cwd: &'static PathBuf,
+        out_dir: &'static PathBuf,
+        token: CancellationToken,
+    ) -> &'static FileSystem {
         let handle = Handle::current();
-        let root_dir = match &args.command {
-            Commands::Extract(extract) => extract.input.as_ref().unwrap(),
-        };
-        let out_dir = match &args.command {
-            Commands::Extract(extract) => extract.output.as_ref().unwrap(),
-        };
 
         tokio::task::spawn_blocking(move || {
             FILESYSTEM.get_or_init(|| {
-                if !root_dir.is_dir() {
+                if !cwd.is_dir() {
                     panic!("Not a correct directory");
                 }
-                let hashes = handle.block_on(async { parse_strings(&root_dir).await.unwrap() });
-                let (path_to_pak, len, size) = create_pak_map(&root_dir);
+                let hashes = handle.block_on(async { parse_strings(&cwd).await.unwrap() });
+                let path_to_pak = map(&cwd);
                 FileSystem {
-                    root_dir,
+                    cwd,
                     out_dir,
                     path_to_pak,
-                    len,
-                    size,
                     hashes,
                     cancel: token,
                 }
@@ -75,6 +73,22 @@ impl FileSystem {
         })
         .await
         .unwrap()
+    }
+
+    pub fn files(
+        &'static self,
+        regex: Option<&Regex>,
+    ) -> HashMap<&'static PathBuf, &'static (PathBuf, String)> {
+        self.path_to_pak
+            .iter()
+            .filter(|(name, _)| {
+                if let Some(filter) = regex {
+                    filter.is_match(name.to_str().unwrap())
+                } else {
+                    true
+                }
+            })
+            .collect()
     }
 
     pub async fn open<P>(
@@ -122,25 +136,25 @@ impl FileSystem {
         }
     }
 
-    pub async fn process_all<F>(&'static self, cb: F) -> tokio::io::Result<()>
+    pub async fn all<F>(
+        &'static self,
+        map: HashMap<&'static PathBuf, &'static (PathBuf, String)>,
+        state: Arc<RwLock<State>>,
+        cb: F,
+    ) -> tokio::io::Result<()>
     where
-        F: Fn(Arc<PathBuf>, PathBuf, usize, usize, usize, usize, u64) -> io::Result<()>
+        F: Fn(Arc<&PathBuf>, &PathBuf, usize, usize, u64) -> io::Result<()>
             + Send
             + Sync
             + Clone
             + 'static,
     {
-        let mut paks: HashMap<PathBuf, Vec<(PathBuf, String)>> = HashMap::new();
-        self.path_to_pak.keys().for_each(|entry| {
-            let path = self.path_to_pak.get(entry).unwrap();
-
-            // dbg!(&path);
-            paks.entry(path.0.clone())
-                .or_default()
-                .push((entry.clone(), path.1.to_owned()));
+        let mut paks: HashMap<&PathBuf, Vec<(&PathBuf, &str)>> = HashMap::new();
+        map.iter().for_each(|(entry, path)| {
+            paks.entry(&path.0).or_default().push((&entry, &path.1));
         });
 
-        let mut paks: Vec<(PathBuf, Vec<(PathBuf, String)>)> = paks.into_iter().collect();
+        let mut paks: Vec<(&PathBuf, Vec<(&PathBuf, &str)>)> = paks.into_iter().collect();
         paks.par_sort_unstable_by(|(s, _), (s2, _)| {
             natord::compare(
                 s.file_stem().expect("msg").to_str().expect("msg"),
@@ -149,11 +163,9 @@ impl FileSystem {
         });
 
         let cb = Arc::new(cb);
-        let active_threads = Arc::new(AtomicUsize::new(0));
-        let max_threads = Arc::new(AtomicUsize::new(0));
         let out_dir = Arc::new(self.out_dir.to_owned());
 
-        tokio::task::spawn_blocking(move || {
+        if let Err(e) = tokio::task::spawn_blocking(move || {
             let pool = ThreadPoolBuilder::new().build().unwrap();
             pool.scope(|p| {
                 paks.into_par_iter().for_each(|(pak_path, entries)| {
@@ -179,52 +191,59 @@ impl FileSystem {
                         }
                         let out_dir = out_dir.clone();
                         let idx = idx.clone();
-                        let active_threads = active_threads.clone();
-                        let max_threads = max_threads.clone();
                         let cb = cb.clone();
                         let archive = archive.clone();
                         let pak_path = pak_path.clone();
+                        let state = state.clone();
                         // let mmap = mmap.clone();
 
                         p.spawn(move |_| {
                             if self.cancel.is_cancelled() {
                                 return;
                             }
-                            let c = active_threads.fetch_add(1, Ordering::Relaxed) + 1;
-                            max_threads.fetch_max(c, Ordering::Relaxed);
 
-                            let mut archive = archive.lock().unwrap();
+                            let state = state.read().unwrap();
+
+                            let c = state.active.fetch_add(1, Ordering::Relaxed) + 1;
+                            state.max.fetch_max(c, Ordering::Relaxed);
+
+                            let Ok(mut archive) = archive.lock() else {
+                                self.cancel.cancel();
+                                return;
+                            };
                             let index = archive.index_for_path(name).unwrap();
                             let mut zip = archive.by_index_raw(index).unwrap();
 
                             let path = out_dir.join(entry.to_path_buf());
-                            let Some(parent) = path.parent() else { return };
 
+                            let mut buf = Vec::with_capacity(zip.size() as usize);
+                            let (bytes, file_type, metadata) = match zip.decompress(&mut buf) {
+                                Ok(res) => res,
+                                Err(_) => {
+                                    self.cancel.cancel();
+                                    return;
+                                }
+                            };
+                            let path = handle_extension(file_type, path, metadata);
+                            let Some(parent) = path.parent() else { return };
                             std::fs::create_dir_all(parent).expect("failed to create directory");
                             let mut file = std::fs::File::create(&path).unwrap();
-                            let Ok(bytes) = zip.decompress(&mut file) else {
-                                (0..20).for_each(|_| {
-                                    dbg!(&path);
-                                });
-                                self.cancel.cancel();
-                                return;
-                            };
 
-                            // drop(zip);
-                            // drop(archive);
+                            std::io::copy(&mut Cursor::new(buf), &mut file).unwrap();
 
-                            if let Err(e) = cb(
+                            state.active.fetch_sub(1, Ordering::Relaxed);
+                            state.max.load(Ordering::Relaxed);
+                            state.size.store(bytes as usize, Ordering::Relaxed);
+
+                            if let Err(_) = cb(
                                 pak_path,
                                 entry,
                                 len,
-                                active_threads.fetch_sub(1, Ordering::Relaxed),
-                                max_threads.load(Ordering::Relaxed),
                                 idx.fetch_add(1, Ordering::Relaxed) + 1,
                                 bytes,
                             ) {
-                                if e.to_string() != "task cancelled" {
-                                    self.cancel.cancel();
-                                }
+                                self.cancel.cancel();
+                                return;
                             }
                         });
                     }
@@ -232,18 +251,125 @@ impl FileSystem {
             });
         })
         .await
-        .unwrap();
+        {
+            self.cancel.cancel();
+            return Err(tokio::io::Error::other(e));
+        };
 
         Ok(())
     }
+}
 
-    pub fn len(&self) -> usize {
-        self.len
-    }
+pub struct State {
+    pub active: Arc<AtomicUsize>,
+    pub max: Arc<AtomicUsize>,
+    pub size: Arc<AtomicUsize>,
+}
 
-    pub fn size(&self) -> u128 {
-        self.size
-    }
+fn handle_extension(file_type: FileType, mut path: PathBuf, meta: Option<Metadata>) -> PathBuf {
+    let ext = path.extension().unwrap().to_os_string();
+    match file_type {
+        FileType::ObjectStream(fmt) => match fmt {
+            ObjectStreamFormat::XML => {
+                if ext != "xml" {
+                    // std::fs::rename(&path, path.with_extension("xml")).unwrap();
+                    path.set_extension("xml");
+                }
+            }
+            ObjectStreamFormat::JSON | ObjectStreamFormat::PRETTY => {
+                if ext != "json" {
+                    // std::fs::rename(&path, path.with_extension("json")).unwrap();
+                    path.set_extension("json");
+                }
+            }
+            _ => {}
+        },
+        FileType::Datasheet(fmt) => {
+            match &ARGS.command {
+                Commands::Extract(extract) => {
+                    if extract.datasheet.datasheet_filenames == DatasheetOutputMode::TYPENAME {
+                        if let Some(meta) = &meta {
+                            match meta {
+                                Metadata::Datasheet(datasheet) => {
+                                    let datatable_root = path
+                                        .ancestors()
+                                        .find(|p| p.ends_with("datatables"))
+                                        .unwrap()
+                                        .to_path_buf();
+
+                                    path = datatable_root;
+                                    path = path
+                                        .join(format!("{}/{}", datasheet._type, datasheet.name));
+                                    path.set_extension(&ext);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            match fmt {
+                DatasheetFormat::BYTES => {}
+                DatasheetFormat::XML => {
+                    if ext != "xml" {
+                        // std::fs::rename(&path, path.with_extension("xml")).unwrap();
+                        path.set_extension("xml");
+                    }
+                }
+                DatasheetFormat::JSON | DatasheetFormat::PRETTY => {
+                    if ext != "json" {
+                        // std::fs::rename(&path, path.with_extension("json")).unwrap();
+                        path.set_extension("json");
+                    }
+                    if let Some(meta) = &meta {
+                        match meta {
+                            Metadata::Datasheet(datasheet) => {
+                                let Some(parent) = path.parent() else {
+                                    panic!("hmm")
+                                };
+                                std::fs::create_dir_all(parent)
+                                    .expect("failed to create directory");
+
+                                // let mut schema =
+                                //     schemars::schema_for_value!(datasheet.json_value());
+                                // schema.schema.metadata().title = Some(datasheet._type.to_owned());
+                                // schema.schema.metadata().id = Some(datasheet.name.to_owned());
+
+                                let stem = path.file_stem().unwrap();
+                                let mut schema_path = path.with_file_name(stem);
+                                schema_path.set_extension("meta.json");
+                                let mut file = std::fs::File::create(schema_path).unwrap();
+                                file.write_all(
+                                    &simd_json::to_vec_pretty(&datasheet.meta()).unwrap(),
+                                )
+                                .unwrap();
+                                // datasheet.to_json_simd(pretty)
+                            }
+                        }
+                    }
+                }
+                DatasheetFormat::CSV => {
+                    if ext != "csv" {
+                        // std::fs::rename(&path, path.with_extension("csv")).unwrap();
+                        path.set_extension("csv");
+                    }
+                }
+                DatasheetFormat::YAML => {
+                    if ext != "yaml" {
+                        // std::fs::rename(&path, path.with_extension("yaml")).unwrap();
+                        path.set_extension("yaml");
+                    }
+                }
+                DatasheetFormat::SQL => {
+                    if ext != "sql" {
+                        // std::fs::rename(&path, path.with_extension("yaml")).unwrap();
+                        path.set_extension("sql");
+                    }
+                }
+            }
+        }
+        _ => {}
+    };
+    path
 }
 
 async fn parse_strings<P: AsRef<Path>>(dir: &P) -> io::Result<LumberyardSource> {
@@ -321,84 +447,75 @@ async fn parse_strings<P: AsRef<Path>>(dir: &P) -> io::Result<LumberyardSource> 
     Ok(ly)
 }
 
-fn create_pak_map<P: AsRef<Path>>(path: &P) -> (HashMap<PathBuf, (PathBuf, String)>, usize, u128) {
-    let size = Arc::new(Mutex::new(0u128));
-    let len = Arc::new(AtomicUsize::new(0));
-
+fn map<P: AsRef<Path>>(path: &P) -> HashMap<PathBuf, (PathBuf, String)> {
     let assets_dir = path.as_ref().join("assets").to_path_buf();
-    (
-        WalkDir::new(assets_dir.to_path_buf())
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|path| {
-                path.file_type().is_file()
-                    && path.path().extension().and_then(|ext| ext.to_str()) == Some("pak")
-            })
-            .par_bridge()
-            .map(|dir| {
-                let size = size.clone();
+    WalkDir::new(assets_dir.to_path_buf())
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|path| {
+            path.file_type().is_file()
+                && path.path().extension().and_then(|ext| ext.to_str()) == Some("pak")
+        })
+        .par_bridge()
+        .map(|dir| {
+            let file = std::fs::File::open(dir.path()).unwrap();
+            let mmap = unsafe { Mmap::map(&file).expect("couldn't map file") };
+            drop(file);
+            let mmap = Cursor::new(mmap);
+            let archive = ZipArchive::new(mmap).unwrap();
 
-                let file = std::fs::File::open(dir.path()).unwrap();
-                let mmap = unsafe { Mmap::map(&file).expect("couldn't map file") };
-                drop(file);
-                let mmap = Cursor::new(mmap);
-                let mut archive = ZipArchive::new(mmap).unwrap();
+            // dbg!(&dir);
+            // let file_names: Vec<String> = archive.file_names().map(|n| n.to_owned()).collect();
+            let file_names = archive
+                .file_names()
+                // .iter()
+                .map(|name| {
+                    let full_name = dir
+                        .to_owned()
+                        .into_path()
+                        .strip_prefix(assets_dir.to_path_buf())
+                        .unwrap()
+                        .to_path_buf()
+                        .parent()
+                        .unwrap()
+                        .join(name);
+                    // let idx = archive.index_for_name(name).unwrap();
+                    // let size = archive.by_index_raw(idx).unwrap().size() as usize;
 
-                // dbg!(&dir);
-                let file_names = archive
-                    .file_names()
-                    .filter(|name| {
-                        if let Some(filter) = match &ARGS.command {
-                            cli::commands::Commands::Extract(ext) => &ext.filter,
-                        } {
-                            filter.is_match(name)
-                        } else {
-                            true
-                        }
-                    })
-                    .map(|name| {
-                        let full_name = dir
-                            .to_owned()
-                            .into_path()
-                            .strip_prefix(assets_dir.to_path_buf())
-                            .unwrap()
-                            .to_path_buf()
-                            .parent()
-                            .unwrap()
-                            .join(name);
+                    (full_name, (dir.path().to_path_buf(), name.to_string()))
+                })
+                .collect::<Vec<(PathBuf, (PathBuf, String))>>();
 
-                        (full_name, (dir.path().to_path_buf(), name.to_owned()))
-                    })
-                    .collect::<Vec<(PathBuf, (PathBuf, String))>>();
-                len.fetch_add(file_names.len(), std::sync::atomic::Ordering::Relaxed);
+            file_names
+        })
+        .flatten()
+        .collect()
+}
 
-                match &ARGS.command {
-                    Commands::Extract(ext) => {
-                        if ext.filter.is_some() {
-                            let mut _size = 0;
-                            for (_, (_, name)) in &file_names {
-                                let index = archive.index_for_name(&name).unwrap();
-                                let file = archive.by_index_raw(index).unwrap();
-                                _size += file.size();
-                            }
-                            let mut size = size.lock().unwrap();
-                            *size += _size as u128;
-                        } else {
-                            let mut guard = size.lock().unwrap();
-                            *guard += archive.decompressed_size().unwrap();
-                        }
-                    }
-                }
-                file_names
-            })
-            .flatten()
-            .collect(),
-        len.load(std::sync::atomic::Ordering::Relaxed),
-        {
-            let size_guard = size.lock().unwrap();
-            *size_guard
+#[derive(Default, Debug)]
+pub enum FileType {
+    Luac,
+    ObjectStream(&'static ObjectStreamFormat),
+    Datasheet(&'static DatasheetFormat),
+    #[default]
+    Other,
+}
+
+pub fn file_type(sig: &[u8; 5]) -> io::Result<FileType> {
+    let _type = match sig {
+        [0x04, 0x00, 0x1B, 0x4C, 0x75] => FileType::Luac,
+        [0x00, 0x00, 0x00, 0x00, 0x03] => match &ARGS.command {
+            Commands::Extract(extract) => {
+                FileType::ObjectStream(&extract.objectstream.objectstream)
+            }
         },
-    )
+        [0x11, 0x00, 0x00, 0x00, _] => match &ARGS.command {
+            Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
+        },
+        _ => FileType::default(),
+    };
+
+    Ok(_type)
 }
 
 #[cfg(test)]
@@ -421,6 +538,6 @@ mod tests {
     #[test]
     fn pak_map() {
         let root = "C:/Program Files (x86)/Steam/steamapps/common/New World";
-        create_pak_map(&root);
+        map(&root);
     }
 }

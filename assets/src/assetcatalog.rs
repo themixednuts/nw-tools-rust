@@ -289,11 +289,11 @@ mod test {
 
     #[tokio::test]
     async fn test() {
-        let catalog = include_bytes!("E:/Extract/NW Live/assetcatalog.catalog");
-        let mut cursor = Cursor::new(catalog);
+        // let catalog = include_bytes!("E:/Extract/NW Live/assetcatalog.catalog");
+        // let mut cursor = Cursor::new(catalog);
 
-        let asset_catalog = AssetCatalog::init().await;
-        assert!(asset_catalog.is_ok());
+        // let asset_catalog = AssetCatalog::init().await;
+        // assert!(asset_catalog.is_ok());
         // dbg!(asset_catalog.unwrap());
     }
 }

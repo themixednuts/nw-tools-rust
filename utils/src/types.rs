@@ -94,7 +94,7 @@ pub fn uuid_data_to_serialize(
             let guid = Uuid::from_bytes(data[0..16].try_into()?)
                 .braced()
                 .encode_upper(&mut buf);
-            let sub_id = u128::from_be_bytes(data[16..32].try_into()?);
+            let sub_id = u64::from_be_bytes(data[16..32].try_into()?);
             let mut buf = Uuid::encode_buffer();
             let _type = Uuid::from_bytes(data[32..48].try_into()?)
                 .braced()

@@ -403,17 +403,17 @@ mod tests {
 
     #[test]
     fn test_struct() {
-        let byt =
-            include_bytes!("E:/Extract/nw live/sharedassets/genericassets/fuelcategory.fueldb");
+        // let byt =
+        //     include_bytes!("E:/Extract/nw live/sharedassets/genericassets/fuelcategory.fueldb");
 
-        let test: ObjectStream = from_reader(&mut Cursor::new(byt)).unwrap();
-        let mut buf = vec![];
-        to_writer(&test, &mut buf).unwrap();
-        dbg!(&test);
-        let mut buf2 = vec![];
-        test.to_writer(&mut buf2).unwrap();
-        assert_eq!(&buf, byt);
-        assert_eq!(&buf2, byt);
+        // let test: ObjectStream = from_reader(&mut Cursor::new(byt)).unwrap();
+        // let mut buf = vec![];
+        // to_writer(&test, &mut buf).unwrap();
+        // dbg!(&test);
+        // let mut buf2 = vec![];
+        // test.to_writer(&mut buf2).unwrap();
+        // assert_eq!(&buf, byt);
+        // assert_eq!(&buf2, byt);
     }
 
     // #[test]

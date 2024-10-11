@@ -1,10 +1,11 @@
 pub mod commands;
+pub mod common;
 mod traits;
 
 use clap::{self, Parser};
 use commands::Commands;
 use std::{io, sync::LazyLock};
-use traits::InteractiveArgs;
+use traits::IArgs;
 
 pub static ARGS: LazyLock<Args> = LazyLock::new(|| match cli() {
     Ok(args) => args,
@@ -12,6 +13,13 @@ pub static ARGS: LazyLock<Args> = LazyLock::new(|| match cli() {
 });
 
 const STEAM_DIR: &'static str = r#"C:\Program Files (x86)\Steam\steamapps\common\New World"#;
+const JSON_PRETTY: &'static str = "json";
+const JSON_MINI: &'static str = "mini";
+const XML: &'static str = "xml";
+const CSV: &'static str = "csv";
+const SQL: &'static str = "sql";
+const BYTES: &'static str = "bytes";
+const YAML: &'static str = "yaml";
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -32,7 +40,7 @@ fn cli() -> io::Result<Args> {
     cliclack::intro("New World Tools")?;
 
     match &mut args.command {
-        Commands::Extract(ext) => ext.interactive()?,
+        Commands::Extract(ext) => ext.configure(())?,
     };
 
     Ok(args)

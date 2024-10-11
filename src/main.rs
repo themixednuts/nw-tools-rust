@@ -6,14 +6,13 @@ use app::App;
 use assets::assetcatalog::AssetCatalog;
 use cli::{commands::Commands, ARGS};
 use cliclack::{spinner, ProgressBar};
-use file_system::FileSystem;
+use file_system::{FileSystem, State};
 use scopeguard::{defer, defer_on_unwind, guard_on_unwind};
 use std::{
-    borrow::Borrow,
     process::ExitCode,
     sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc,
+        atomic::{AtomicU64, AtomicUsize, Ordering},
+        Arc, RwLock,
     },
 };
 use tokio::{
@@ -26,7 +25,7 @@ use utils::{format_bytes, format_duration};
 
 #[tokio::main]
 async fn main() -> tokio::io::Result<ExitCode> {
-    console_subscriber::init();
+    // console_subscriber::init();
     let app = App::init();
     // parse_lumberyard_source().await.unwrap();
     // map_resources().await;
@@ -45,18 +44,19 @@ async fn main() -> tokio::io::Result<ExitCode> {
 
 async fn run() -> tokio::io::Result<()> {
     // TODO: handle this differently
-    let args = &ARGS;
 
-    let input_path = match &args.command {
-        Commands::Extract(extract) => extract.input.as_ref().unwrap(),
+    let (cwd, out_dir, filter) = match &ARGS.command {
+        Commands::Extract(extract) => (
+            extract.common.input.input.as_ref().unwrap(),
+            extract.common.output.output.as_ref().unwrap(),
+            extract.common.filter.filter.as_ref(),
+        ),
     };
-    assert!(input_path.join("assets").exists());
-    // let out_path = Arc::new(args.output.as_ref().unwrap());
 
     let fs = tokio::spawn(async move {
         let pb = cliclack::spinner();
         pb.start("Initializing File System");
-        let fs = FileSystem::init(App::handle().cancel.clone()).await;
+        let fs = FileSystem::init(cwd, out_dir, App::handle().cancel.clone()).await;
         pb.stop("File System Initialized");
 
         // let pb = cliclack::spinner();
@@ -67,17 +67,18 @@ async fn run() -> tokio::io::Result<()> {
     })
     .await?;
 
-    let len = fs.len() as u64;
-    let size = fs.size();
+    let files = fs.files(filter);
+    let len = files.len() as u64;
+    // let size: usize = files.iter().map(|(_, (_, _, size))| size).sum();
 
-    let multi_pb = Arc::new(cliclack::MultiProgress::new("Decompressing paks"));
+    let multi_pb = Arc::new(cliclack::MultiProgress::new("Extracting Pak(s)"));
     let all = Arc::new(multi_pb.add(ProgressBar::new(len)));
-    let status_pb = Arc::new(multi_pb.add(spinner()));
     let stats_pb = Arc::new(multi_pb.add(spinner()));
     let pak_pb = Arc::new(multi_pb.add(spinner()));
     let file_pb = Arc::new(multi_pb.add(spinner()));
 
-    status_pb.start("Processing...");
+    // multi_pb.println("Processing");
+
     all.start("");
     stats_pb.start("");
     file_pb.start("");
@@ -90,10 +91,16 @@ async fn run() -> tokio::io::Result<()> {
     let bytes_cloned = Arc::clone(&bytes);
     let start = Instant::now();
     let all_pb = Arc::clone(&all);
-    let status_pb_clone = status_pb.clone();
+    let state = Arc::new(RwLock::new(State {
+        active: Arc::new(AtomicUsize::new(0)),
+        max: Arc::new(AtomicUsize::new(0)),
+        size: Arc::new(AtomicUsize::new(0)),
+    }));
+    let state_clone = state.clone();
+    let stats_pb_clone = stats_pb.clone();
 
     task::spawn(async move {
-        let mut interval = time::interval(Duration::from_millis(1000 / 120));
+        let mut interval = time::interval(Duration::from_millis(1000 / 10));
 
         loop {
             if App::handle().cancel.is_cancelled() {
@@ -102,8 +109,8 @@ async fn run() -> tokio::io::Result<()> {
 
             interval.tick().await;
             let elapsed = start.elapsed();
-            let dots = ".".repeat(((elapsed.as_secs() % 3) + 1) as usize);
-            status_pb_clone.set_message(format!("Processing{}", dots));
+            // let dots = ".".repeat(((elapsed.as_secs() % 3) + 1) as usize);
+            // multi_pb_clone.println(format!("Processing{}", dots));
             let bytes_prcocessed = bytes_cloned.load(Ordering::Relaxed);
             let bytes_per_sec = bytes_prcocessed as f64 / elapsed.as_secs_f64();
             let processed_count = processed_clone.load(Ordering::Relaxed);
@@ -121,21 +128,27 @@ async fn run() -> tokio::io::Result<()> {
                 Duration::ZERO
             };
 
+            let state = state_clone.read().unwrap();
+
+            stats_pb_clone.set_message(format!(
+                "#Tasks: {} | Max Tasks: {} | #Last Bytes Written: {} ",
+                state.active.load(Ordering::Relaxed),
+                state.max.load(Ordering::Relaxed),
+                format_bytes(state.size.load(Ordering::Relaxed) as f64),
+            ));
             all_pb.set_message(format!(
-                "ETA: {} | Throughput: {}/s | Approx. Size: {}/{}",
+                "ETA: {} | Throughput: {}/s",
                 format_duration(eta),
                 format_bytes(bytes_per_sec),
-                format_bytes(bytes_prcocessed as f64),
-                format_bytes(size as f64)
+                // format_bytes(size as f64)
             ));
         }
     });
 
-    let status_pb_clone = status_pb.clone();
     let multi_pb_clone = multi_pb.clone();
     tokio::spawn(async move {
         App::handle().cancel.cancelled().await;
-        status_pb_clone.set_message("Aborting...");
+        multi_pb_clone.println("Aborting...");
         multi_pb_clone.cancel();
     });
 
@@ -144,17 +157,10 @@ async fn run() -> tokio::io::Result<()> {
     let bytes_cloned = Arc::clone(&bytes);
     let file_pb_clone = file_pb.clone();
     let pak_pb_clone = pak_pb.clone();
-    let stats_pb_clone = stats_pb.clone();
 
-    fs.process_all(move |pak, entry, len, active, max, idx, size| {
+    fs.all(files, state.clone(), move |pak, entry, len, idx, size| {
         bytes_cloned.fetch_add(size, Ordering::Relaxed);
         all_pb.inc(1);
-        stats_pb_clone.set_message(format!(
-            "#Tasks: {} | Max Tasks: {} | #Last Bytes Written: {} ",
-            active,
-            max,
-            format_bytes(size as f64),
-        ));
         pak_pb_clone.set_message(format!(
             "{} ({idx}/{len})",
             pak.file_name().unwrap().to_str().unwrap()
@@ -172,7 +178,6 @@ async fn run() -> tokio::io::Result<()> {
     let all_pb = all.clone();
     let file_pb = file_pb.clone();
     let pak_pb = pak_pb.clone();
-    status_pb.stop("Done");
     all_pb.stop("");
     file_pb.stop("");
     pak_pb.stop("");

@@ -1,12 +1,9 @@
-use std::{
-    ffi::CString,
-    io::{self, Cursor, Read, Seek, SeekFrom},
-};
+use std::io::{self, Cursor, Read, Seek, SeekFrom};
 
-use crc32fast::Hasher;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Number, Value};
+use simd_json::OwnedValue;
 
 const MAGIC: [u8; 4] = [0x11, 0x00, 0x00, 0x00];
 const VERSION: usize = 0x00;
@@ -84,6 +81,100 @@ pub struct Metadata {
 }
 
 impl Datasheet {
+    pub fn meta(&self) -> Value {
+        serde_json::json!({
+            "type": self._type,
+            "name": self.name,
+            "fields": self.header.iter().map(|field| {
+                let text = &field.text;
+                let _type = match &field._type {
+                     1 => "string",
+                     2 => "number",
+                     3 => "boolean",
+                     _ => unimplemented!()
+                    };
+                    (text, _type)
+            }).collect::<IndexMap<_, _>>(),
+        })
+    }
+
+    pub fn to_sql(&self) -> String {
+        let create = format!(
+            "CREATE TABLE '{}'(\n\t{}\n);\n",
+            self.name,
+            self.header
+                .iter()
+                .enumerate()
+                .map(|(i, header)| format!(
+                    "'{}' {}{}",
+                    header.text,
+                    match header._type {
+                        1 => "TEXT",
+                        2 => "REAL",
+                        3 => "INT",
+                        _ => unreachable!("type not supported"),
+                    },
+                    match i {
+                        0 => " PRIMARY KEY",
+                        _ => "",
+                    }
+                ))
+                .collect::<Vec<_>>()
+                .join(",\n\t")
+        );
+
+        let insert = format!(
+            "INSERT INTO '{}' ('{}') VALUES\n\t({});\n",
+            self.name,
+            self.header
+                .iter()
+                .map(|header| header.text.to_owned())
+                .collect::<Vec<_>>()
+                .join("','"),
+            self.rows
+                .iter()
+                .map(|row| row
+                    .iter()
+                    .map(|cell| match cell {
+                        DatasheetCell::String(v) => v.to_owned(),
+                        DatasheetCell::Number(v) => v.to_owned().to_string(),
+                        DatasheetCell::Boolean(v) => (*v as u32).to_owned().to_string(),
+                    })
+                    .collect::<Vec<_>>()
+                    .join(","))
+                .collect::<Vec<_>>()
+                .join("),\n\t(")
+        );
+
+        format!("{}\n\n{}", create, insert)
+    }
+
+    pub fn json_value(&self) -> OwnedValue {
+        simd_json::json!(self
+            .rows
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .enumerate()
+                    .map(|(i, cell)| {
+                        let value = match cell {
+                            DatasheetCell::String(value) => Value::String(value.into()),
+                            DatasheetCell::Number(value) => {
+                                if value.fract() == 0.0 {
+                                    Value::Number((*value as i64).into())
+                                } else {
+                                    Number::from_f64(*value).into()
+                                }
+                            }
+                            DatasheetCell::Boolean(value) => Value::Bool(*value),
+                        };
+                        (&self.header[i].text, value)
+                    })
+                    .collect::<IndexMap<_, _>>()
+            })
+            .collect::<Vec<_>>())
+    }
+
     pub fn to_json(&self) -> String {
         json!(self
             .rows
@@ -120,15 +211,19 @@ impl Datasheet {
                     .enumerate()
                     .map(|(i, cell)| {
                         let value = match cell {
-                            DatasheetCell::String(value) => Value::String(value.into()),
+                            DatasheetCell::String(value) => {
+                                simd_json::value::owned::Value::String(value.into())
+                            }
                             DatasheetCell::Number(value) => {
                                 if value.fract() == 0.0 {
-                                    Value::Number((*value as i64).into())
+                                    simd_json::value::owned::Value::Static((*value as i64).into())
                                 } else {
-                                    Number::from_f64(*value).into()
+                                    simd_json::value::owned::Value::Static((*value).into())
                                 }
                             }
-                            DatasheetCell::Boolean(value) => Value::Bool(*value),
+                            DatasheetCell::Boolean(value) => {
+                                simd_json::value::owned::Value::Static((*value).into())
+                            }
                         };
                         (&self.header[i].text, value)
                     })
@@ -211,6 +306,7 @@ impl Datasheet {
 
 impl<R: Read> From<&mut R> for Datasheet {
     fn from(value: &mut R) -> Self {
+        // value.rewind().unwrap();
         from_reader(value).unwrap()
     }
 }
@@ -236,17 +332,17 @@ fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
 
     data.seek(SeekFrom::Current(36))?;
     data.read_exact(&mut buffer)?;
-    let data_end_offset = i32::from_le_bytes(buffer);
+    let data_end_offset = u32::from_le_bytes(buffer);
 
     data.read_exact(&mut buffer)?;
-    let _ = i32::from_le_bytes(buffer);
+    let _ = u32::from_le_bytes(buffer);
 
     data.seek(SeekFrom::Current(4))?;
     data.read_exact(&mut buffer)?;
-    let column_count = i32::from_le_bytes(buffer) as usize;
+    let column_count = u32::from_le_bytes(buffer) as usize;
 
     data.read_exact(&mut buffer)?;
-    let row_count = i32::from_le_bytes(buffer) as usize;
+    let row_count = u32::from_le_bytes(buffer) as usize;
 
     // SKIP TO HEADER OFFSET
     data.seek(SeekFrom::Current(16))?;
@@ -318,8 +414,13 @@ fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
         rows.push(cells);
     }
 
-    data.seek(SeekFrom::Current(name_offset.into()))?;
+    data.seek(SeekFrom::Start(
+        (strings_offset as u32 + name_offset).into(),
+    ))?;
     let name = read_string(&mut data)?;
+    data.seek(SeekFrom::Start(
+        (strings_offset as u32 + _type_offset).into(),
+    ))?;
     let _type = read_string(&mut data)?;
 
     Ok(Datasheet {

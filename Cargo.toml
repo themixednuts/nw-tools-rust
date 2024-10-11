@@ -1,7 +1,44 @@
+[package]
+name = "nw-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+file-system = { path = "./file-system" }
+assets = { path = "./assets" }
+utils = { path = "./utils" }
+object-stream = { path = "./object-stream" }
+console-subscriber = { workspace = true }
+cli = { path = "./cli" }
+cliclack = { workspace = true }
+crc32fast = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true, features = ["preserve_order"] }
+walkdir = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tokio-stream = { workspace = true }
+tokio-util = { workspace = true, features = ["compat"] }
+futures = { workspace = true }
+rayon = { workspace = true }
+scopeguard = { workspace = true }
+zip = { workspace = true }
+ctrlc = { workspace = true }
+regex = { workspace = true }
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["async_tokio"] }
+
+[[bench]]
+name = "bench"
+harness = false
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+
 [workspace]
 resolver = "2"
 members = [
-  "nw-tools",
   "object-stream",
   "file-system",
   "datasheet",
@@ -11,6 +48,7 @@ members = [
 ]
 
 [workspace.dependencies]
+
 async-channel = { version = "2.3.1" }
 clap = { version = "4.5.9", features = ["derive"] }
 cliclack = { version = "0.3.2" }
@@ -32,6 +70,7 @@ pelite = { version = "0.10.0" }
 quick-xml = { version = "0.36.0", features = ["serialize"] }
 rayon = "1.10.0"
 regex = { version = "1.10.5" }
+simd-json = { version = "0.13.10" }
 rusqlite = { version = "0.32.0", features = ["bundled-full"] }
 scopeguard = { version = "1.2.0" }
 serde = { version = "1.0.204", features = ["derive"] }
@@ -46,7 +85,4 @@ uuid = { version = "^1.10.0", features = ["serde"] }
 uuid-simd = { version = "0.8.0" }
 walkdir = { version = "2.5.0" }
 zip = { version = "=2.1.3" }
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
+schemars = { version = "0.8.21", features = ["preserve_order"] }

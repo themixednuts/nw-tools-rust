@@ -214,7 +214,7 @@ impl From<Element> for XMLElement {
             name: value.name,
             field: value.field,
             value: match value.data {
-                Some(data) if !data.is_empty() => {
+                Some(data) if !data.is_empty() || value.elements.is_empty() => {
                     uuid_data_to_serialize(&value.id, &data, false).ok()
                 }
                 _ => None,
@@ -547,6 +547,19 @@ where
         let mut buf = vec![0; data_size];
         reader.read_exact(&mut buf)?;
         element.data = Some(buf);
+        if element
+            .field
+            .as_ref()
+            .is_some_and(|v| v == "m_collisionFilterOverride")
+            && element.data.as_ref().is_some_and(|v| {
+                v != &[
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ]
+                .to_vec()
+            })
+        {
+            dbg!(&element.data, &element.data_size);
+        }
     }
     element.flags = flags;
 

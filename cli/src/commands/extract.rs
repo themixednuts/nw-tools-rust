@@ -1,55 +1,38 @@
-use clap::{Parser, ValueEnum};
-use dirs::home_dir;
+use clap::Parser;
 use regex::Regex;
-use rusqlite::{params, OptionalExtension};
-use std::{io, path::PathBuf, str::FromStr};
+use rusqlite::params;
+use std::io;
 
-use crate::{traits::InteractiveArgs, STEAM_DIR};
+use crate::{
+    common::{
+        datasheet::{DatasheetConfig, DatasheetFormat, DatasheetOutputMode},
+        objectstream::{ObjectStreamConfig, ObjectStreamFormat},
+        CommonConfig,
+    },
+    traits::IArgs,
+    BYTES, CSV, JSON_MINI, JSON_PRETTY, SQL, XML, YAML,
+};
 
 #[derive(Debug, Parser)]
 pub struct Extract {
-    /// New World root directory. Needs to be root, not ./assets as it looks for the bin for parsing strings.
-    #[arg(short, long, value_parser = validate_path)]
-    pub input: Option<PathBuf>,
-    #[arg(short, long)]
-    pub output: Option<PathBuf>,
-    #[arg(short, long)]
-    /// Filter file names with regex
-    pub filter: Option<Regex>,
-    #[arg(short = 's', long, default_value = "bytes")]
-    pub objectstream: ObjectStreamFormat,
-    #[arg(short, long, default_value = "bytes")]
-    pub datasheet: DatasheetFormat,
+    #[command(flatten)]
+    pub common: CommonConfig,
+    #[command(flatten)]
+    pub datasheet: DatasheetConfig,
+    #[command(flatten)]
+    pub objectstream: ObjectStreamConfig,
 }
 
-#[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
-pub enum DatasheetFormat {
-    #[default]
-    BYTES,
-    XML,
-    JSON,
-    JSONPRETTY,
-    CSV,
-    YAML,
-}
-#[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
-pub enum ObjectStreamFormat {
-    #[default]
-    BYTES,
-    XML,
-    JSON,
-    JSONPRETTY,
-    // CSV,
-    // YAML,
-}
+impl<'a> IArgs<'a> for Extract {
+    type Value = ();
 
-impl InteractiveArgs for Extract {
-    fn interactive(&mut self) -> io::Result<()> {
+    fn configure(&mut self, _: Self::Value) -> io::Result<()> {
         let config_dir = dirs::config_local_dir().unwrap().join(".nwtools");
         let conn = rusqlite::Connection::open(config_dir).unwrap();
 
         conn.pragma_update_and_check(None, "journal_mode", "WAL", |_res| Ok(()))
             .unwrap();
+
         conn.pragma_update(None, "synchronous", 1).unwrap();
 
         conn
@@ -59,87 +42,11 @@ impl InteractiveArgs for Extract {
         )
         .unwrap();
 
-        let last_input: Option<String> = conn
-            .query_row(
-                "select value from configs where name = ?",
-                ["input"],
-                |row| row.get(0),
-            )
-            .optional()
-            .unwrap();
+        self.common.configure(&conn)?;
 
-        if self.input.is_none() {
-            let input: PathBuf = cliclack::input("New World Directory")
-                .default_input(&last_input.unwrap_or_else(|| STEAM_DIR.to_string()))
-                .validate_interactively(|path: &String| match PathBuf::from_str(path) {
-                    Ok(p) => {
-                        if p.join(r"Bin64\NewWorld.exe").exists() && p.join(r"assets").exists() {
-                            Ok(())
-                        } else if p.exists() {
-                            Err("New World does not exist in that path.")
-                        } else {
-                            Err("Not a valid path")
-                        }
-                    }
-                    _ => Err("Not a valid path"),
-                })
-                .interact()?;
-            self.input = Some(input);
-        };
-
-        let input = self.input.as_ref().unwrap();
-        conn.execute(
-            r#"insert or replace into configs (name, value) values ("input", ?)"#,
-            params![input.to_str()],
-        )
-        .unwrap();
-
-        let nw_type = if input
-            .to_str()
-            .is_some_and(|path| path.to_lowercase().contains("new world marketing"))
-        {
-            "marketing"
-        } else if input
-            .to_str()
-            .is_some_and(|path| path.to_lowercase().contains("new world public test realm"))
-        {
-            "ptr"
-        } else {
-            "live"
-        };
-
-        let home_dir = home_dir().unwrap();
-
-        let last_output: Option<String> = conn
-            .query_row(
-                "select value from configs where name = ?",
-                ["output"],
-                |row| row.get(0),
-            )
-            .optional()
-            .unwrap();
-        if self.output.is_none() {
-            let output: PathBuf = cliclack::input("Extract Directory")
-                .default_input(&last_output.unwrap_or_else(|| {
-                    home_dir
-                        .join(r"Documents\nw\".to_owned() + nw_type)
-                        .to_str()
-                        .unwrap_or_default()
-                        .to_string()
-                }))
-                .interact()?;
-            self.output = Some(output);
-        }
-        let output = self.output.as_ref().unwrap();
-        conn.execute(
-            r#"insert or replace into configs (name, value) values ("output", ?)"#,
-            params![output.to_str()],
-        )
-        .unwrap();
-
-        if self.filter.is_none()
-            && self.objectstream == ObjectStreamFormat::BYTES
-            && self.datasheet == DatasheetFormat::BYTES
+        if self.common.filter.filter.is_none()
+            && self.objectstream.objectstream == ObjectStreamFormat::BYTES
+            && self.datasheet.datasheet == DatasheetFormat::BYTES
         {
             let is_default = cliclack::confirm("Use defaults?")
                 .initial_value(true)
@@ -153,43 +60,59 @@ impl InteractiveArgs for Extract {
                     ("filter", "Filter", ""),
                     (
                         "datasheet",
-                        "Datasheet",
-                        "bytes = default | json | jsonpretty | yaml | csv",
+                        "Datasheet Format",
+                        &format!(
+                            "{} = default | {} | {} | {} | {}",
+                            BYTES, JSON_MINI, JSON_PRETTY, YAML, CSV
+                        ),
                     ),
-                    ("object", "ObjectStream", "bytes = default | xml | json"),
+                    (
+                        "datasheet-output-mode",
+                        "Datasheet Output Mode",
+                        "original = default, typename",
+                    ),
+                    // ("with-meta")
+                    (
+                        "objectstream",
+                        "ObjectStream",
+                        &format!(
+                            "{} = default | {} | {} | {}",
+                            BYTES, XML, JSON_MINI, JSON_PRETTY
+                        ),
+                    ),
                 ])
                 .interact()?;
 
                 if options.contains(&"filter") {
                     let rx: Regex = cliclack::input("Include").required(false).interact()?;
                     if rx.as_str() == Regex::new("").unwrap().as_str() {
-                        self.filter = None;
+                        self.common.filter.filter = None;
                     } else {
-                        self.filter = Some(rx)
+                        self.common.filter.filter = Some(rx)
                     }
                 }
 
-                let filter = self.filter.as_ref();
+                let filter = self.common.filter.filter.as_ref();
                 conn.execute(
                     r#"insert or replace into configs (name, value) values ("filter", ?)"#,
                     params![filter.map(|v| v.as_str())],
                 )
                 .unwrap();
-                if options.contains(&"object") {
+                if options.contains(&"objectstream") {
                     let obj_stream = cliclack::Select::new("ObjectStream Format")
                         .items(&[
-                            ("bytes", "Binary", "default"),
-                            ("xml", "XML", ""),
-                            ("json", "JSON", ""),
-                            ("pretty", "JSON Pretty", ""),
+                            (BYTES, "Binary", "default"),
+                            (XML, "XML", ""),
+                            (JSON_PRETTY, "JSON Pretty", ""),
+                            (JSON_MINI, "JSON Minified", ""),
                         ])
                         .initial_value("bytes")
                         .interact()?;
 
-                    self.objectstream = match obj_stream {
-                        "xml" => ObjectStreamFormat::XML,
-                        "json" => ObjectStreamFormat::JSON,
-                        "pretty" => ObjectStreamFormat::JSONPRETTY,
+                    self.objectstream.objectstream = match obj_stream {
+                        XML => ObjectStreamFormat::XML,
+                        JSON_MINI => ObjectStreamFormat::JSON,
+                        JSON_PRETTY => ObjectStreamFormat::PRETTY,
                         _ => ObjectStreamFormat::BYTES,
                     };
                 }
@@ -197,37 +120,45 @@ impl InteractiveArgs for Extract {
                 if options.contains(&"datasheet") {
                     let datasheet = cliclack::Select::new("Datasheet Format")
                         .items(&[
-                            ("bytes", "Binary", "default"),
-                            ("json", "JSON", ""),
-                            ("pretty", "JSON Pretty", ""),
-                            ("csv", "CSV", ""),
-                            ("yaml", "YAML", "vomit"),
+                            (BYTES, "Binary", "default"),
+                            (JSON_MINI, "JSON Minified", ""),
+                            (JSON_PRETTY, "JSON Pretty", ""),
+                            (CSV, "CSV", ""),
+                            (YAML, "YAML", "vomit"),
                         ])
                         .initial_value("bytes")
                         .interact()?;
 
-                    self.datasheet = match datasheet {
-                        "json" => DatasheetFormat::JSON,
-                        "pretty" => DatasheetFormat::JSONPRETTY,
-                        "csv" => DatasheetFormat::CSV,
-                        "yaml" => DatasheetFormat::YAML,
+                    self.datasheet.datasheet = match datasheet {
+                        JSON_MINI => DatasheetFormat::JSON,
+                        JSON_PRETTY => DatasheetFormat::PRETTY,
+                        CSV => DatasheetFormat::CSV,
+                        YAML => DatasheetFormat::YAML,
+                        SQL => DatasheetFormat::SQL,
                         _ => DatasheetFormat::BYTES,
+                    };
+                }
+
+                if options.contains(&"datasheet-output-mode") {
+                    let mode = cliclack::Select::new("Datasheet Output Mode")
+                        .items(&[
+                            ("original", "Original", "datatables/javelindata_[name]"),
+                            (
+                                "typename",
+                                "Type Name",
+                                "datatables/[Table Type]/[Table Name]",
+                            ),
+                        ])
+                        .initial_value("original")
+                        .interact()?;
+                    self.datasheet.datasheet_filenames = match mode {
+                        "typename" => DatasheetOutputMode::TYPENAME,
+                        _ => DatasheetOutputMode::ORIGINAL,
                     };
                 }
             }
         }
         conn.close().unwrap();
         Ok(())
-    }
-}
-
-fn validate_path(path: &str) -> Result<PathBuf, String> {
-    let path = PathBuf::from(path);
-    if path.join(r"Bin64\NewWorld.exe").exists() && path.join(r"assets").exists() {
-        Ok(path)
-    } else if path.exists() {
-        Err("New World does not exist in that path.".into())
-    } else {
-        Err("Not a valid path".into())
     }
 }
