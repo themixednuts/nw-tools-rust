@@ -179,9 +179,9 @@ async fn run() -> tokio::io::Result<()> {
     let file_pb = file_pb.clone();
     let pak_pb = pak_pb.clone();
     all_pb.stop("");
+    stats_pb.stop("");
     file_pb.stop("");
     pak_pb.stop("");
-    stats_pb.stop("");
     multi_pb.stop();
     let processed = processed.load(Ordering::Relaxed);
     let bytes_cloned = Arc::clone(&bytes);

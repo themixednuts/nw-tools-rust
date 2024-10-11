@@ -13,6 +13,7 @@ use flate2::Decompress;
 use object_stream::{from_reader, JSONObjectStream, XMLObjectStream};
 use quick_xml::se::Serializer;
 use serde::Serialize;
+use simd_json::prelude::ArrayTrait;
 use std::io::{self, Cursor, Read, Write};
 use zip::{read::ZipFile, CompressionMethod};
 
@@ -76,6 +77,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
             CompressionMethod::Unsupported(15) => {
                 let mut compressed = vec![];
                 std::io::copy(self.zip, &mut compressed)?;
+                self.buf.resize(self.zip.size() as usize, 0);
 
                 oodle_safe::decompress(
                     &compressed,
@@ -112,7 +114,9 @@ impl<'a, 'b> Decompressor<'a, 'b> {
     pub fn compressed_size(&mut self) {}
 
     pub fn file_type(&self) -> io::Result<FileType> {
-        let sig = &self.buf[..5];
+        let len = self.buf.len().min(5);
+        let sig = &self.buf[..len];
+
         let _type = match sig {
             [0x04, 0x00, 0x1B, 0x4C, 0x75] => FileType::Luac,
             [0x00, 0x00, 0x00, 0x00, 0x03] => match &ARGS.command {
@@ -120,7 +124,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                     FileType::ObjectStream(&extract.objectstream.objectstream)
                 }
             },
-            [0x11, 0x00, 0x00, 0x00, _] => match &ARGS.command {
+            [0x11, 0x00, 0x00, 0x00] => match &ARGS.command {
                 Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
             },
             _ => FileType::default(),
@@ -176,7 +180,9 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                 }
             }
             FileType::Datasheet(fmt) => {
-                let datasheet = Datasheet::try_from(self.buf.to_owned()).unwrap();
+                let mut datasheet = Datasheet::try_from(self.buf.to_owned()).unwrap();
+
+                datasheet.with_localization(self.localization);
 
                 // if **fmt == DatasheetFormat::BYTES {
                 //     return Ok((
@@ -190,11 +196,11 @@ impl<'a, 'b> Decompressor<'a, 'b> {
 
                 match fmt {
                     DatasheetFormat::MINI => {
-                        let string = datasheet.to_json_simd(false)?;
+                        let string = serde_json::to_string(&datasheet.to_json())?;
                         std::io::copy(&mut string.as_bytes(), writer)
                     }
                     DatasheetFormat::PRETTY => {
-                        let string = datasheet.to_json_simd(true)?;
+                        let string = serde_json::to_string_pretty(&datasheet.to_json())?;
                         std::io::copy(&mut string.as_bytes(), writer)
                     }
                     DatasheetFormat::YAML => {

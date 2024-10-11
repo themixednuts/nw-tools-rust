@@ -14,6 +14,7 @@ use simd_json::prelude::ArrayTrait;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::sync::RwLock;
+use tracing::instrument::WithSubscriber;
 // use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
@@ -180,7 +181,6 @@ impl FileSystem {
         };
 
         let locale = Arc::new(locale);
-        dbg!(&locale);
 
         let cb = Arc::new(cb);
         let out_dir = Arc::new(self.out_dir.to_owned());
@@ -346,31 +346,37 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                         // std::fs::rename(&path, path.with_extension("json")).unwrap();
                         path.set_extension("json");
                     }
+                    let with_meta = match &ARGS.command {
+                        Commands::Extract(cmd) => cmd.datasheet.with_meta,
+                    };
+
                     if let Some(meta) = &meta {
-                        match meta {
-                            Metadata::Datasheet(datasheet) => {
-                                let Some(parent) = path.parent() else {
-                                    panic!("hmm")
-                                };
-                                std::fs::create_dir_all(parent)
-                                    .expect("failed to create directory");
+                        if with_meta {
+                            match meta {
+                                Metadata::Datasheet(datasheet) => {
+                                    let Some(parent) = path.parent() else {
+                                        panic!("hmm")
+                                    };
+                                    std::fs::create_dir_all(parent)
+                                        .expect("failed to create directory");
 
-                                // let mut schema =
-                                //     schemars::schema_for_value!(datasheet.json_value());
-                                // schema.schema.metadata().title = Some(datasheet._type.to_owned());
-                                // schema.schema.metadata().id = Some(datasheet.name.to_owned());
+                                    // let mut schema =
+                                    //     schemars::schema_for_value!(datasheet.json_value());
+                                    // schema.schema.metadata().title = Some(datasheet._type.to_owned());
+                                    // schema.schema.metadata().id = Some(datasheet.name.to_owned());
 
-                                let stem = path.file_stem().unwrap();
-                                let mut schema_path = path.with_file_name(stem);
-                                schema_path.set_extension("meta.json");
-                                let mut file = std::fs::File::create(schema_path).unwrap();
-                                file.write_all(
-                                    &simd_json::to_vec_pretty(&datasheet.meta()).unwrap(),
-                                )
-                                .unwrap();
-                                // datasheet.to_json_simd(pretty)
+                                    let stem = path.file_stem().unwrap();
+                                    let mut schema_path = path.with_file_name(stem);
+                                    schema_path.set_extension("meta.json");
+                                    let mut file = std::fs::File::create(schema_path).unwrap();
+                                    file.write_all(
+                                        &simd_json::to_vec_pretty(&datasheet.meta()).unwrap(),
+                                    )
+                                    .unwrap();
+                                    // datasheet.to_json_simd(pretty)
+                                }
                             }
-                        }
+                        };
                     }
                 }
                 DatasheetFormat::CSV => {
@@ -555,7 +561,7 @@ pub async fn load_localization(
 
                     let mut entry = archive.by_index_raw(idx).unwrap();
                     let mut buf = Vec::with_capacity(entry.size() as usize);
-                    let mut decompressor = Decompressor::try_new(&mut entry, None).unwrap();
+                    let decompressor = Decompressor::try_new(&mut entry, None).unwrap();
                     decompressor.to_writer(&mut buf).unwrap();
 
                     let locale =

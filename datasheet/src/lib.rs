@@ -106,10 +106,15 @@ impl<'a> Datasheet<'a> {
     }
 
     fn parse_localization(&self, key: String) -> String {
+        if !key.starts_with("@") {
+            return key;
+        }
+
         let Some(map) = self.localization else {
             return key;
         };
-        match map.get(&key) {
+
+        match map.get(&key.to_lowercase()[1..]) {
             Some(v) => v.clone().unwrap_or_else(|| key),
             None => key,
         }
@@ -194,7 +199,7 @@ impl<'a> Datasheet<'a> {
             .collect::<Vec<_>>())
     }
 
-    pub fn to_json(&self) -> String {
+    pub fn to_json(&self) -> Value {
         json!(self
             .rows
             .iter()
@@ -220,7 +225,6 @@ impl<'a> Datasheet<'a> {
                     .collect::<IndexMap<_, _>>()
             })
             .collect::<Vec<_>>())
-        .to_string()
     }
 
     pub fn to_json_simd(&self, pretty: bool) -> Result<String, simd_json::Error> {

@@ -44,7 +44,12 @@ impl From<Localization> for DashMap<String, Option<String>> {
         value
             .string
             .iter()
-            .map(|s| (s.key.to_owned(), s.value.to_owned()))
+            .map(|s| {
+                (
+                    s.key.to_owned().map(|s| s.to_lowercase()),
+                    s.value.to_owned(),
+                )
+            })
             .filter_map(|(k, v)| match k {
                 Some(k) => Some((k, v)),
                 None => None,
