@@ -130,7 +130,7 @@ impl<'a> IArgs<'a> for Extract {
                         .interact()?;
 
                     self.datasheet.datasheet = match datasheet {
-                        JSON_MINI => DatasheetFormat::JSON,
+                        JSON_MINI => DatasheetFormat::MINI,
                         JSON_PRETTY => DatasheetFormat::PRETTY,
                         CSV => DatasheetFormat::CSV,
                         YAML => DatasheetFormat::YAML,

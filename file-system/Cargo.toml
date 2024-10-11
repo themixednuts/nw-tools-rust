@@ -8,6 +8,7 @@ utils = { path = "../utils" }
 cli = { path = "../cli" }
 object-stream = { path = "../object-stream" }
 datasheet = { path = "../datasheet" }
+localization = { workspace = true }
 console-subscriber = { workspace = true }
 async-channel = { workspace = true }
 flate2 = { workspace = true }
@@ -31,11 +32,11 @@ uuid = { workspace = true }
 walkdir = { workspace = true }
 zip = { workspace = true }
 memmap2 = { workspace = true }
-# fmmap = { workspace = true }
 ouroboros = { workspace = true }
 quick-xml = { workspace = true }
 schemars = { workspace = true }
 simd-json = { workspace = true }
+ignore = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }

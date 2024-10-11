@@ -1,17 +1,27 @@
 use clap::{Parser, ValueEnum};
 use rusqlite::Connection;
 
-use crate::traits::IArgs;
+use crate::{traits::IArgs, BYTES, CSV, JSON_MINI, JSON_PRETTY, SQL, XML, YAML};
 
 #[derive(Debug, Parser)]
 pub struct DatasheetConfig {
-    #[arg(long, default_value = "bytes")]
+    #[arg(long, value_enum, default_value_t)]
     pub datasheet: DatasheetFormat,
-    #[arg(long, default_value = "original")]
+    #[arg(long, value_enum, default_value_t)]
     /// Save datasheet filenames as
     pub datasheet_filenames: DatasheetOutputMode,
     #[arg(long)]
-    pub datasheet_schema: bool,
+    pub with_meta: bool,
+    #[arg(long, value_enum, default_value_t)]
+    pub inline_locale: Localization,
+}
+
+#[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
+pub enum Localization {
+    #[default]
+    EN,
+    ES,
+    IT,
 }
 
 impl<'a> IArgs<'a> for DatasheetConfig {
@@ -27,11 +37,28 @@ pub enum DatasheetFormat {
     #[default]
     BYTES,
     XML,
-    JSON,
+    /// Minified JSON
+    MINI,
+    /// Pretty JSON
     PRETTY,
     CSV,
     YAML,
     SQL,
+}
+
+impl ToString for DatasheetFormat {
+    fn to_string(&self) -> String {
+        match self {
+            DatasheetFormat::BYTES => BYTES,
+            DatasheetFormat::XML => XML,
+            DatasheetFormat::MINI => JSON_MINI,
+            DatasheetFormat::PRETTY => JSON_PRETTY,
+            DatasheetFormat::CSV => CSV,
+            DatasheetFormat::YAML => YAML,
+            DatasheetFormat::SQL => SQL,
+        }
+        .into()
+    }
 }
 
 impl<'a> IArgs<'a> for DatasheetFormat {

@@ -130,7 +130,7 @@ where
             extra = Some(Metadata::Datasheet(datasheet.to_owned()));
 
             match fmt {
-                DatasheetFormat::JSON => {
+                DatasheetFormat::MINI => {
                     let string = datasheet.to_json_simd(false)?;
                     std::io::copy(&mut string.as_bytes(), writer)
                 }

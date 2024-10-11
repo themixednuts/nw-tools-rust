@@ -95,6 +95,7 @@ impl Datasheet {
                     };
                     (text, _type)
             }).collect::<IndexMap<_, _>>(),
+            "rows": self.row_count,
         })
     }
 

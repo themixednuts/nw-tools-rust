@@ -45,6 +45,7 @@ members = [
   "assets",
   "utils",
   "cli",
+  "localization",
 ]
 
 [workspace.dependencies]
@@ -60,6 +61,7 @@ dirs = { version = "5.0.1" }
 flate2 = { version = "1.0.30" }
 fmmap = "0.3.3"
 futures = { version = "0.3.30" }
+localization = { path = "./localization" }
 memmap2 = "0.9.4"
 natord = { version = "1.0.9" }
 nucleo-matcher = { version = "0.3.1" }
@@ -86,3 +88,4 @@ uuid-simd = { version = "0.8.0" }
 walkdir = { version = "2.5.0" }
 zip = { version = "=2.1.3" }
 schemars = { version = "0.8.21", features = ["preserve_order"] }
+ignore = { version = "0.4.23" }

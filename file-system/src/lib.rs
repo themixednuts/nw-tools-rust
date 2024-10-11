@@ -6,15 +6,18 @@ use cli::common::{
 use cli::ARGS;
 use core::panic;
 use decompressor::{Metadata, ZipFileExt};
+use localization::Localization;
 use memmap2::Mmap;
 use regex::Regex;
+use simd_json::prelude::ArrayTrait;
+use std::collections::HashSet;
 use std::fmt::Debug;
 use std::sync::RwLock;
 // use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
 use rayon::{prelude::*, ThreadPoolBuilder};
-use std::io::{self, Cursor, Write};
+use std::io::{self, BufReader, Cursor, Write};
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
     collections::HashMap,
@@ -74,6 +77,51 @@ impl FileSystem {
         .await
         .unwrap()
     }
+    pub async fn load_localization(&'static self, locale: &str) -> HashMap<String, String> {
+        let locale_path = PathBuf::from(format!("localization/{}", locale));
+        let files = self
+            .path_to_pak
+            .iter()
+            .filter(|(_, (_, name))| name.starts_with(locale_path.to_str().unwrap()))
+            .map(|(_, v)| v)
+            .collect::<Vec<_>>();
+
+        files
+            .iter()
+            .map(|(path, _)| path)
+            .collect::<HashSet<_>>()
+            .par_iter()
+            .map(|path| {
+                let file = std::fs::File::open(path).unwrap();
+                let mut archive = ZipArchive::new(file).unwrap();
+
+                files
+                    .iter()
+                    .map(|(_path, name)| {
+                        let Some(idx) = archive.index_for_name(name) else {
+                            return None;
+                        };
+
+                        let mut entry = archive.by_index_raw(idx).unwrap();
+                        let mut buf = Vec::with_capacity(entry.size() as usize);
+                        entry.decompress(&mut buf).unwrap();
+
+                        let locale =
+                            match std::panic::catch_unwind(|| Localization::from(Cursor::new(buf)))
+                            {
+                                Ok(v) => v,
+                                Err(_) => panic!("File Name: {}\n", name),
+                            };
+
+                        Some(HashMap::from(locale))
+                    })
+                    .filter_map(|v| v)
+                    .flatten()
+                    .collect::<HashMap<_, _>>()
+            })
+            .flatten()
+            .collect::<HashMap<_, _>>()
+    }
 
     pub fn files(
         &'static self,
@@ -104,6 +152,7 @@ impl FileSystem {
                 let mut archive = ZipArchive::new(file).unwrap();
                 let index = archive.index_for_path(entry).unwrap();
                 let mut entry = archive.by_index_raw(index).unwrap();
+
                 let mut buf = vec![];
                 entry.decompress(&mut buf).unwrap();
                 let reader = Cursor::new(buf);
@@ -315,7 +364,7 @@ fn handle_extension(file_type: FileType, mut path: PathBuf, meta: Option<Metadat
                         path.set_extension("xml");
                     }
                 }
-                DatasheetFormat::JSON | DatasheetFormat::PRETTY => {
+                DatasheetFormat::MINI | DatasheetFormat::PRETTY => {
                     if ext != "json" {
                         // std::fs::rename(&path, path.with_extension("json")).unwrap();
                         path.set_extension("json");
