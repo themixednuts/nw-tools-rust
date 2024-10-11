@@ -26,6 +26,12 @@ pub struct KeyValue {
     rel_version: Option<String>,
     #[serde(rename = "@speaker")]
     speaker: Option<String>,
+    #[serde(rename = "@name")]
+    name: Option<String>,
+    #[serde(rename = "@VO_Status")]
+    vo_status: Option<String>,
+    #[serde(rename = "@dialogue-next")]
+    dialogue_next: Option<String>,
     #[serde(rename = "@xsi:nil")]
     xsi_nil: Option<String>,
     #[serde(rename = "$text")]
