@@ -12,14 +12,14 @@ pub static ARGS: LazyLock<Args> = LazyLock::new(|| match cli() {
     Err(_) => std::process::exit(0),
 });
 
-const STEAM_DIR: &'static str = r#"C:\Program Files (x86)\Steam\steamapps\common\New World"#;
-const PRETTY: &'static str = "json";
-const MINI: &'static str = "mini";
-const XML: &'static str = "xml";
-const CSV: &'static str = "csv";
-const SQL: &'static str = "sql";
-const BYTES: &'static str = "bytes";
-const YAML: &'static str = "yaml";
+const STEAM_DIR: &str = r#"C:\Program Files (x86)\Steam\steamapps\common\New World"#;
+const PRETTY: &str = "json";
+const MINI: &str = "mini";
+const XML: &str = "xml";
+const CSV: &str = "csv";
+const SQL: &str = "sql";
+const BYTES: &str = "bytes";
+const YAML: &str = "yaml";
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]

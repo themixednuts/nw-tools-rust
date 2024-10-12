@@ -115,7 +115,7 @@ impl<'a> Datasheet<'a> {
         };
 
         match map.get(&key.to_lowercase()[1..]) {
-            Some(v) => v.clone().unwrap_or_else(|| key),
+            Some(v) => v.clone().unwrap_or(key),
             None => key,
         }
     }
@@ -529,8 +529,8 @@ fn from_reader<R: Read>(data: &mut R) -> io::Result<Datasheet> {
     let mut rows = Vec::with_capacity(row_count);
     for _ in 0..row_count {
         let mut cells = Vec::with_capacity(column_count);
-        for j in 0..column_count {
-            let _type = header[j]._type;
+        for header in header.iter().take(column_count) {
+            let _type = header._type;
             let meta = Metadata {
                 crc32: {
                     data.read_exact(&mut buffer)?;

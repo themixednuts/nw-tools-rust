@@ -147,12 +147,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                     std::io::copy(&mut self.buf.as_slice(), writer)?;
                     return Ok(None);
                 };
-                let hashes = if let Some(fs) = FILESYSTEM.get() {
-                    Some(&fs.hashes)
-                } else {
-                    None
-                };
-
+                let hashes = FILESYSTEM.get().map(|fs| &fs.hashes);
                 let Ok(obj_stream) = from_reader(&mut self.buf.as_slice(), hashes) else {
                     std::io::copy(&mut self.buf.as_slice(), writer)?;
                     return Ok(None);

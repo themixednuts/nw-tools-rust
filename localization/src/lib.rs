@@ -50,10 +50,7 @@ impl From<Localization> for DashMap<String, Option<String>> {
                     s.value.to_owned(),
                 )
             })
-            .filter_map(|(k, v)| match k {
-                Some(k) => Some((k, v)),
-                None => None,
-            })
+            .filter_map(|(k, v)| k.map(|k| (k, v)))
             .collect::<DashMap<_, _>>()
     }
 }
@@ -64,10 +61,7 @@ impl From<Localization> for HashMap<String, Option<String>> {
             .string
             .iter()
             .map(|s| (s.key.to_owned(), s.value.to_owned()))
-            .filter_map(|(k, v)| match k {
-                Some(k) => Some((k, v)),
-                None => None,
-            })
+            .filter_map(|(k, v)| k.map(|k| (k, v)))
             .collect::<HashMap<_, _>>()
     }
 }

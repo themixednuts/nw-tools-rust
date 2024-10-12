@@ -73,7 +73,7 @@ pub struct XMLObjectStream {
 
 impl XMLObjectStream {
     pub fn to_writer(&mut self, buf: &mut impl Write) -> io::Result<u64> {
-        let string = quick_xml::se::to_string(self).map_err(|e| std::io::Error::other(e))?;
+        let string = quick_xml::se::to_string(self).map_err(std::io::Error::other)?;
         std::io::copy(&mut Cursor::new(string), buf)
     }
 }

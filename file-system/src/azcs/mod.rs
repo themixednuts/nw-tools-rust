@@ -1,7 +1,7 @@
 use flate2::{read::ZlibDecoder, Decompress};
 use std::io::{self, BufReader, Cursor, Read};
 
-const AZCS_SIGNATURE: &'static [u8; 4] = b"AZCS";
+const AZCS_SIGNATURE: &[u8; 4] = b"AZCS";
 
 const UNCOMPRESSED_SIGNATURES: [[u8; 5]; 3] = [
     [0x00, 0x00, 0x00, 0x00, 0x03],

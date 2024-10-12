@@ -17,6 +17,7 @@ use simd_json::prelude::ArrayTrait;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::io::{self, Cursor, Write};
+use std::str::pattern::Pattern;
 use std::sync::RwLock;
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
@@ -99,9 +100,10 @@ impl FileSystem {
         let mut matchers = vec![];
         if let Some(patterns) = string {
             patterns.split(',').for_each(|pattern| {
-                if pattern.starts_with('!') {
+                let pattern = pattern.trim();
+                if let Some(pattern) = pattern.strip_prefix('!') {
                     matchers.push(Globs::Exclude(
-                        GlobBuilder::new(&pattern[1..])
+                        GlobBuilder::new(pattern)
                             .literal_separator(true)
                             .build()
                             .unwrap()
@@ -187,7 +189,7 @@ impl FileSystem {
     {
         let mut paks: HashMap<&PathBuf, Vec<(&PathBuf, &str)>> = HashMap::new();
         map.iter().for_each(|(entry, path)| {
-            paks.entry(&path.0).or_default().push((&entry, &path.1));
+            paks.entry(&path.0).or_default().push((entry, &path.1));
         });
 
         let mut paks: Vec<(&PathBuf, Vec<(&PathBuf, &str)>)> = paks.into_iter().collect();
@@ -285,15 +287,16 @@ impl FileSystem {
                             state.max.load(Ordering::Relaxed);
                             state.size.store(bytes as usize, Ordering::Relaxed);
 
-                            if let Err(_) = cb(
+                            if cb(
                                 pak_path,
                                 entry,
                                 len,
                                 idx.fetch_add(1, Ordering::Relaxed) + 1,
                                 bytes,
-                            ) {
+                            )
+                            .is_err()
+                            {
                                 self.cancel.cancel();
-                                return;
                             }
                         });
                     }
@@ -575,9 +578,7 @@ pub async fn load_localization(
             files
                 .iter()
                 .map(|(_path, name)| {
-                    let Some(idx) = archive.index_for_name(name) else {
-                        return None;
-                    };
+                    let idx = archive.index_for_name(name)?;
 
                     let mut entry = archive.by_index_raw(idx).unwrap();
                     let mut buf = Vec::with_capacity(entry.size() as usize);
