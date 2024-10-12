@@ -1,18 +1,10 @@
 extern crate criterion;
-use std::{
-    collections::HashMap,
-    io::{Cursor, Read},
-    path::PathBuf,
-    sync::Arc,
-};
+// use std::path::PathBuf;
 
 use criterion::{criterion_group, criterion_main, Criterion};
-use file_system::FileSystem;
-use futures::{self, future::join_all, FutureExt, StreamExt};
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use tokio::{self, fs::File, io::AsyncSeekExt, sync::RwLock};
-use walkdir::WalkDir;
-use zip::ZipArchive;
+use tokio::{self};
+// use walkdir::WalkDir;
+// use zip::ZipArchive;
 
 // fn bench_sync(c: &mut Criterion) {
 //     let mut group = c.benchmark_group("file_sytem");
@@ -34,8 +26,8 @@ use zip::ZipArchive;
 fn get_all(c: &mut Criterion) {
     let mut group = c.benchmark_group("get_all");
     group.sample_size(10);
-    group.bench_function("get_all", |b| {
-        let runtime = tokio::runtime::Runtime::new().unwrap();
+    group.bench_function("get_all", |_b| {
+        let _runtime = tokio::runtime::Runtime::new().unwrap();
 
         // let _fs = runtime.block_on(async {
         //     FileSystem::init("E:/Games/Steam/steamapps/common/New World")
@@ -61,29 +53,29 @@ fn get_all(c: &mut Criterion) {
     });
 }
 
-fn index(c: &mut Criterion) {
-    c.bench_function("pak index", |b| {
-        b.iter(|| {
-            let files = WalkDir::new("E:/Games/Steam/steamapps/common/New World/assets")
-                .into_iter()
-                .filter_map(|e| e.ok())
-                .filter(|path| {
-                    path.file_type().is_file()
-                        && path.path().extension().and_then(|ext| ext.to_str()) == Some("pak")
-                })
-                .par_bridge()
-                .map(|dir| {
-                    let file = std::fs::File::open(dir.path()).unwrap();
-                    let archive = ZipArchive::new(file).unwrap();
-                    archive
-                        .file_names()
-                        .map(|name| (name.to_owned(), dir.path().to_path_buf()))
-                        .collect::<Vec<(String, PathBuf)>>()
-                })
-                .collect::<Vec<_>>();
-        });
-    });
-}
+// fn index(c: &mut Criterion) {
+//     c.bench_function("pak index", |b| {
+//         b.iter(|| {
+//             let files = WalkDir::new("E:/Games/Steam/steamapps/common/New World/assets")
+//                 .into_iter()
+//                 .filter_map(|e| e.ok())
+//                 .filter(|path| {
+//                     path.file_type().is_file()
+//                         && path.path().extension().and_then(|ext| ext.to_str()) == Some("pak")
+//                 })
+//                 .par_bridge()
+//                 .map(|dir| {
+//                     let file = std::fs::File::open(dir.path()).unwrap();
+//                     let archive = ZipArchive::new(file).unwrap();
+//                     archive
+//                         .file_names()
+//                         .map(|name| (name.to_owned(), dir.path().to_path_buf()))
+//                         .collect::<Vec<(String, PathBuf)>>()
+//                 })
+//                 .collect::<Vec<_>>();
+//         });
+//     });
+// }
 
 // fn to_json(c: &mut Criterion) {
 //     let mut fs = FileSystem::new("E:/Games/Steam/steamapps/common/New World/assets").unwrap();

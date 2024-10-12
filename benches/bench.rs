@@ -1,9 +1,9 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use file_system::FileSystem;
-use std::io::Cursor;
-use tokio;
+// use file_system::FileSystem;
+// use std::io::Cursor;
+// use tokio;
 
-fn bench(c: &mut Criterion) {
+fn bench(_c: &mut Criterion) {
     // c.bench_function("catalog", |b| {
     //     let catalog = include_bytes!("E:/Extract/NW Live/assetcatalog.catalog");
 

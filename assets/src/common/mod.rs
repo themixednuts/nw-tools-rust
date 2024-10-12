@@ -1,4 +1,4 @@
-use std::{array::TryFromSliceError, collections::HashMap, io::Read, path::PathBuf};
+use std::{array::TryFromSliceError, collections::HashMap, path::PathBuf};
 use uuid::Uuid;
 
 pub struct ProductDependancy {

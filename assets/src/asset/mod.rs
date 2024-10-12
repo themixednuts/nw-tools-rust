@@ -1,6 +1,6 @@
-use uuid::Uuid;
+// use uuid::Uuid;
 
-use crate::common::{self, AssetId};
+use crate::common::AssetId;
 
 pub struct Asset {
     id: AssetId,

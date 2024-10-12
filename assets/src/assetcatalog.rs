@@ -1,14 +1,11 @@
 use std::{
     collections::HashMap,
-    io,
+    io::{self, Cursor, Read, Seek},
     path::{Path, PathBuf},
     sync::OnceLock,
 };
 
-use file_system::{FileSystem, FILESYSTEM};
-use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt};
 use uuid::{self, Uuid};
-use uuid_simd::UuidExt;
 
 use crate::common::{AssetId, AssetInfo};
 
@@ -36,15 +33,13 @@ pub struct AssetCatalog {
     // asset_dependencies: HashMap<AssetId, Vec<ProductDependancy>>,
 }
 
-impl AssetCatalog {
-    pub async fn init() -> tokio::io::Result<&'static Self> {
-        let fs = FILESYSTEM.get().unwrap();
-        let mut data = fs.open("assetcatalog.catalog").await?;
+impl TryFrom<&[u8]> for AssetCatalog {
+    type Error = tokio::io::Error;
 
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        let mut data = Cursor::new(data);
         let mut buf = [0u8; 4];
-        data.read_exact(&mut buf)
-            .await
-            .expect("Error reading asset catalog signature bytes");
+        data.read_exact(&mut buf)?;
 
         assert_eq!(
             &buf,
@@ -55,43 +50,43 @@ impl AssetCatalog {
         );
 
         let version = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
 
         let size = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
 
         // Field 4
-        data.seek(tokio::io::SeekFrom::Current(4)).await?;
+        data.seek(tokio::io::SeekFrom::Current(4))?;
 
         let guid_offset = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
         let asset_type_offset = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
         let dir_data_offset = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
         let file_name_data_offset = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
 
         // size 2 assert
         assert_eq!(size, {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         });
 
         let asset_id_to_info_num = {
-            data.read_exact(&mut buf).await?;
+            data.read_exact(&mut buf)?;
             u32::from_le_bytes(buf)
         };
 
@@ -103,39 +98,33 @@ impl AssetCatalog {
 
         let asset_id_to_info_ref_size = std::mem::size_of::<AssetIdToInfoRef>() as u64;
         let mut asset_id_to_info_data = vec![0u8; asset_id_to_info_num as usize];
-        data.read_exact(&mut asset_id_to_info_data).await?;
+        data.read_exact(&mut asset_id_to_info_data)?;
 
         let mut guid_data = vec![0u8; 16 * asset_id_to_info_num as usize];
-        data.seek(tokio::io::SeekFrom::Start(guid_offset as u64))
-            .await?;
-        data.read_exact(&mut guid_data).await?;
+        data.seek(tokio::io::SeekFrom::Start(guid_offset as u64))?;
+        data.read_exact(&mut guid_data)?;
 
         let guid_data = guid_data.chunks_exact(16).collect::<Vec<_>>();
         assert_eq!(asset_id_to_info_num as usize, guid_data.len());
 
         let mut asset_type_data = vec![0u8; 16 * asset_id_to_info_num as usize];
-        data.seek(tokio::io::SeekFrom::Start(asset_type_offset as u64))
-            .await?;
-        data.read_exact(&mut asset_type_data).await?;
+        data.seek(tokio::io::SeekFrom::Start(asset_type_offset as u64))?;
+        data.read_exact(&mut asset_type_data)?;
 
         let asset_tye_data = asset_type_data.chunks_exact(16).collect::<Vec<_>>();
         assert_eq!(asset_id_to_info_num as usize, asset_tye_data.len());
 
         let dir_data_size = file_name_data_offset - dir_data_offset;
         let mut dir_data = vec![0u8; dir_data_size as usize];
-        data.seek(tokio::io::SeekFrom::Start(dir_data_offset as u64))
-            .await?;
-        data.read_exact(&mut dir_data).await?;
+        data.seek(tokio::io::SeekFrom::Start(dir_data_offset as u64))?;
+        data.read_exact(&mut dir_data)?;
 
-        let current = data
-            .seek(tokio::io::SeekFrom::Start(file_name_data_offset as u64))
-            .await?;
-        let end = data.seek(tokio::io::SeekFrom::End(0)).await?;
+        let current = data.seek(tokio::io::SeekFrom::Start(file_name_data_offset as u64))?;
+        let end = data.seek(tokio::io::SeekFrom::End(0))?;
         let file_name_data_size = end - current;
         let mut file_name_data = vec![0u8; file_name_data_size as usize];
-        data.seek(tokio::io::SeekFrom::Start(file_name_data_offset as u64))
-            .await?;
-        data.read_exact(&mut file_name_data).await?;
+        data.seek(tokio::io::SeekFrom::Start(file_name_data_offset as u64))?;
+        data.read_exact(&mut file_name_data)?;
 
         for (idx, id_to_info_ref) in asset_id_to_info_data
             .chunks_exact(asset_id_to_info_ref_size as usize)
@@ -143,27 +132,83 @@ impl AssetCatalog {
         {
             let mut chunks = id_to_info_ref.chunks_exact(4);
 
-            let guid_index =
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg")) as usize;
-            let sub_id = u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg"));
+            let guid_index = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            ) as usize;
+            let sub_id = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            );
             assert_eq!(
                 guid_index,
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg")) as usize
+                u32::from_le_bytes(
+                    chunks
+                        .next()
+                        .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                        .try_into()
+                        .expect("msg")
+                ) as usize
             );
 
             assert_eq!(
                 sub_id,
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg"))
+                u32::from_le_bytes(
+                    chunks
+                        .next()
+                        .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                        .try_into()
+                        .expect("msg")
+                )
             );
-            let asset_type_index =
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg")) as usize;
-            let _field_6 = u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg"));
-            let size_bytes = u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg"));
-            let _field_8 = u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg"));
-            let dir_offset =
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg")) as usize;
-            let file_name_offset =
-                u32::from_le_bytes(chunks.next().unwrap().try_into().expect("msg")) as usize;
+            let asset_type_index = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            ) as usize;
+            let _field_6 = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            );
+            let size_bytes = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            );
+            let _field_8 = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            );
+            let dir_offset = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            ) as usize;
+            let file_name_offset = u32::from_le_bytes(
+                chunks
+                    .next()
+                    .ok_or_else(|| std::io::Error::other("Chunk Empty"))?
+                    .try_into()
+                    .expect("msg"),
+            ) as usize;
 
             let asset_id = AssetId {
                 guid: Uuid::from_bytes(guid_data[guid_index].try_into().expect("msg")),
@@ -206,14 +251,16 @@ impl AssetCatalog {
             relative_path_index.insert(path, idx);
         }
 
-        Ok(CATALOG.get_or_init(move || Self {
+        Ok(Self {
             version,
             asset_infos,
             asset_id_index,
             relative_path_index,
-        }))
+        })
     }
+}
 
+impl AssetCatalog {
     pub fn get_asset_info_by_id<T>(&'static self, id: T) -> io::Result<&AssetInfo>
     where
         T: AsRef<AssetId>,
@@ -283,9 +330,9 @@ struct LegacyAssetIdToRealAssetIdRef {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use std::io::Cursor;
-    use tokio;
+    // use super::*;
+    // use std::io::Cursor;
+    // use tokio;
 
     #[tokio::test]
     async fn test() {

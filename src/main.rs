@@ -24,7 +24,7 @@ use tokio::{
     task::{self},
     time::{self, Duration, Instant},
 };
-use tracing::{info, instrument};
+use tracing::instrument;
 use tracing_subscriber::FmtSubscriber;
 use utils::{format_bytes, format_duration};
 
@@ -81,10 +81,11 @@ async fn initialize(
     let fs = FileSystem::init(cwd, out, App::handle().cancel.clone()).await;
     pb.stop("File System Initialized");
 
-    // let pb = cliclack::spinner();
-    // pb.start("Initializing Asset Catalog");
-    // let _ = AssetCatalog::init().await.unwrap();
-    // pb.stop("Asset Catalog Initialized");
+    let pb = cliclack::spinner();
+    pb.start("Initializing Asset Catalog");
+    let data = fs.open("assetcatalog.catalog")?;
+    let _catalog = AssetCatalog::try_from(data.as_slice())?;
+    pb.stop("Asset Catalog Initialized");
     Ok(fs)
 }
 

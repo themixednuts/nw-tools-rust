@@ -7,30 +7,24 @@ use cli::ARGS;
 use core::panic;
 use dashmap::DashMap;
 use decompressor::{Decompressor, Metadata};
-use globset::{Glob, GlobMatcher};
+use globset::{GlobBuilder, GlobMatcher};
 use localization::Localization;
 use memmap2::Mmap;
-use regex::Regex;
-use simd_json::prelude::ArrayTrait;
-use std::collections::HashSet;
-use std::fmt::Debug;
-use std::sync::RwLock;
-// use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
 use rayon::{prelude::*, ThreadPoolBuilder};
+use simd_json::prelude::ArrayTrait;
+use std::collections::HashSet;
+use std::fmt::Debug;
 use std::io::{self, Cursor, Write};
+use std::sync::RwLock;
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
     sync::{atomic::AtomicUsize, Arc},
 };
-use tokio::{
-    fs::File,
-    io::{AsyncRead, AsyncSeek},
-    runtime::Handle,
-};
+use tokio::runtime::Handle;
 use tokio_util::sync::CancellationToken;
 use utils::{crc32, lumberyard::LumberyardSource};
 use uuid::Uuid;
@@ -45,6 +39,7 @@ pub static FILESYSTEM: OnceLock<FileSystem> = OnceLock::new();
 
 #[derive(Debug)]
 pub struct FileSystem {
+    #[allow(dead_code)]
     cwd: &'static PathBuf,
     out_dir: &'static PathBuf,
     path_to_pak: HashMap<PathBuf, (PathBuf, String)>,
@@ -101,58 +96,54 @@ impl FileSystem {
         &'static self,
         string: Option<&String>,
     ) -> HashMap<&'static PathBuf, &'static (PathBuf, String)> {
-        let mut builder = globset::GlobSetBuilder::new();
         let mut matchers = vec![];
         if let Some(patterns) = string {
             patterns.split(',').for_each(|pattern| {
                 if pattern.starts_with('!') {
                     matchers.push(Globs::Exclude(
-                        Glob::new(&pattern[1..]).unwrap().compile_matcher(),
+                        GlobBuilder::new(&pattern[1..])
+                            .literal_separator(true)
+                            .build()
+                            .unwrap()
+                            .compile_matcher(),
                     ))
                 } else {
                     matchers.push(Globs::Include(
-                        Glob::new(pattern).unwrap().compile_matcher(),
+                        GlobBuilder::new(pattern)
+                            .literal_separator(true)
+                            .build()
+                            .unwrap()
+                            .compile_matcher(),
                     ))
                 }
-                builder.add(Glob::new(pattern).unwrap());
             })
         };
-        let globset = builder.build().unwrap();
 
         self.path_to_pak
             .iter()
-            .filter(|(name, _)| {
-                // globset.is_match(name)
-                matchers.iter().all(|glob| glob.is_match(name))
-                // if let Some(filter) = string {
-                //     filter.is_match(name.to_str().unwrap())
-                // } else {
-                //     true
-                // }
-            })
+            .filter(|(name, _)| matchers.iter().all(|glob| glob.is_match(name)))
             .collect()
     }
 
-    pub async fn open<P>(
-        &'static self,
-        entry: P,
-    ) -> tokio::io::Result<impl AsyncRead + AsyncSeek + Unpin + Sync + Send>
+    pub fn open<P>(&'static self, entry: P) -> std::io::Result<Vec<u8>>
     where
         P: AsRef<Path>,
     {
         match self.path_to_pak.get(entry.as_ref()) {
             Some((path, _str)) => {
-                let file = File::open(path).await?.into_std().await;
-                let mut archive = ZipArchive::new(file).unwrap();
-                let index = archive.index_for_path(entry).unwrap();
-                let mut entry = archive.by_index_raw(index).unwrap();
+                let file = std::fs::File::open(path)?;
+                let mut archive = ZipArchive::new(file)?;
+
+                let index = archive
+                    .index_for_path(entry)
+                    .ok_or_else(|| std::io::Error::other("No Index"))?;
+                let mut entry = archive.by_index_raw(index)?;
 
                 let mut buf = vec![];
-                let decompressor = Decompressor::try_new(&mut entry, None).unwrap();
+                let decompressor = Decompressor::try_new(&mut entry, None)?;
                 decompressor.to_writer(&mut buf).unwrap();
 
-                let reader = Cursor::new(buf);
-                Ok(reader)
+                Ok(buf)
             }
             None => {
                 // let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
@@ -232,14 +223,9 @@ impl FileSystem {
                     let idx = Arc::new(AtomicUsize::new(0));
                     let file = std::fs::OpenOptions::new()
                         .read(true)
-                        // .write(true)
                         .open(pak_path.as_ref())
                         .unwrap();
-                    let mmap = unsafe {
-                        Mmap::map(&file).expect("couldn't map file")
-                        // .make_mut()
-                        // .expect("couldnt make mut")
-                    };
+                    let mmap = unsafe { Mmap::map(&file).expect("couldn't map file") };
 
                     let archive = Arc::new(Mutex::new(ZipArchive::new(Cursor::new(mmap)).unwrap()));
 
@@ -336,13 +322,11 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
         FileType::ObjectStream(fmt) => match fmt {
             ObjectStreamFormat::XML => {
                 if ext != "xml" {
-                    // std::fs::rename(&path, path.with_extension("xml")).unwrap();
                     path.set_extension("xml");
                 }
             }
             ObjectStreamFormat::MINI | ObjectStreamFormat::PRETTY => {
                 if ext != "json" {
-                    // std::fs::rename(&path, path.with_extension("json")).unwrap();
                     path.set_extension("json");
                 }
             }
@@ -376,13 +360,11 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 DatasheetFormat::BYTES => {}
                 DatasheetFormat::XML => {
                     if ext != "xml" {
-                        // std::fs::rename(&path, path.with_extension("xml")).unwrap();
                         path.set_extension("xml");
                     }
                 }
                 DatasheetFormat::MINI | DatasheetFormat::PRETTY => {
                     if ext != "json" {
-                        // std::fs::rename(&path, path.with_extension("json")).unwrap();
                         path.set_extension("json");
                     }
                     let with_meta = match &ARGS.command {
@@ -421,19 +403,16 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 }
                 DatasheetFormat::CSV => {
                     if ext != "csv" {
-                        // std::fs::rename(&path, path.with_extension("csv")).unwrap();
                         path.set_extension("csv");
                     }
                 }
                 DatasheetFormat::YAML => {
                     if ext != "yaml" {
-                        // std::fs::rename(&path, path.with_extension("yaml")).unwrap();
                         path.set_extension("yaml");
                     }
                 }
                 DatasheetFormat::SQL => {
                     if ext != "sql" {
-                        // std::fs::rename(&path, path.with_extension("yaml")).unwrap();
                         path.set_extension("sql");
                     }
                 }

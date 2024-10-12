@@ -146,19 +146,20 @@ impl<'a> Datasheet<'a> {
         );
 
         let insert = format!(
-            "INSERT INTO '{}' ('{}') VALUES\n\t({});\n",
+            "INSERT INTO '{}' ({}) VALUES\n\t({});\n",
             self.name,
             self.header
                 .iter()
-                .map(|header| header.text.to_owned())
+                .map(|header| format!("'{}'", header.text.to_owned()))
                 .collect::<Vec<_>>()
-                .join("','"),
+                .join(","),
             self.rows
                 .iter()
                 .map(|row| row
                     .iter()
                     .map(|cell| match cell {
-                        DatasheetCell::String(v) => self.parse_localization(v.to_owned()),
+                        DatasheetCell::String(v) =>
+                            format!("'{}'", self.parse_localization(v.to_owned())),
                         DatasheetCell::Number(v) => v.to_owned().to_string(),
                         DatasheetCell::Boolean(v) => (*v as u32).to_owned().to_string(),
                     })

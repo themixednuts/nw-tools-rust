@@ -13,7 +13,7 @@ pub struct Filter {
 impl<'a> IArgs<'a> for Filter {
     type Value = Option<String>;
 
-    fn configure(&mut self, value: Self::Value) -> std::io::Result<()> {
+    fn configure(&mut self, _value: Self::Value) -> std::io::Result<()> {
         // if self.filter.is_none() {
         //     let filter: String = cliclack::input("Extract Directory")
         //         .default_input(&value.unwrap_or_else(|| "".into()).as_str())

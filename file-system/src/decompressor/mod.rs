@@ -13,7 +13,6 @@ use flate2::Decompress;
 use object_stream::{from_reader, JSONObjectStream, XMLObjectStream};
 use quick_xml::se::Serializer;
 use serde::Serialize;
-use simd_json::prelude::ArrayTrait;
 use std::io::{self, Cursor, Read, Write};
 use zip::{read::ZipFile, CompressionMethod};
 
@@ -140,7 +139,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
         let file_type = self.file_type()?;
         let mut extra = None;
 
-        let size = match &file_type {
+        let _size = match &file_type {
             FileType::Luac => std::io::copy(&mut (&self.buf[2..]), writer),
             FileType::ObjectStream(fmt) => {
                 // early return no serialziation

@@ -1,6 +1,7 @@
-use std::io::Cursor;
+use std::fs::File;
 use zip::ZipArchive;
 
-pub struct Pak<'a> {
-    inner: &'a mut ZipArchive<Cursor<&'a [u8]>>,
+pub struct Pak {
+    file: File,
+    archive: ZipArchive<File>,
 }
