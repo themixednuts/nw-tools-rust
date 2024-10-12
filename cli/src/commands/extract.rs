@@ -1,5 +1,4 @@
 use clap::Parser;
-use regex::Regex;
 use rusqlite::params;
 use std::io;
 
@@ -81,8 +80,8 @@ impl<'a> IArgs<'a> for Extract {
                 .interact()?;
 
                 if options.contains(&"filter") {
-                    let rx: Regex = cliclack::input("Include").required(false).interact()?;
-                    if rx.as_str() == Regex::new("").unwrap().as_str() {
+                    let rx: String = cliclack::input("Include").required(false).interact()?;
+                    if rx.is_empty() {
                         self.common.filter.filter = None;
                     } else {
                         self.common.filter.filter = Some(rx)

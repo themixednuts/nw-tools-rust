@@ -8,7 +8,7 @@ use std::{path::PathBuf, str::FromStr};
 
 use super::validate_path;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 pub struct Input {
     /// New World root directory. Needs to be root, not ./assets as it looks for the bin for parsing strings.
     #[arg(short, long, value_parser = validate_path)]

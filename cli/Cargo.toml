@@ -10,3 +10,4 @@ dirs = { workspace = true }
 regex = { workspace = true }
 rusqlite = { workspace = true }
 ctrlc = { workspace = true }
+ignore = { workspace = true }

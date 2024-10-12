@@ -7,6 +7,7 @@ use cli::ARGS;
 use core::panic;
 use dashmap::DashMap;
 use decompressor::{Decompressor, Metadata};
+use globset::{Glob, GlobMatcher};
 use localization::Localization;
 use memmap2::Mmap;
 use regex::Regex;
@@ -14,7 +15,6 @@ use simd_json::prelude::ArrayTrait;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::sync::RwLock;
-use tracing::instrument::WithSubscriber;
 // use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
 use pelite::FileMap;
@@ -52,6 +52,23 @@ pub struct FileSystem {
     cancel: CancellationToken,
 }
 
+enum Globs {
+    Include(GlobMatcher),
+    Exclude(GlobMatcher),
+}
+
+impl Globs {
+    fn is_match<P>(&self, path: &P) -> bool
+    where
+        P: AsRef<Path>,
+    {
+        match self {
+            Globs::Include(glob) => glob.is_match(path),
+            Globs::Exclude(glob) => !glob.is_match(path),
+        }
+    }
+}
+
 impl FileSystem {
     pub async fn init(
         cwd: &'static PathBuf,
@@ -82,16 +99,36 @@ impl FileSystem {
 
     pub fn files(
         &'static self,
-        regex: Option<&Regex>,
+        string: Option<&String>,
     ) -> HashMap<&'static PathBuf, &'static (PathBuf, String)> {
+        let mut builder = globset::GlobSetBuilder::new();
+        let mut matchers = vec![];
+        if let Some(patterns) = string {
+            patterns.split(',').for_each(|pattern| {
+                if pattern.starts_with('!') {
+                    matchers.push(Globs::Exclude(
+                        Glob::new(&pattern[1..]).unwrap().compile_matcher(),
+                    ))
+                } else {
+                    matchers.push(Globs::Include(
+                        Glob::new(pattern).unwrap().compile_matcher(),
+                    ))
+                }
+                builder.add(Glob::new(pattern).unwrap());
+            })
+        };
+        let globset = builder.build().unwrap();
+
         self.path_to_pak
             .iter()
             .filter(|(name, _)| {
-                if let Some(filter) = regex {
-                    filter.is_match(name.to_str().unwrap())
-                } else {
-                    true
-                }
+                // globset.is_match(name)
+                matchers.iter().all(|glob| glob.is_match(name))
+                // if let Some(filter) = string {
+                //     filter.is_match(name.to_str().unwrap())
+                // } else {
+                //     true
+                // }
             })
             .collect()
     }
@@ -178,6 +215,7 @@ impl FileSystem {
                 }
                 None => None,
             },
+            Commands::Test(_) => unreachable!(),
         };
 
         let locale = Arc::new(locale);
@@ -332,6 +370,7 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                         }
                     }
                 }
+                Commands::Test(_) => unreachable!(),
             };
             match fmt {
                 DatasheetFormat::BYTES => {}
@@ -348,6 +387,7 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                     }
                     let with_meta = match &ARGS.command {
                         Commands::Extract(cmd) => cmd.datasheet.with_meta,
+                        Commands::Test(_) => unreachable!(),
                     };
 
                     if let Some(meta) = &meta {
@@ -481,6 +521,7 @@ async fn parse_strings<P: AsRef<Path>>(dir: &P) -> io::Result<LumberyardSource> 
 
 fn map<P: AsRef<Path>>(path: &P) -> HashMap<PathBuf, (PathBuf, String)> {
     let assets_dir = path.as_ref().join("assets").to_path_buf();
+
     WalkDir::new(assets_dir.to_path_buf())
         .into_iter()
         .filter_map(|e| e.ok())

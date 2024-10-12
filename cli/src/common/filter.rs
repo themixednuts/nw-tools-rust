@@ -1,23 +1,22 @@
 use clap::Parser;
-use regex::Regex;
 use rusqlite::{params, OptionalExtension};
 
 use crate::traits::{IArgs, IDatabase};
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 pub struct Filter {
     #[arg(short, long)]
-    /// Filter file names with regex
-    pub filter: Option<Regex>,
+    /// Filter file names with a glob
+    pub filter: Option<String>,
 }
 
 impl<'a> IArgs<'a> for Filter {
-    type Value = Option<Regex>;
+    type Value = Option<String>;
 
-    fn configure(&mut self, _: Self::Value) -> std::io::Result<()> {
+    fn configure(&mut self, value: Self::Value) -> std::io::Result<()> {
         // if self.filter.is_none() {
-        //     let filter: Regex = cliclack::input("Extract Directory")
-        //         .default_input(&value.unwrap_or_else(|| Regex::new("").unwrap()).as_str())
+        //     let filter: String = cliclack::input("Extract Directory")
+        //         .default_input(&value.unwrap_or_else(|| "".into()).as_str())
         //         .interact()?;
         //     self.filter = Some(filter);
         // }

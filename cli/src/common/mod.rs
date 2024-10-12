@@ -13,7 +13,7 @@ use std::path::PathBuf;
 
 use crate::traits::{IArgs, IDatabase};
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 pub struct CommonConfig {
     #[command(flatten)]
     pub input: Input,
@@ -22,6 +22,8 @@ pub struct CommonConfig {
     #[command(flatten)]
     pub filter: Filter,
 }
+
+impl CommonConfig {}
 
 impl<'a> IArgs<'a> for CommonConfig {
     type Value = &'a Connection;
@@ -35,7 +37,7 @@ impl<'a> IArgs<'a> for CommonConfig {
             .configure((last, nw_type(&self.input.input.as_ref().unwrap())))?;
         self.output.save(value).unwrap();
 
-        // let last = self.filter.load(value).unwrap().unwrap();
+        // let last = self.filter.load(value).unwrap();
         self.filter.configure(None)?;
         // self.filter.save(value).unwrap();
 

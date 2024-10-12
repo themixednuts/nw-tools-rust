@@ -36,8 +36,8 @@ ouroboros = { workspace = true }
 quick-xml = { workspace = true }
 schemars = { workspace = true }
 simd-json = { workspace = true }
-ignore = { workspace = true }
 dashmap = { workspace = true }
+globset = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }

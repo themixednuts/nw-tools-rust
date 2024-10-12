@@ -6,7 +6,7 @@ use rusqlite::{params, OptionalExtension};
 
 use crate::traits::{IArgs, IDatabase};
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 pub struct Output {
     #[arg(short, long)]
     pub output: Option<PathBuf>,

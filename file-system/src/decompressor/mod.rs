@@ -116,6 +116,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
     pub fn file_type(&self) -> io::Result<FileType> {
         let len = self.buf.len().min(5);
         let sig = &self.buf[..len];
+        // dbg!(&len, &sig);
 
         let _type = match sig {
             [0x04, 0x00, 0x1B, 0x4C, 0x75] => FileType::Luac,
@@ -123,9 +124,11 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                 Commands::Extract(extract) => {
                     FileType::ObjectStream(&extract.objectstream.objectstream)
                 }
+                _ => unreachable!(),
             },
-            [0x11, 0x00, 0x00, 0x00] => match &ARGS.command {
+            [0x11, 0x00, 0x00, 0x00, _] => match &ARGS.command {
                 Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
+                _ => unreachable!(),
             },
             _ => FileType::default(),
         };
@@ -194,6 +197,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
 
                 extra = Some(Metadata::Datasheet(datasheet.to_owned()));
 
+                // dbg!(&fmt);
                 match fmt {
                     DatasheetFormat::MINI => {
                         let string = serde_json::to_string(&datasheet.to_json())?;
@@ -225,41 +229,6 @@ impl<'a, 'b> Decompressor<'a, 'b> {
         Ok(extra)
     }
 }
-
-// pub trait ZipFileExt {
-//     fn decompress(
-//         &mut self,
-//         buf: &mut impl Write,
-//     ) -> std::io::Result<(u64, FileType, Option<Metadata>)>;
-// }
-
-// impl ZipFileExt for ZipFile<'_> {
-//     fn decompress(
-//         &mut self,
-//         buf: &mut impl Write,
-//     ) -> std::io::Result<(u64, FileType, Option<Metadata>)> {
-//         decompress_zip(self, buf)
-//     }
-// }
-
-// pub fn to_writer<'a>(
-//     mut reader: impl Read + Unpin,
-//     buf: &'a mut impl Write,
-//     localization: Option<&'a DashMap<String, Option<String>>>,
-// ) -> io::Result<(u64, FileType, Option<Metadata<'a>>)> {
-//     let mut sig = [0; 4];
-//     reader.read_exact(&mut sig).unwrap();
-
-//     if is_azcs(&mut sig) {
-//         let cursor = Cursor::new(sig.to_owned());
-//         let reader = azcs::decompress(cursor.chain(reader)).unwrap();
-//         to_writer_internal(reader, buf, localization)
-//     } else {
-//         let cursor = Cursor::new(sig.to_owned());
-//         let reader = cursor.chain(reader);
-//         to_writer_internal(reader, buf, localization)
-//     }
-// }
 
 pub enum Metadata<'a> {
     Datasheet(Datasheet<'a>),

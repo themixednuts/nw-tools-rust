@@ -41,6 +41,7 @@ fn cli() -> io::Result<Args> {
 
     match &mut args.command {
         Commands::Extract(ext) => ext.configure(())?,
+        Commands::Test(cmd) => {}
     };
 
     Ok(args)

@@ -4,11 +4,14 @@ mod resources;
 
 use app::App;
 use assets::assetcatalog::AssetCatalog;
-use cli::{commands::Commands, ARGS};
+use cli::{
+    commands::{test::TestCommands, Commands},
+    ARGS,
+};
 use cliclack::{spinner, ProgressBar};
 use file_system::{FileSystem, State};
-use scopeguard::{defer, defer_on_unwind, guard_on_unwind};
 use std::{
+    path::PathBuf,
     process::ExitCode,
     sync::{
         atomic::{AtomicU64, AtomicUsize, Ordering},
@@ -21,11 +24,16 @@ use tokio::{
     task::{self},
     time::{self, Duration, Instant},
 };
+use tracing::{info, instrument};
+use tracing_subscriber::FmtSubscriber;
 use utils::{format_bytes, format_duration};
 
 #[tokio::main]
+#[instrument]
 async fn main() -> tokio::io::Result<ExitCode> {
-    // console_subscriber::init();
+    let subscriber = FmtSubscriber::builder().finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     let app = App::init();
     // parse_lumberyard_source().await.unwrap();
     // map_resources().await;
@@ -42,31 +50,66 @@ async fn main() -> tokio::io::Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
+#[instrument]
 async fn run() -> tokio::io::Result<()> {
-    // TODO: handle this differently
-
-    let (cwd, out_dir, filter) = match &ARGS.command {
-        Commands::Extract(extract) => (
-            extract.common.input.input.as_ref().unwrap(),
-            extract.common.output.output.as_ref().unwrap(),
-            extract.common.filter.filter.as_ref(),
-        ),
+    match &ARGS.command {
+        Commands::Extract(extract) => {
+            let cwd = extract.common.input.input.as_ref().unwrap();
+            let out = extract.common.output.output.as_ref().unwrap();
+            let filter = extract.common.filter.filter.as_ref();
+            run_extract(cwd, out, filter).await?
+        }
+        Commands::Test(test) => match test.commands {
+            TestCommands::Filter(ref cmd) => {
+                let cwd = cmd.input.input.as_ref().unwrap();
+                let out = cmd.output.output.as_ref().unwrap();
+                let filter = cmd.filter.filter.as_ref();
+                run_test(cwd, out, filter).await?
+            }
+        },
     };
 
-    let fs = tokio::spawn(async move {
-        let pb = cliclack::spinner();
-        pb.start("Initializing File System");
-        let fs = FileSystem::init(cwd, out_dir, App::handle().cancel.clone()).await;
-        pb.stop("File System Initialized");
+    Ok(())
+}
 
-        // let pb = cliclack::spinner();
-        // pb.start("Initializing Asset Catalog");
-        // let _ = AssetCatalog::init().await.unwrap();
-        // pb.stop("Asset Catalog Initialized");
-        fs
-    })
-    .await?;
+async fn initialize(
+    cwd: &'static PathBuf,
+    out: &'static PathBuf,
+) -> tokio::io::Result<&'static FileSystem> {
+    let pb = cliclack::spinner();
+    pb.start("Initializing File System");
+    let fs = FileSystem::init(cwd, out, App::handle().cancel.clone()).await;
+    pb.stop("File System Initialized");
 
+    // let pb = cliclack::spinner();
+    // pb.start("Initializing Asset Catalog");
+    // let _ = AssetCatalog::init().await.unwrap();
+    // pb.stop("Asset Catalog Initialized");
+    Ok(fs)
+}
+
+#[instrument]
+async fn run_test(
+    cwd: &'static PathBuf,
+    out: &'static PathBuf,
+    filter: Option<&String>,
+) -> tokio::io::Result<()> {
+    let fs = initialize(cwd, out).await?;
+    let files = fs.files(filter);
+    println!("Filter: {:?}", filter);
+    for file in files {
+        println!("File: {}", file.0.display());
+    }
+    Ok(())
+}
+
+#[instrument]
+async fn run_extract(
+    cwd: &'static PathBuf,
+    out: &'static PathBuf,
+    filter: Option<&String>,
+) -> tokio::io::Result<()> {
+    let fs = initialize(cwd, out).await?;
     let files = fs.files(filter);
     let len = files.len() as u64;
     // let size: usize = files.iter().map(|(_, (_, _, size))| size).sum();
@@ -194,6 +237,5 @@ async fn run() -> tokio::io::Result<()> {
         format_bytes(bytes_cloned.load(Ordering::Relaxed) as f64)
     ))
     .unwrap();
-
     Ok(())
 }
