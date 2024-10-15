@@ -7,7 +7,7 @@ use cli::ARGS;
 use core::panic;
 use dashmap::DashMap;
 use decompressor::{Decompressor, Metadata};
-use globset::{GlobBuilder, GlobMatcher};
+use globset::{GlobBuilder, GlobMatcher, GlobSetBuilder};
 use localization::Localization;
 use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
@@ -17,7 +17,6 @@ use simd_json::prelude::ArrayTrait;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::io::{self, Cursor, Write};
-use std::str::pattern::Pattern;
 use std::sync::RwLock;
 use std::sync::{atomic::Ordering, Mutex, OnceLock};
 use std::{
@@ -325,12 +324,12 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
         FileType::ObjectStream(fmt) => match fmt {
             ObjectStreamFormat::XML => {
                 if ext != "xml" {
-                    path.set_extension("xml");
+                    path = path.with_extension("xml");
                 }
             }
             ObjectStreamFormat::MINI | ObjectStreamFormat::PRETTY => {
                 if ext != "json" {
-                    path.set_extension("json");
+                    path = path.with_extension("json");
                 }
             }
             _ => {}
@@ -351,7 +350,7 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                                     path = datatable_root;
                                     path = path
                                         .join(format!("{}/{}", datasheet._type, datasheet.name));
-                                    path.set_extension(&ext);
+                                    path = path.with_extension(&ext);
                                 }
                             }
                         }
@@ -363,12 +362,12 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 DatasheetFormat::BYTES => {}
                 DatasheetFormat::XML => {
                     if ext != "xml" {
-                        path.set_extension("xml");
+                        path = path.with_extension("xml");
                     }
                 }
                 DatasheetFormat::MINI | DatasheetFormat::PRETTY => {
                     if ext != "json" {
-                        path.set_extension("json");
+                        path = path.with_extension("json");
                     }
                     let with_meta = match &ARGS.command {
                         Commands::Extract(cmd) => cmd.datasheet.with_meta,
@@ -406,17 +405,17 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 }
                 DatasheetFormat::CSV => {
                     if ext != "csv" {
-                        path.set_extension("csv");
+                        path = path.with_extension("csv");
                     }
                 }
                 DatasheetFormat::YAML => {
                     if ext != "yaml" {
-                        path.set_extension("yaml");
+                        path = path.with_extension("yaml");
                     }
                 }
                 DatasheetFormat::SQL => {
                     if ext != "sql" {
-                        path.set_extension("sql");
+                        path = path.with_extension("sql");
                     }
                 }
             }

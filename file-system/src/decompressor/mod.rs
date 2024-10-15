@@ -113,19 +113,15 @@ impl<'a, 'b> Decompressor<'a, 'b> {
     pub fn compressed_size(&mut self) {}
 
     pub fn file_type(&self) -> io::Result<FileType> {
-        let len = self.buf.len().min(5);
-        let sig = &self.buf[..len];
-        // dbg!(&len, &sig);
-
-        let _type = match sig {
-            [0x04, 0x00, 0x1B, 0x4C, 0x75] => FileType::Luac,
-            [0x00, 0x00, 0x00, 0x00, 0x03] => match &ARGS.command {
+        let _type = match self.buf.as_slice() {
+            [0x04, 0x00, 0x1B, 0x4C, 0x75, ..] => FileType::Luac,
+            [0x00, 0x00, 0x00, 0x00, 0x03, ..] => match &ARGS.command {
                 Commands::Extract(extract) => {
                     FileType::ObjectStream(&extract.objectstream.objectstream)
                 }
                 _ => unreachable!(),
             },
-            [0x11, 0x00, 0x00, 0x00, _] => match &ARGS.command {
+            [0x11, 0x00, 0x00, 0x00, ..] => match &ARGS.command {
                 Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
                 _ => unreachable!(),
             },
@@ -227,114 +223,3 @@ impl<'a, 'b> Decompressor<'a, 'b> {
 pub enum Metadata<'a> {
     Datasheet(Datasheet<'a>),
 }
-
-// TODO: refactor this, should really be two different things
-// fn to_writer_internal<'a, 'b, R, W>(
-//     mut reader: R,
-//     writer: &'b mut W,
-//     localization: Option<&'a DashMap<String, Option<String>>>,
-// ) -> io::Result<(u64, FileType, Option<Metadata<'a>>)>
-// where
-//     R: Read,
-//     W: Write,
-// {
-//     let mut sig = [0; 5];
-//     reader.read_exact(&mut sig)?;
-//     let file_type = file_type(&sig)?;
-//     let mut extra = None;
-
-//     let size = match &file_type {
-//         FileType::Luac => {
-//             let buf = sig[2..5].to_owned();
-//             std::io::copy(&mut buf.chain(reader), writer)
-//         }
-//         FileType::ObjectStream(fmt) => {
-//             // early return no serialziation
-//             if **fmt == ObjectStreamFormat::BYTES {
-//                 return Ok((
-//                     std::io::copy(&mut sig.chain(reader), writer)?,
-//                     file_type,
-//                     None,
-//                 ));
-//             };
-//             let hashes = if let Some(fs) = FILESYSTEM.get() {
-//                 Some(&fs.hashes)
-//             } else {
-//                 None
-//             };
-
-//             let Ok(obj_stream) = from_reader(&mut sig.chain(&mut reader), hashes) else {
-//                 return Ok((
-//                     std::io::copy(&mut sig.chain(reader), writer)?,
-//                     file_type,
-//                     None,
-//                 ));
-//             };
-//             match fmt {
-//                 ObjectStreamFormat::XML => {
-//                     let obj_stream = XMLObjectStream::from(obj_stream);
-//                     let mut buf = String::new();
-//                     let mut ser = Serializer::new(&mut buf);
-//                     ser.indent('\t', 2);
-//                     obj_stream.serialize(ser).unwrap();
-//                     std::io::copy(&mut buf.as_bytes(), writer)
-//                 }
-//                 ObjectStreamFormat::MINI => {
-//                     let obj_stream = JSONObjectStream::from(obj_stream);
-//                     let string = serde_json::to_string(&obj_stream)
-//                         .expect("couldnt parse object stream to json");
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 ObjectStreamFormat::PRETTY => {
-//                     let obj_stream = JSONObjectStream::from(obj_stream);
-//                     let string = serde_json::to_string_pretty(&obj_stream)
-//                         .expect("couldnt parse object stream to json");
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 _ => std::io::copy(&mut sig.chain(reader), writer),
-//             }
-//         }
-//         FileType::Datasheet(fmt) => {
-//             let mut reader = sig.chain(reader);
-//             let datasheet = Datasheet::from(&mut reader);
-
-//             // if **fmt == DatasheetFormat::BYTES {
-//             //     return Ok((
-//             //         std::io::copy(&mut sig.chain(reader), writer)?,
-//             //         file_type,
-//             //         Some(Metadata::Datasheet(datasheet.to_owned())),
-//             //     ));
-//             // };
-
-//             extra = Some(Metadata::Datasheet(datasheet.to_owned()));
-
-//             match fmt {
-//                 DatasheetFormat::MINI => {
-//                     let string = datasheet.to_json_simd(false)?;
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 DatasheetFormat::PRETTY => {
-//                     let string = datasheet.to_json_simd(true)?;
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 DatasheetFormat::YAML => {
-//                     let string = datasheet.to_yaml();
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 DatasheetFormat::CSV => {
-//                     let string = datasheet.to_csv();
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//                 DatasheetFormat::BYTES => std::io::copy(&mut sig.chain(reader), writer),
-//                 DatasheetFormat::XML => todo!(),
-//                 DatasheetFormat::SQL => {
-//                     let string = datasheet.to_sql();
-//                     std::io::copy(&mut string.as_bytes(), writer)
-//                 }
-//             }
-//         }
-//         _ => std::io::copy(&mut sig.chain(reader), writer),
-//     }?;
-
-//     Ok((size, file_type, extra))
-// }

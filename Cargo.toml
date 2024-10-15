@@ -47,7 +47,7 @@ members = [
   "assets",
   "utils",
   "cli",
-  "localization",
+  "localization", "distribution", "vshapec",
 ]
 
 [workspace.dependencies]

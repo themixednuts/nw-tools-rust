@@ -35,9 +35,6 @@ async fn main() -> tokio::io::Result<ExitCode> {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     let app = App::init();
-    // parse_lumberyard_source().await.unwrap();
-    // map_resources().await;
-    // return Ok(());
 
     let token = app.cancel.clone();
     tokio::spawn(async move {

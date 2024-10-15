@@ -3,8 +3,8 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 
 #[derive(Debug)]
 pub struct EventBus {
-    sender: Arc<Sender<Event>>,
-    receiver: Receiver<Event>,
+    pub sender: Arc<Sender<Event>>,
+    pub receiver: Receiver<Event>,
 }
 
 impl Default for EventBus {

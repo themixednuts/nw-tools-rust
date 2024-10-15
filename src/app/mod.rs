@@ -24,5 +24,7 @@ impl App {
     pub fn handle() -> &'static Self {
         APP.get().expect("App wasn't initialized")
     }
-    pub fn event(&self) {}
+    pub fn event(&self) {
+        // self.bus = EventBus::new();
+    }
 }
