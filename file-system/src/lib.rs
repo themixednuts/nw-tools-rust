@@ -7,7 +7,7 @@ use cli::ARGS;
 use core::panic;
 use dashmap::DashMap;
 use decompressor::{Decompressor, Metadata};
-use globset::{GlobBuilder, GlobMatcher, GlobSetBuilder};
+use globset::{GlobBuilder, GlobMatcher};
 use localization::Localization;
 use memmap2::Mmap;
 use pelite::pe::{Pe, PeFile};
@@ -319,17 +319,19 @@ pub struct State {
 }
 
 fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metadata>) -> PathBuf {
-    let ext = path.extension().unwrap().to_os_string();
+    let mut ext = path.extension().unwrap().to_os_string();
     match file_type {
         FileType::ObjectStream(fmt) => match fmt {
             ObjectStreamFormat::XML => {
                 if ext != "xml" {
-                    path = path.with_extension("xml");
+                    ext.push(".xml");
+                    path.set_extension(ext);
                 }
             }
             ObjectStreamFormat::MINI | ObjectStreamFormat::PRETTY => {
                 if ext != "json" {
-                    path = path.with_extension("json");
+                    ext.push(".json");
+                    path.set_extension(ext);
                 }
             }
             _ => {}
@@ -362,12 +364,14 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 DatasheetFormat::BYTES => {}
                 DatasheetFormat::XML => {
                     if ext != "xml" {
-                        path = path.with_extension("xml");
+                        ext.push(".xml");
+                        path.set_extension(ext);
                     }
                 }
                 DatasheetFormat::MINI | DatasheetFormat::PRETTY => {
                     if ext != "json" {
-                        path = path.with_extension("json");
+                        ext.push(".json");
+                        path.set_extension(ext);
                     }
                     let with_meta = match &ARGS.command {
                         Commands::Extract(cmd) => cmd.datasheet.with_meta,
@@ -405,17 +409,20 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 }
                 DatasheetFormat::CSV => {
                     if ext != "csv" {
-                        path = path.with_extension("csv");
+                        ext.push(".csv");
+                        path.set_extension(ext);
                     }
                 }
                 DatasheetFormat::YAML => {
                     if ext != "yaml" {
-                        path = path.with_extension("yaml");
+                        ext.push(".yaml");
+                        path = path.with_extension(ext);
                     }
                 }
                 DatasheetFormat::SQL => {
                     if ext != "sql" {
-                        path = path.with_extension("sql");
+                        ext.push(".sql");
+                        path.set_extension(ext);
                     }
                 }
             }
@@ -461,9 +468,6 @@ async fn parse_strings<P: AsRef<Path>>(dir: &P) -> io::Result<LumberyardSource> 
                 if chunk == b'\0' {
                     if !vec.is_empty() {
                         if let Ok(str) = std::str::from_utf8(&vec) {
-                            // if str == "Max Instanced SlayerScript State Count" {
-                            //     println!("{str}");
-                            // }
                             let string = str.trim_end_matches('\0').to_string();
                             if string.len() > 4
                                 && string
@@ -518,8 +522,6 @@ fn map<P: AsRef<Path>>(path: &P) -> HashMap<PathBuf, (PathBuf, String)> {
             let mmap = Cursor::new(mmap);
             let archive = ZipArchive::new(mmap).unwrap();
 
-            // dbg!(&dir);
-            // let file_names: Vec<String> = archive.file_names().map(|n| n.to_owned()).collect();
             let file_names = archive
                 .file_names()
                 // .iter()
@@ -533,8 +535,6 @@ fn map<P: AsRef<Path>>(path: &P) -> HashMap<PathBuf, (PathBuf, String)> {
                         .parent()
                         .unwrap()
                         .join(name);
-                    // let idx = archive.index_for_name(name).unwrap();
-                    // let size = archive.by_index_raw(idx).unwrap().size() as usize;
 
                     (full_name, (dir.path().to_path_buf(), name.to_string()))
                 })
