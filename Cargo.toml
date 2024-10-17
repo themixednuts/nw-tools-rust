@@ -27,6 +27,7 @@ utils = { workspace = true }
 object-stream = { workspace = true }
 cli = { workspace = true }
 distribution = { workspace = true }
+vshapec = { workspace = true }
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["async_tokio"] }
@@ -60,6 +61,8 @@ utils = { path = "./utils" }
 object-stream = { path = "./object-stream" }
 cli = { path = "./cli" }
 distribution = { path = "./distribution" }
+datasheet = { path = "./datasheet" }
+vshapec = { path = "./vshapec" }
 async-channel = { version = "2.3.1" }
 clap = { version = "4.5.9", features = ["derive"] }
 cliclack = { version = "0.3.2" }

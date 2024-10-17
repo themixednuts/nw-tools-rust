@@ -1,5 +1,6 @@
 use cli::commands::Commands;
 use cli::common::distribution::DistributionFormat;
+use cli::common::vshapec::VShapeFormat;
 use cli::common::{
     datasheet::{DatasheetFormat, DatasheetOutputMode},
     objectstream::ObjectStreamFormat,
@@ -327,6 +328,21 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 path.set_extension("lua");
             }
         }
+        FileType::VShapeC(fmt) => match fmt {
+            VShapeFormat::PRETTY | VShapeFormat::MINI => {
+                if ext != "json" {
+                    ext.push(".json");
+                    path.set_extension(ext);
+                }
+            }
+            VShapeFormat::YAML => {
+                if ext != "yaml" {
+                    ext.push(".yaml");
+                    path = path.with_extension(ext);
+                }
+            }
+            _ => {}
+        },
         FileType::ObjectStream(fmt) => match fmt {
             ObjectStreamFormat::XML => {
                 if ext != "xml" {
@@ -558,6 +574,7 @@ pub enum FileType {
     ObjectStream(&'static ObjectStreamFormat),
     Datasheet(&'static DatasheetFormat),
     Distribution(&'static DistributionFormat),
+    VShapeC(&'static VShapeFormat),
     #[default]
     Other,
 }

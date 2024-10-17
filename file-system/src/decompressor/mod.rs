@@ -4,7 +4,7 @@ use crate::{
 };
 use cli::{
     commands::Commands,
-    common::{datasheet::DatasheetFormat, objectstream::ObjectStreamFormat},
+    common::{datasheet::DatasheetFormat, objectstream::ObjectStreamFormat, vshapec::VShapeFormat},
     ARGS,
 };
 use dashmap::DashMap;
@@ -16,6 +16,7 @@ use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::io::{self, Cursor, Read, Write};
 use tracing::Instrument;
+use vshapec;
 use zip::{read::ZipFile, CompressionMethod};
 
 #[derive()]
@@ -134,6 +135,10 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                 Commands::Extract(cmd) => FileType::Distribution(&cmd.distribution.distribution),
                 _ => unreachable!(),
             },
+            (_, n) if n.ends_with(".vshapec") => match &ARGS.command {
+                Commands::Extract(cmd) => FileType::VShapeC(&cmd.vshapec.vshapec),
+                _ => unreachable!(),
+            },
             _ => FileType::default(),
         };
 
@@ -153,11 +158,31 @@ impl<'a, 'b> Decompressor<'a, 'b> {
 
                         // let msg_pack = byte_code.to_msgpack().unwrap();
                         // let mut pack = msg_pack.as_slice();
-                        std::io::copy(&mut byte_code, writer)
+                        std::io::copy(&mut buf, writer)
                     }
                     false => std::io::copy(&mut buf, writer),
                 }
             }
+            FileType::VShapeC(fmt) => match fmt {
+                VShapeFormat::MINI => {
+                    let vshape = vshapec::VShapeC::from_reader(self.buf.as_slice())?;
+                    let mut buf = serde_json::to_vec(&vshape).unwrap();
+                    std::io::copy(&mut buf.as_slice(), writer)
+                }
+                VShapeFormat::PRETTY => {
+                    let vshape = vshapec::VShapeC::from_reader(self.buf.as_slice())?;
+                    let mut buf = serde_json::to_vec_pretty(&vshape).unwrap();
+
+                    std::io::copy(&mut buf.as_slice(), writer)
+                }
+                VShapeFormat::YAML => {
+                    let vshape = vshapec::VShapeC::from_reader(self.buf.as_slice())?;
+                    let mut buf = serde_yml::to_string(&vshape).unwrap();
+
+                    std::io::copy(&mut buf.as_bytes(), writer)
+                }
+                _ => std::io::copy(&mut self.buf.as_slice(), writer),
+            },
             FileType::ObjectStream(fmt) => {
                 // early return no serialziation
                 if **fmt == ObjectStreamFormat::BYTES {

@@ -978,6 +978,7 @@ dependencies = [
  "scopeguard",
  "serde",
  "serde_json",
+ "serde_yml",
  "simd-json",
  "tokio",
  "tokio-stream",
@@ -986,6 +987,7 @@ dependencies = [
  "tracing-subscriber",
  "utils",
  "uuid",
+ "vshapec",
  "walkdir",
  "zip",
 ]
@@ -1923,6 +1925,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "utils",
+ "vshapec",
  "walkdir",
  "zip",
 ]
@@ -3130,6 +3133,12 @@ checksum = "9dcc60c0624df774c82a0ef104151231d37da4962957d691c011c852b2473314"
 [[package]]
 name = "vshapec"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_bytes",
+ "serde_json",
+ "serde_yml",
+]
 
 [[package]]
 name = "vsimd"

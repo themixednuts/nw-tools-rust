@@ -7,6 +7,7 @@ use crate::{
         datasheet::{DatasheetConfig, DatasheetFormat, DatasheetOutputMode},
         distribution::{DistributionConfig, DistributionFormat},
         objectstream::{ObjectStreamConfig, ObjectStreamFormat},
+        vshapec::VShapeConfig,
         CommonConfig,
     },
     traits::IArgs,
@@ -23,6 +24,8 @@ pub struct Extract {
     pub objectstream: ObjectStreamConfig,
     #[command(flatten)]
     pub distribution: DistributionConfig,
+    #[command(flatten)]
+    pub vshapec: VShapeConfig,
     #[arg(long)]
     pub luac: bool,
 }

@@ -4,11 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-utils = { path = "../utils" }
-cli = { path = "../cli" }
-object-stream = { path = "../object-stream" }
-datasheet = { path = "../datasheet" }
+utils = { workspace = true }
+cli = { workspace = true }
+object-stream = { workspace = true }
+datasheet = { workspace = true }
 localization = { workspace = true }
+vshapec = { workspace = true }
 console-subscriber = { workspace = true }
 async-channel = { workspace = true }
 flate2 = { workspace = true }
@@ -23,6 +24,7 @@ regex = { workspace = true }
 scopeguard = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_yml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tokio = { workspace = true }

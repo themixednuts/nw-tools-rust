@@ -5,6 +5,7 @@ pub mod input;
 pub mod lua;
 pub mod objectstream;
 pub mod output;
+pub mod vshapec;
 
 use clap::Parser;
 use filter::Filter;
@@ -40,7 +41,7 @@ impl<'a> IArgs<'a> for CommonConfig {
         self.output.save(value).unwrap();
 
         // let last = self.filter.load(value).unwrap();
-        self.filter.configure(None)?;
+        // self.filter.configure(None)?;
         // self.filter.save(value).unwrap();
 
         Ok(())
