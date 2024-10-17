@@ -4,12 +4,7 @@ version = "0.1.3"
 edition = "2021"
 
 [dependencies]
-file-system = { path = "./file-system" }
-assets = { path = "./assets" }
-utils = { path = "./utils" }
-object-stream = { path = "./object-stream" }
 console-subscriber = { workspace = true }
-cli = { path = "./cli" }
 cliclack = { workspace = true }
 crc32fast = { workspace = true }
 serde = { workspace = true }
@@ -26,6 +21,12 @@ ctrlc = { workspace = true }
 regex = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+file-system = { workspace = true }
+assets = { workspace = true }
+utils = { workspace = true }
+object-stream = { workspace = true }
+cli = { workspace = true }
+distribution = { workspace = true }
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["async_tokio"] }
@@ -53,6 +54,12 @@ members = [
 ]
 
 [workspace.dependencies]
+file-system = { path = "./file-system" }
+assets = { path = "./assets" }
+utils = { path = "./utils" }
+object-stream = { path = "./object-stream" }
+cli = { path = "./cli" }
+distribution = { path = "./distribution" }
 async-channel = { version = "2.3.1" }
 clap = { version = "4.5.9", features = ["derive"] }
 cliclack = { version = "0.3.2" }
@@ -63,12 +70,12 @@ ctrlc = { version = "3.4.4" }
 dashmap = { version = "6.1.0", features = ["serde", "rayon"] }
 dirs = { version = "5.0.1" }
 flate2 = { version = "1.0.30" }
-fmmap = "0.3.3"
 futures = { version = "0.3.30" }
-indexmap = { version = "2.6.0", features = ["rayon", "serde"] }
+globset = { version = "0.4.15" }
 ignore = { version = "0.4.23" }
+indexmap = { version = "2.6.0", features = ["rayon", "serde"] }
 localization = { path = "./localization" }
-memmap2 = "0.9.4"
+memmap2 = { version = "0.9.4" }
 natord = { version = "1.0.9" }
 nucleo-matcher = { version = "0.3.1" }
 num_cpus = { version = "1.16.0" }
@@ -76,16 +83,17 @@ oodle-safe = { version = "0.2.0" }
 ouroboros = { version = "0.18.4" }
 pelite = { version = "0.10.0" }
 quick-xml = { version = "0.36.0", features = ["serialize"] }
-rayon = "1.10.0"
+rayon = { version = "1.10.0" }
 regex = { version = "1.10.5" }
 rusqlite = { version = "0.32.0", features = ["bundled-full"] }
 schemars = { version = "0.8.21", features = ["preserve_order"] }
 scopeguard = { version = "1.2.0" }
 serde = { version = "1.0.204", features = ["derive"] }
-serde_bytes = "0.11.15"
+serde_bytes = { version = "0.11.15" }
 serde_json = { version = "1.0.120", features = ["preserve_order"] }
 serde_yml = { version = "0.0.12" }
 simd-json = { version = "0.13.10" }
+thiserror = { version = "1.0.64" }
 tokio = { version = "^1.38.0", features = ["full", "tracing"] }
 tokio-stream = { version = "0.1.15" }
 tokio-util = { version = "0.7.11", features = ["full"] }
@@ -95,4 +103,5 @@ uuid = { version = "^1.10.0", features = ["serde"] }
 uuid-simd = { version = "0.8.0" }
 walkdir = { version = "2.5.0" }
 zip = { version = "=2.1.3" }
-globset = { version = "0.4.15" }
+luac-parser = { version = "0.5.2" }
+rmp-serde = { version = "1.3.0" }

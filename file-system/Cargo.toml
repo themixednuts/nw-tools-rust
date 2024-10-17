@@ -38,6 +38,9 @@ schemars = { workspace = true }
 simd-json = { workspace = true }
 dashmap = { workspace = true }
 globset = { workspace = true }
+luac-parser = { workspace = true }
+rmp-serde = { workspace = true }
+
 
 [dev-dependencies]
 criterion = { workspace = true }

@@ -5,6 +5,7 @@ use std::io;
 use crate::{
     common::{
         datasheet::{DatasheetConfig, DatasheetFormat, DatasheetOutputMode},
+        distribution::{DistributionConfig, DistributionFormat},
         objectstream::{ObjectStreamConfig, ObjectStreamFormat},
         CommonConfig,
     },
@@ -20,6 +21,10 @@ pub struct Extract {
     pub datasheet: DatasheetConfig,
     #[command(flatten)]
     pub objectstream: ObjectStreamConfig,
+    #[command(flatten)]
+    pub distribution: DistributionConfig,
+    #[arg(long)]
+    pub luac: bool,
 }
 
 impl<'a> IArgs<'a> for Extract {
@@ -70,7 +75,11 @@ impl<'a> IArgs<'a> for Extract {
                         "Datasheet Output Mode",
                         "original = default, typename",
                     ),
-                    // ("with-meta")
+                    (
+                        "distribution",
+                        "Distribution",
+                        &format!("{} = default | {} | {}", BYTES, MINI, PRETTY),
+                    ),
                     (
                         "objectstream",
                         "ObjectStream",
@@ -150,6 +159,22 @@ impl<'a> IArgs<'a> for Extract {
                     self.datasheet.datasheet_filenames = match mode {
                         "typename" => DatasheetOutputMode::TYPENAME,
                         _ => DatasheetOutputMode::ORIGINAL,
+                    };
+                }
+                if options.contains(&"distribution") {
+                    let dist = cliclack::Select::new("Distribution Format")
+                        .items(&[
+                            (BYTES, "Binary", "default"),
+                            (MINI, "JSON Minified", ""),
+                            (PRETTY, "JSON Pretty", ""),
+                        ])
+                        .initial_value("bytes")
+                        .interact()?;
+
+                    self.distribution.distribution = match dist {
+                        MINI => DistributionFormat::MINI,
+                        PRETTY => DistributionFormat::PRETTY,
+                        _ => DistributionFormat::BYTES,
                     };
                 }
             }

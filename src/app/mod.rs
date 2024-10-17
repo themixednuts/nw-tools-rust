@@ -1,5 +1,5 @@
 use crate::events::EventBus;
-use std::sync::{LazyLock, OnceLock};
+use std::sync::OnceLock;
 use tokio_util::sync::CancellationToken;
 use utils::lumberyard::LumberyardSource;
 
@@ -19,7 +19,7 @@ struct AppState {
 
 impl App {
     pub fn init() -> &'static Self {
-        APP.get_or_init(|| App::default())
+        APP.get_or_init(App::default)
     }
     pub fn handle() -> &'static Self {
         APP.get().expect("App wasn't initialized")

@@ -10,10 +10,12 @@ use cli::{
 use dashmap::DashMap;
 use datasheet::Datasheet;
 use flate2::Decompress;
+use luac_parser::*;
 use object_stream::{from_reader, JSONObjectStream, XMLObjectStream};
 use quick_xml::se::Serializer;
 use serde::Serialize;
 use std::io::{self, Cursor, Read, Write};
+use tracing::Instrument;
 use zip::{read::ZipFile, CompressionMethod};
 
 #[derive()]
@@ -113,16 +115,23 @@ impl<'a, 'b> Decompressor<'a, 'b> {
     pub fn compressed_size(&mut self) {}
 
     pub fn file_type(&self) -> io::Result<FileType> {
-        let _type = match self.buf.as_slice() {
-            [0x04, 0x00, 0x1B, 0x4C, 0x75, ..] => FileType::Luac,
-            [0x00, 0x00, 0x00, 0x00, 0x03, ..] => match &ARGS.command {
+        let _type = match (self.buf.as_slice(), self.zip.name()) {
+            ([0x04, 0x00, 0x1B, 0x4C, 0x75, ..], _) => match &ARGS.command {
+                Commands::Extract(cmd) => FileType::Luac(cmd.luac),
+                _ => unreachable!(),
+            },
+            ([0x00, 0x00, 0x00, 0x00, 0x03, ..], _) => match &ARGS.command {
                 Commands::Extract(extract) => {
                     FileType::ObjectStream(&extract.objectstream.objectstream)
                 }
                 _ => unreachable!(),
             },
-            [0x11, 0x00, 0x00, 0x00, ..] => match &ARGS.command {
+            ([0x11, 0x00, 0x00, 0x00, ..], _) => match &ARGS.command {
                 Commands::Extract(extract) => FileType::Datasheet(&extract.datasheet.datasheet),
+                _ => unreachable!(),
+            },
+            (_, n) if n.ends_with(".distribution") => match &ARGS.command {
+                Commands::Extract(cmd) => FileType::Distribution(&cmd.distribution.distribution),
                 _ => unreachable!(),
             },
             _ => FileType::default(),
@@ -136,7 +145,19 @@ impl<'a, 'b> Decompressor<'a, 'b> {
         let mut extra = None;
 
         let _size = match &file_type {
-            FileType::Luac => std::io::copy(&mut (&self.buf[2..]), writer),
+            FileType::Luac(b) => {
+                let mut buf = &self.buf[2..];
+                match b {
+                    true => {
+                        // let mut byte_code = luac_parser::parse(buf).unwrap();
+
+                        // let msg_pack = byte_code.to_msgpack().unwrap();
+                        // let mut pack = msg_pack.as_slice();
+                        std::io::copy(&mut byte_code, writer)
+                    }
+                    false => std::io::copy(&mut buf, writer),
+                }
+            }
             FileType::ObjectStream(fmt) => {
                 // early return no serialziation
                 if **fmt == ObjectStreamFormat::BYTES {

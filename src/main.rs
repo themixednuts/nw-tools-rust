@@ -9,13 +9,15 @@ use cli::{
     ARGS,
 };
 use cliclack::{spinner, ProgressBar};
+use distribution::*;
 use file_system::{FileSystem, State};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{
     path::PathBuf,
     process::ExitCode,
     sync::{
         atomic::{AtomicU64, AtomicUsize, Ordering},
-        Arc, RwLock,
+        Arc, LazyLock, RwLock,
     },
 };
 use tokio::{
@@ -56,12 +58,15 @@ async fn run() -> tokio::io::Result<()> {
             let filter = extract.common.filter.filter.as_ref();
             run_extract(cwd, out, filter).await?
         }
-        Commands::Test(test) => match test.commands {
-            TestCommands::Filter(ref cmd) => {
-                let cwd = cmd.input.input.as_ref().unwrap();
-                let out = cmd.output.output.as_ref().unwrap();
-                let filter = cmd.filter.filter.as_ref();
-                run_test(cwd, out, filter).await?
+        Commands::Test(test) => match &test.commands {
+            TestCommands::Filter { input, filter } => {
+                let cwd = input.input.as_ref().unwrap();
+                let filter = filter.filter.as_ref();
+                run_test_filter(cwd, filter).await?
+            }
+            TestCommands::Distribution { input } => {
+                let cwd = input.input.as_ref().unwrap();
+                run_test_distribution(cwd).await?
             }
         },
     };
@@ -87,17 +92,38 @@ async fn initialize(
 }
 
 #[instrument]
-async fn run_test(
-    cwd: &'static PathBuf,
-    out: &'static PathBuf,
-    filter: Option<&String>,
-) -> tokio::io::Result<()> {
-    let fs = initialize(cwd, out).await?;
+async fn run_test_filter(cwd: &'static PathBuf, filter: Option<&String>) -> tokio::io::Result<()> {
+    static OUT: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::new());
+    let fs = initialize(cwd, &OUT).await?;
     let files = fs.files(filter);
     println!("Filter: {:?}", filter);
-    for file in files {
-        println!("File: {}", file.0.display());
+    for (file_path, (_full_path, _)) in files {
+        println!("File: {}", file_path.display());
     }
+    Ok(())
+}
+#[instrument]
+async fn run_test_distribution(cwd: &'static PathBuf) -> tokio::io::Result<()> {
+    static OUT: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::new());
+    let fs = initialize(cwd, &OUT).await?;
+    let files = fs.files(Some(&String::from("**/*.distribution")));
+
+    tokio::task::spawn_blocking(move || {
+        let multi = cliclack::ProgressBar::new(files.len() as u64);
+        multi.start("Starting Distribution tests.");
+        files.par_iter().for_each(|(file_path, (_full_path, _))| {
+            let entry = fs.open(file_path).unwrap();
+            multi.set_message(format!("{}", file_path.parent().unwrap().display()));
+            if let Err(e) = Distribution::from_reader(&mut entry.as_slice()) {
+                println!("Distribution Failed: {}\n{}", file_path.display(), e);
+            };
+            multi.inc(1);
+        });
+        multi.stop("Distribution Tests Done.");
+    })
+    .await
+    .unwrap();
+
     Ok(())
 }
 
@@ -110,15 +136,12 @@ async fn run_extract(
     let fs = initialize(cwd, out).await?;
     let files = fs.files(filter);
     let len = files.len() as u64;
-    // let size: usize = files.iter().map(|(_, (_, _, size))| size).sum();
 
     let multi_pb = Arc::new(cliclack::MultiProgress::new("Extracting Pak(s)"));
     let all = Arc::new(multi_pb.add(ProgressBar::new(len)));
     let stats_pb = Arc::new(multi_pb.add(spinner()));
     let pak_pb = Arc::new(multi_pb.add(spinner()));
     let file_pb = Arc::new(multi_pb.add(spinner()));
-
-    // multi_pb.println("Processing");
 
     all.start("");
     stats_pb.start("");
@@ -150,8 +173,6 @@ async fn run_extract(
 
             interval.tick().await;
             let elapsed = start.elapsed();
-            // let dots = ".".repeat(((elapsed.as_secs() % 3) + 1) as usize);
-            // multi_pb_clone.println(format!("Processing{}", dots));
             let bytes_prcocessed = bytes_cloned.load(Ordering::Relaxed);
             let bytes_per_sec = bytes_prcocessed as f64 / elapsed.as_secs_f64();
             let processed_count = processed_clone.load(Ordering::Relaxed);
@@ -159,12 +180,6 @@ async fn run_extract(
                 let remaining = len - processed_count;
                 let time_per_file = elapsed.as_secs_f64() / (processed_count + 1) as f64;
                 Duration::from_secs_f64(time_per_file * remaining as f64)
-                // let remaining = size - bytes_prcocessed as u128;
-                // if bytes_per_sec > 0.0 {
-                //     Duration::from_secs_f64(remaining as f64 / bytes_per_sec)
-                // } else {
-                //     Duration::ZERO
-                // }
             } else {
                 Duration::ZERO
             };
@@ -181,7 +196,6 @@ async fn run_extract(
                 "ETA: {} | Throughput: {}/s",
                 format_duration(eta),
                 format_bytes(bytes_per_sec),
-                // format_bytes(size as f64)
             ));
         }
     });

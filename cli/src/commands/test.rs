@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::common::CommonConfig;
+use crate::common::{filter::Filter, input::Input};
 
 #[derive(Debug, Parser)]
 pub struct Test {
@@ -10,5 +10,14 @@ pub struct Test {
 
 #[derive(Subcommand, Debug)]
 pub enum TestCommands {
-    Filter(CommonConfig),
+    Filter {
+        #[command(flatten)]
+        input: Input,
+        #[command(flatten)]
+        filter: Filter,
+    },
+    Distribution {
+        #[command(flatten)]
+        input: Input,
+    },
 }

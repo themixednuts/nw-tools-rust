@@ -1,4 +1,5 @@
 use cli::commands::Commands;
+use cli::common::distribution::DistributionFormat;
 use cli::common::{
     datasheet::{DatasheetFormat, DatasheetOutputMode},
     objectstream::ObjectStreamFormat,
@@ -68,7 +69,7 @@ impl FileSystem {
     pub async fn init(
         cwd: &'static PathBuf,
         out_dir: &'static PathBuf,
-        token: CancellationToken,
+        cancel: CancellationToken,
     ) -> &'static FileSystem {
         let handle = Handle::current();
 
@@ -84,7 +85,7 @@ impl FileSystem {
                     out_dir,
                     path_to_pak,
                     hashes,
-                    cancel: token,
+                    cancel,
                 }
             })
         })
@@ -321,6 +322,11 @@ pub struct State {
 fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metadata>) -> PathBuf {
     let mut ext = path.extension().unwrap().to_os_string();
     match file_type {
+        FileType::Luac(fmt) => {
+            if *fmt {
+                path.set_extension("lua");
+            }
+        }
         FileType::ObjectStream(fmt) => match fmt {
             ObjectStreamFormat::XML => {
                 if ext != "xml" {
@@ -548,9 +554,10 @@ fn map<P: AsRef<Path>>(path: &P) -> HashMap<PathBuf, (PathBuf, String)> {
 
 #[derive(Default, Debug)]
 pub enum FileType {
-    Luac,
+    Luac(bool),
     ObjectStream(&'static ObjectStreamFormat),
     Datasheet(&'static DatasheetFormat),
+    Distribution(&'static DistributionFormat),
     #[default]
     Other,
 }

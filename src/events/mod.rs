@@ -11,7 +11,7 @@ impl Default for EventBus {
     fn default() -> Self {
         let (tx, rx) = channel(1000);
         Self {
-            sender: tx.into(),
+            sender: Arc::new(tx),
             receiver: rx,
         }
     }
@@ -26,15 +26,15 @@ impl EventBus {
 }
 
 #[derive(Clone, Debug)]
-enum Event {
+pub enum Event {
     Error(ErrorType),
     State(StateType),
     Task(TaskType),
 }
 
 #[derive(Clone, Debug)]
-enum ErrorType {}
+pub enum ErrorType {}
 #[derive(Clone, Debug)]
-enum TaskType {}
+pub enum TaskType {}
 #[derive(Clone, Debug)]
-enum StateType {}
+pub enum StateType {}
