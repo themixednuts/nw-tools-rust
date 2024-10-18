@@ -5,6 +5,7 @@ use std::io;
 use crate::{
     common::{
         datasheet::{DatasheetConfig, DatasheetFormat, DatasheetOutputMode},
+        dds::DDSConfig,
         distribution::{DistributionConfig, DistributionFormat},
         objectstream::{ObjectStreamConfig, ObjectStreamFormat},
         vshapec::VShapeConfig,
@@ -26,6 +27,8 @@ pub struct Extract {
     pub distribution: DistributionConfig,
     #[command(flatten)]
     pub vshapec: VShapeConfig,
+    #[command(flatten)]
+    pub dds: DDSConfig,
     #[arg(long)]
     pub luac: bool,
 }

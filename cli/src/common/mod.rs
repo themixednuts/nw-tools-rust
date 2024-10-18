@@ -1,4 +1,5 @@
 pub mod datasheet;
+pub mod dds;
 pub mod distribution;
 pub mod filter;
 pub mod input;

@@ -1,4 +1,5 @@
 use cli::commands::Commands;
+use cli::common::dds::DDSFormat;
 use cli::common::distribution::DistributionFormat;
 use cli::common::vshapec::VShapeFormat;
 use cli::common::{
@@ -124,7 +125,7 @@ impl FileSystem {
 
         self.path_to_pak
             .iter()
-            .filter(|(name, _)| matchers.iter().all(|glob| glob.is_match(name)))
+            .filter(|(name, _)| matchers.iter().any(|glob| glob.is_match(name)))
             .collect()
     }
 
@@ -143,7 +144,7 @@ impl FileSystem {
                 let mut entry = archive.by_index_raw(index)?;
 
                 let mut buf = vec![];
-                let decompressor = Decompressor::try_new(&mut entry, None)?;
+                let mut decompressor = Decompressor::try_new(&mut entry, None)?;
                 decompressor.to_writer(&mut buf).unwrap();
 
                 Ok(buf)
@@ -265,7 +266,7 @@ impl FileSystem {
                             let path = out_dir.join(entry.to_path_buf());
 
                             let mut buf = Vec::with_capacity(zip.size() as usize);
-                            let de =
+                            let mut de =
                                 Decompressor::try_new(&mut zip, locale.as_ref().into()).unwrap();
 
                             let metadata = match de.to_writer(&mut buf) {
@@ -328,6 +329,27 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 path.set_extension("lua");
             }
         }
+        FileType::DDS(fmt) => match fmt {
+            DDSFormat::BYTES | DDSFormat::FLAT => {}
+            DDSFormat::PNG => {
+                if ext != "png" {
+                    ext.push(".png");
+                    path.set_extension(ext);
+                }
+            }
+            DDSFormat::JPEG => {
+                if ext != "jpeg" {
+                    ext.push(".jpeg");
+                    path.set_extension(ext);
+                }
+            }
+            DDSFormat::WEBP => {
+                if ext != "webp" {
+                    ext.push(".webp");
+                    path.set_extension(ext);
+                }
+            }
+        },
         FileType::VShapeC(fmt) => match fmt {
             VShapeFormat::PRETTY | VShapeFormat::MINI => {
                 if ext != "json" {
@@ -336,6 +358,21 @@ fn handle_extension(file_type: &FileType, mut path: PathBuf, meta: Option<&Metad
                 }
             }
             VShapeFormat::YAML => {
+                if ext != "yaml" {
+                    ext.push(".yaml");
+                    path = path.with_extension(ext);
+                }
+            }
+            _ => {}
+        },
+        FileType::Distribution(fmt) => match fmt {
+            DistributionFormat::PRETTY | DistributionFormat::MINI => {
+                if ext != "json" {
+                    ext.push(".json");
+                    path.set_extension(ext);
+                }
+            }
+            DistributionFormat::YAML => {
                 if ext != "yaml" {
                     ext.push(".yaml");
                     path = path.with_extension(ext);
@@ -575,6 +612,7 @@ pub enum FileType {
     Datasheet(&'static DatasheetFormat),
     Distribution(&'static DistributionFormat),
     VShapeC(&'static VShapeFormat),
+    DDS(&'static DDSFormat),
     #[default]
     Other,
 }
@@ -605,7 +643,7 @@ pub async fn load_localization(
 
                     let mut entry = archive.by_index_raw(idx).unwrap();
                     let mut buf = Vec::with_capacity(entry.size() as usize);
-                    let decompressor = Decompressor::try_new(&mut entry, None).unwrap();
+                    let mut decompressor = Decompressor::try_new(&mut entry, None).unwrap();
                     decompressor.to_writer(&mut buf).unwrap();
 
                     let locale =

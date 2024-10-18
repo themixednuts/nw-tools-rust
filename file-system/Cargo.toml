@@ -10,6 +10,7 @@ object-stream = { workspace = true }
 datasheet = { workspace = true }
 localization = { workspace = true }
 vshapec = { workspace = true }
+distribution = { workspace = true }
 console-subscriber = { workspace = true }
 async-channel = { workspace = true }
 flate2 = { workspace = true }
@@ -42,6 +43,9 @@ dashmap = { workspace = true }
 globset = { workspace = true }
 luac-parser = { workspace = true }
 rmp-serde = { workspace = true }
+ddsfile = { workspace = true }
+image_dds = { workspace = true }
+image = { workspace = true }
 
 
 [dev-dependencies]

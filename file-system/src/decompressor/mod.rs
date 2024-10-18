@@ -4,17 +4,22 @@ use crate::{
 };
 use cli::{
     commands::Commands,
-    common::{datasheet::DatasheetFormat, objectstream::ObjectStreamFormat, vshapec::VShapeFormat},
+    common::{
+        datasheet::DatasheetFormat, dds::DDSFormat, distribution::DistributionFormat,
+        objectstream::ObjectStreamFormat, vshapec::VShapeFormat,
+    },
     ARGS,
 };
 use dashmap::DashMap;
 use datasheet::Datasheet;
 use flate2::Decompress;
+use image_dds::ImageFormat;
 use luac_parser::*;
 use object_stream::{from_reader, JSONObjectStream, XMLObjectStream};
 use quick_xml::se::Serializer;
+use rayon::prelude::*;
 use serde::Serialize;
-use std::io::{self, Cursor, Read, Write};
+use std::io::{self, Cursor, Read, Seek, Write};
 use tracing::Instrument;
 use vshapec;
 use zip::{read::ZipFile, CompressionMethod};
@@ -108,6 +113,7 @@ impl<'a, 'b> Decompressor<'a, 'b> {
             }
             self.buf = tmp;
         };
+
         Ok(())
     }
 
@@ -139,6 +145,10 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                 Commands::Extract(cmd) => FileType::VShapeC(&cmd.vshapec.vshapec),
                 _ => unreachable!(),
             },
+            (_, n) if n.ends_with(".dds") => match &ARGS.command {
+                Commands::Extract(cmd) => FileType::DDS(&cmd.dds.dds),
+                _ => unreachable!(),
+            },
             _ => FileType::default(),
         };
 
@@ -163,6 +173,188 @@ impl<'a, 'b> Decompressor<'a, 'b> {
                     false => std::io::copy(&mut buf, writer),
                 }
             }
+            FileType::DDS(fmt) => match fmt {
+                DDSFormat::BYTES => std::io::copy(&mut self.buf.as_slice(), writer),
+                DDSFormat::PNG => {
+                    let fs = FILESYSTEM.get().unwrap();
+                    let mut files = fs
+                        .files(Some(&format!("{}.*", self.zip.name())))
+                        .into_iter()
+                        .collect::<Vec<_>>();
+
+                    files.sort_unstable_by(|(s, _), (s2, _)| {
+                        let s_is_a = s.to_str().map_or(false, |name| name.ends_with(".a"));
+                        let s2_is_a = s2.to_str().map_or(false, |name| name.ends_with(".a"));
+
+                        match (s_is_a, s2_is_a) {
+                            (true, false) => std::cmp::Ordering::Less,
+                            (false, true) => std::cmp::Ordering::Greater,
+                            _ => {
+                                natord::compare(s.to_str().expect("msg"), s2.to_str().expect("msg"))
+                            }
+                        }
+                    });
+
+                    let mut buf = self.buf.clone();
+
+                    buf.extend(
+                        files
+                            .into_par_iter()
+                            .map(|(p, _)| fs.open(p).unwrap())
+                            .flatten()
+                            .collect::<Vec<u8>>()
+                            .into_iter(),
+                    );
+
+                    let mut buf = Cursor::new(buf);
+                    let dds = ddsfile::Dds::read(&mut buf).unwrap();
+                    let mut image = image_dds::image_from_dds(&dds, 0).unwrap();
+
+                    let mut buf = Cursor::new(Vec::with_capacity(image.len()));
+                    image.write_to(&mut buf, image::ImageFormat::Png);
+                    buf.set_position(0);
+                    std::io::copy(&mut buf, writer)
+                }
+                DDSFormat::JPEG => {
+                    let fs = FILESYSTEM.get().unwrap();
+                    let mut files = fs
+                        .files(Some(&format!("{}.*", self.zip.name())))
+                        .into_iter()
+                        .collect::<Vec<_>>();
+
+                    files.sort_unstable_by(|(s, _), (s2, _)| {
+                        let s_is_a = s.to_str().map_or(false, |name| name.ends_with(".a"));
+                        let s2_is_a = s2.to_str().map_or(false, |name| name.ends_with(".a"));
+
+                        match (s_is_a, s2_is_a) {
+                            (true, false) => std::cmp::Ordering::Less,
+                            (false, true) => std::cmp::Ordering::Greater,
+                            _ => {
+                                natord::compare(s.to_str().expect("msg"), s2.to_str().expect("msg"))
+                            }
+                        }
+                    });
+
+                    let mut buf = self.buf.clone();
+
+                    buf.extend(
+                        files
+                            .into_par_iter()
+                            .map(|(p, _)| fs.open(p).unwrap())
+                            .flatten()
+                            .collect::<Vec<u8>>()
+                            .into_iter(),
+                    );
+
+                    let mut buf = Cursor::new(buf);
+                    let dds = ddsfile::Dds::read(&mut buf).unwrap();
+                    let mut image = image_dds::image_from_dds(&dds, 0).unwrap();
+
+                    let mut buf = Cursor::new(Vec::with_capacity(image.len()));
+                    image.write_to(&mut buf, image::ImageFormat::Jpeg);
+                    buf.set_position(0);
+                    std::io::copy(&mut buf, writer)
+                }
+                DDSFormat::WEBP => {
+                    let fs = FILESYSTEM.get().unwrap();
+                    let mut files = fs
+                        .files(Some(&format!("{}.*", self.zip.name())))
+                        .into_iter()
+                        .collect::<Vec<_>>();
+
+                    files.sort_unstable_by(|(s, _), (s2, _)| {
+                        let s_is_a = s.to_str().map_or(false, |name| name.ends_with(".a"));
+                        let s2_is_a = s2.to_str().map_or(false, |name| name.ends_with(".a"));
+
+                        match (s_is_a, s2_is_a) {
+                            (true, false) => std::cmp::Ordering::Less,
+                            (false, true) => std::cmp::Ordering::Greater,
+                            _ => {
+                                natord::compare(s.to_str().expect("msg"), s2.to_str().expect("msg"))
+                            }
+                        }
+                    });
+
+                    let mut buf = self.buf.clone();
+
+                    buf.extend(
+                        files
+                            .into_par_iter()
+                            .map(|(p, _)| fs.open(p).unwrap())
+                            .flatten()
+                            .collect::<Vec<u8>>()
+                            .into_iter(),
+                    );
+
+                    let mut buf = Cursor::new(buf);
+                    let dds = ddsfile::Dds::read(&mut buf).unwrap();
+                    let mut image = image_dds::image_from_dds(&dds, 0).unwrap();
+
+                    let mut buf = Cursor::new(Vec::with_capacity(image.len()));
+                    image.write_to(&mut buf, image::ImageFormat::WebP);
+                    buf.set_position(0);
+                    std::io::copy(&mut buf, writer)
+                }
+                DDSFormat::FLAT => {
+                    let fs = FILESYSTEM.get().unwrap();
+                    let mut files = fs
+                        .files(Some(&format!("{}.*", self.zip.name())))
+                        .into_iter()
+                        .collect::<Vec<_>>();
+
+                    files.sort_unstable_by(|(s, _), (s2, _)| {
+                        let s_is_a = s.to_str().map_or(false, |name| name.ends_with(".a"));
+                        let s2_is_a = s2.to_str().map_or(false, |name| name.ends_with(".a"));
+
+                        match (s_is_a, s2_is_a) {
+                            (true, false) => std::cmp::Ordering::Less,
+                            (false, true) => std::cmp::Ordering::Greater,
+                            _ => {
+                                natord::compare(s.to_str().expect("msg"), s2.to_str().expect("msg"))
+                            }
+                        }
+                        // natord::compare(s.to_str().expect("msg"), s2.to_str().expect("msg"))
+                    });
+                    files.reverse();
+
+                    let mut buf = self.buf.clone();
+
+                    buf.extend(
+                        files
+                            .into_par_iter()
+                            .map(|(p, _)| fs.open(p).unwrap())
+                            .flatten()
+                            .collect::<Vec<u8>>()
+                            .into_iter(),
+                    );
+
+                    let mut buf = Cursor::new(buf);
+                    std::io::copy(&mut buf, writer)
+                }
+            },
+            FileType::Distribution(fmt) => match fmt {
+                DistributionFormat::MINI => {
+                    let dist =
+                        distribution::Distribution::from_reader(&mut self.buf.as_slice()).unwrap();
+                    let mut buf = serde_json::to_vec(&dist).unwrap();
+                    std::io::copy(&mut buf.as_slice(), writer)
+                }
+                DistributionFormat::PRETTY => {
+                    let dist =
+                        distribution::Distribution::from_reader(&mut self.buf.as_slice()).unwrap();
+                    let mut buf = serde_json::to_vec_pretty(&dist).unwrap();
+
+                    std::io::copy(&mut buf.as_slice(), writer)
+                }
+                DistributionFormat::YAML => {
+                    let dist =
+                        distribution::Distribution::from_reader(&mut self.buf.as_slice()).unwrap();
+                    let mut buf = serde_yml::to_string(&dist).unwrap();
+
+                    std::io::copy(&mut buf.as_bytes(), writer)
+                }
+                _ => std::io::copy(&mut self.buf.as_slice(), writer),
+            },
             FileType::VShapeC(fmt) => match fmt {
                 VShapeFormat::MINI => {
                     let vshape = vshapec::VShapeC::from_reader(self.buf.as_slice())?;

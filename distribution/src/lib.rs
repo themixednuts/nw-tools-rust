@@ -1,3 +1,4 @@
+use serde::Serialize;
 use std::io;
 use std::{array::TryFromSliceError, io::Read};
 use thiserror::Error;
@@ -11,35 +12,21 @@ pub enum MyError {
     TryFromSliceError(#[from] std::array::TryFromSliceError),
 }
 
+#[derive(Debug, Serialize)]
 pub struct Distribution {
+    #[serde(flatten)]
     pub slices: SlicesData,
+    #[serde(flatten)]
     pub gatherables: GatherablesData,
-    pub other: Other,
-    pub other2: Other,
+    pub unknown1: Unknown,
+    pub unknown2: Unknown,
 }
 
-pub struct CompactString {
-    len: u8,
-    string: Vec<u8>,
-}
-
-impl CompactString {
-    fn from_reader<R: Read>(value: &mut R) -> Result<Self, MyError> {
-        let mut buf = [0u8; 1];
-        value.read_exact(&mut buf)?;
-        let len = u8::from_le_bytes(buf);
-        let mut string = vec![0u8; len as usize];
-        value.read_exact(&mut string)?;
-
-        assert_eq!(len as usize, string.len());
-        Ok(CompactString { len, string })
-    }
-}
-
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SlicesData {
-    len: u16,
-    slice_names: Vec<CompactString>,
-    variant_names: Vec<CompactString>,
+    slices: Vec<String>,
+    variants: Vec<String>,
 }
 
 impl SlicesData {
@@ -49,36 +36,48 @@ impl SlicesData {
 
         let len = u16::from_le_bytes(buf);
 
-        let mut slice_names = Vec::with_capacity(len as usize);
-        let mut variant_names = Vec::with_capacity(len as usize);
+        let mut slices = Vec::with_capacity(len as usize);
+        let mut variants = Vec::with_capacity(len as usize);
 
         for _ in 0..len {
-            slice_names.push(CompactString::from_reader(value)?);
+            let mut buf = [0u8; 1];
+            value.read_exact(&mut buf)?;
+            let len = u8::from_le_bytes(buf);
+            let mut string = vec![0; len as usize];
+            value.read_exact(&mut string)?;
+            assert_eq!(len as usize, string.len());
+
+            let string = String::from_utf8(string).unwrap();
+            slices.push(string);
         }
         for _ in 0..len {
-            variant_names.push(CompactString::from_reader(value)?);
+            let mut buf = [0u8; 1];
+            value.read_exact(&mut buf)?;
+            let len = u8::from_le_bytes(buf);
+            let mut string = vec![0; len as usize];
+            value.read_exact(&mut string)?;
+            assert_eq!(len as usize, string.len());
+
+            let string = String::from_utf8(string).unwrap();
+            variants.push(string);
         }
 
-        assert_eq!(len as usize, slice_names.len());
-        assert_eq!(len as usize, variant_names.len());
+        assert_eq!(len as usize, slices.len());
+        assert_eq!(len as usize, variants.len());
 
-        Ok(Self {
-            len,
-            slice_names,
-            variant_names,
-        })
+        Ok(Self { slices, variants })
     }
 }
 
+#[derive(Debug, Serialize)]
 pub struct GatherablesData {
-    len: u32,
     indices: Vec<u16>,
-    pos: Vec<Position>,
+    positions: Vec<Position>,
 
     // possibly a vector3 instead vector2 for rotation/scale
-    field: Vec<u16>,
-    field2: Vec<u16>,
-    field3: Vec<u8>,
+    extra1: Vec<u16>,
+    extra2: Vec<u16>,
+    extra3: Vec<u8>,
 }
 
 impl GatherablesData {
@@ -97,93 +96,90 @@ impl GatherablesData {
         assert_eq!(len as usize, indices.len());
 
         let mut buf = [0u8; 4];
-        let mut pos = Vec::with_capacity(len as usize);
+        let mut positions = Vec::with_capacity(len as usize);
 
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            pos.push(Position::try_from(&buf)?);
+            positions.push(Position::try_from(&buf)?);
         }
-        assert_eq!(len as usize, pos.len());
+        assert_eq!(len as usize, positions.len());
 
         let mut buf = [0u8; 2];
-        let mut field = Vec::with_capacity(len as usize);
-        let mut field2 = Vec::with_capacity(len as usize);
+        let mut extra1 = Vec::with_capacity(len as usize);
+        let mut extra2 = Vec::with_capacity(len as usize);
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            field.push(u16::from_le_bytes(buf));
+            extra1.push(u16::from_le_bytes(buf));
         }
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            field2.push(u16::from_le_bytes(buf));
+            extra2.push(u16::from_le_bytes(buf));
         }
 
-        assert_eq!(len as usize, field.len());
-        assert_eq!(len as usize, field2.len());
+        assert_eq!(len as usize, extra1.len());
+        assert_eq!(len as usize, extra2.len());
 
         let mut buf = [0u8; 1];
-        let mut field3 = Vec::with_capacity(len as usize);
+        let mut extra3 = Vec::with_capacity(len as usize);
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            field3.push(u8::from_le_bytes(buf));
+            extra3.push(u8::from_le_bytes(buf));
         }
-        assert_eq!(len as usize, field3.len());
+        assert_eq!(len as usize, extra3.len());
 
         Ok(Self {
-            len,
             indices,
-            pos,
-            field,
-            field2,
-            field3,
+            positions,
+            extra1,
+            extra2,
+            extra3,
         })
     }
 }
 
-pub struct Other {
-    len: u32,
+#[derive(Debug, Serialize)]
+pub struct Unknown {
     // possibly a vector3 instead vector2 for rotation/scale
-    pos: Vec<Position>,
-    field: Vec<u8>,
+    positions: Vec<Position>,
+    extra: Vec<u8>,
 }
 
-impl Other {
+impl Unknown {
     fn from_reader<R: Read>(value: &mut R) -> Result<Self, MyError> {
         let mut buf = [0u8; 4];
         value.read_exact(&mut buf)?;
 
         let len = u32::from_le_bytes(buf);
-        let mut pos = Vec::with_capacity(len as usize);
+        let mut positions = Vec::with_capacity(len as usize);
 
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            pos.push(Position::try_from(&buf)?);
+            positions.push(Position::try_from(&buf)?);
         }
 
-        let mut field = Vec::with_capacity(len as usize);
+        let mut extra = Vec::with_capacity(len as usize);
 
         let mut buf = [0u8; 1];
         for _ in 0..len {
             value.read_exact(&mut buf)?;
-            field.push(u8::from_le_bytes(buf));
+            extra.push(u8::from_le_bytes(buf));
         }
 
-        Ok(Self { len, pos, field })
+        Ok(Self { positions, extra })
     }
 }
 
-pub struct Position {
-    x: u16,
-    y: u16,
-}
+#[derive(Debug, Serialize)]
+pub struct Position(u16, u16);
 
 impl TryFrom<&[u8; 4]> for Position {
     type Error = TryFromSliceError;
 
     fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
-        Ok(Position {
-            x: u16::from_le_bytes(value[..2].try_into()?),
-            y: u16::from_le_bytes(value[2..].try_into()?),
-        })
+        Ok(Position(
+            u16::from_le_bytes(value[..2].try_into()?),
+            u16::from_le_bytes(value[2..].try_into()?),
+        ))
     }
 }
 
@@ -199,12 +195,12 @@ impl Distribution {
             println!("Couldn't read gatherablesData");
             return Err(gatherables.err().unwrap());
         };
-        let other = Other::from_reader(value);
+        let other = Unknown::from_reader(value);
         let Ok(other) = other else {
             println!("Couldn't read otherData");
             return Err(other.err().unwrap());
         };
-        let other2 = Other::from_reader(value);
+        let other2 = Unknown::from_reader(value);
         let Ok(other2) = other2 else {
             println!("Couldn't read other2Data");
             return Err(other2.err().unwrap());
@@ -213,8 +209,8 @@ impl Distribution {
         Ok(Distribution {
             slices,
             gatherables,
-            other,
-            other2,
+            unknown1: other,
+            unknown2: other2,
         })
     }
 }

@@ -3,12 +3,12 @@ use clap::{Parser, ValueEnum};
 use crate::traits::IArgs;
 
 #[derive(Debug, Parser)]
-pub struct DistributionConfig {
+pub struct DDSConfig {
     #[arg(long, default_value = "bytes")]
-    pub distribution: DistributionFormat,
+    pub dds: DDSFormat,
 }
 
-impl<'a> IArgs<'a> for DistributionConfig {
+impl<'a> IArgs<'a> for DDSConfig {
     type Value = ();
     fn configure(&mut self, _: Self::Value) -> std::io::Result<()> {
         todo!()
@@ -16,12 +16,11 @@ impl<'a> IArgs<'a> for DistributionConfig {
 }
 
 #[derive(ValueEnum, Debug, Clone, Default, PartialEq, Eq)]
-pub enum DistributionFormat {
+pub enum DDSFormat {
     #[default]
     BYTES,
-    // XML,
-    MINI,
-    PRETTY,
-    // CSV,
-    YAML,
+    PNG,
+    JPEG,
+    WEBP,
+    FLAT,
 }
